@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { createEditor, Descendant, Text, Range, NodeEntry } from 'slate';
-import { Slate, Editable, withReact, RenderLeafProps } from 'slate-react';
+import { Slate, Editable, withReact, RenderLeafProps, RenderElementProps } from 'slate-react';
 
 interface ContentViewerProps {
   content: Descendant[];
@@ -33,22 +33,44 @@ const ContentViewer = ({ content, highlight }: ContentViewerProps) => {
     }
     return ranges;
   }, [highlight]);
-  
+
+  const renderElement = useCallback((props: RenderElementProps) => {
+    const { attributes, children, element } = props;
+    const style = { textAlign: element.align };
+    switch (element.type) {
+      case 'bulleted-list':
+        return <ul style={style} {...attributes}>{children}</ul>;
+      case 'numbered-list':
+        return <ol style={style} {...attributes}>{children}</ol>;
+      case 'list-item':
+        return <li {...attributes}>{children}</li>;
+      default:
+        return <p style={style} {...attributes}>{children}</p>;
+    }
+  }, []);
+
+  // SỬA LỖI: Lấy thêm `attributes` từ `props`
   const renderLeaf = useCallback((props: RenderLeafProps) => {
-    const { attributes, children, leaf } = props;
-    return (
-      <span {...attributes}>
-        {leaf.highlight ? <mark>{children}</mark> : children}
-      </span>
-    );
+    const { attributes } = props; // <-- Lấy attributes ở đây
+    let { children, leaf } = props;
+
+    if (leaf.bold) children = <strong>{children}</strong>;
+    if (leaf.italic) children = <em>{children}</em>;
+    if (leaf.underline) children = <u>{children}</u>;
+    if (leaf.color) children = <span style={{ color: leaf.color }}>{children}</span>;
+    if (leaf.highlight) children = <mark>{children}</mark>;
+    
+    // Sử dụng `attributes` đã lấy được
+    return <span {...attributes}>{children}</span>;
   }, []);
 
   return (
     <Slate editor={editor} initialValue={safeContent}>
-      <Editable 
-        readOnly 
+      <Editable
+        readOnly
         placeholder="Không có nội dung..."
         decorate={decorate}
+        renderElement={renderElement}
         renderLeaf={renderLeaf}
       />
     </Slate>

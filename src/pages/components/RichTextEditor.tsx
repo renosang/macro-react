@@ -17,7 +17,7 @@ const CustomEditor = {
   },
   toggleMark(editor: Editor, format: MarkFormat) {
     const isActive = CustomEditor.isMarkActive(editor, format);
-    if (isActive) { Editor.removeMark(editor, format); } 
+    if (isActive) { Editor.removeMark(editor, format); }
     else { Editor.addMark(editor, format, true); }
   },
   isBlockActive(editor: Editor, format: AlignFormat | ListFormat) {
@@ -57,7 +57,7 @@ const CustomEditor = {
 
 const MarkButton = ({ format, children }: { format: MarkFormat, children: React.ReactNode }) => {
     const editor = useSlate();
-    return <button type="button" className={`toolbar-button`} onMouseDown={e => { e.preventDefault(); CustomEditor.toggleMark(editor, format); }}>{children}</button>;
+    return <button type="button" className={`toolbar-button ${CustomEditor.isMarkActive(editor, format) ? 'active' : ''}`} onMouseDown={e => { e.preventDefault(); CustomEditor.toggleMark(editor, format); }}>{children}</button>;
 };
 const BlockButton = ({ format, children }: { format: ListFormat, children: React.ReactNode }) => {
     const editor = useSlate();
@@ -79,7 +79,7 @@ interface RichTextEditorProps {
 
 const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-  
+
   const renderElement = useCallback((props: RenderElementProps) => {
     const { attributes, children, element } = props;
     const style = { textAlign: element.align };
@@ -100,7 +100,6 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
     if (props.leaf.bold) children = <strong>{children}</strong>;
     if (props.leaf.italic) children = <em>{children}</em>;
     if (props.leaf.underline) children = <u>{children}</u>;
-    // Bổ sung lại logic tô màu chữ
     if (props.leaf.color) children = <span style={{ color: props.leaf.color }}>{children}</span>;
     return <span {...props.attributes}>{children}</span>;
   }, []);
@@ -124,7 +123,7 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
           <ColorButton color="#007bff">A</ColorButton>
           <ColorButton color="#28a745">A</ColorButton>
         </div>
-        
+
         <Editable
           className="editable-area"
           placeholder="Nhập nội dung macro..."
