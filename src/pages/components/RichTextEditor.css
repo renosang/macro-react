@@ -1,10 +1,37 @@
 .editor-container {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
 }
 
 .editable-area {
-  min-height: 200px; /* Chiều cao tối thiểu */
-  outline: none; /* Bỏ viền xanh khi focus */
+  min-height: 200px;
+  padding: 10px 15px;
+  outline: none;
+  line-height: 1.6;
+}
+
+/* --- STYLE MỚI CHO TOOLBAR --- */
+.toolbar {
+  padding: 8px 12px;
+  border-bottom: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.toolbar-button {
+  cursor: pointer;
+  border: 1px solid transparent;
+  background-color: transparent;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-right: 4px;
+}
+
+.toolbar-button:hover {
+  background-color: #e9ecef;
+}
+
+.toolbar-button.active {
+  background-color: #cfe2ff;
+  border-color: #b6d4fe;
 }
