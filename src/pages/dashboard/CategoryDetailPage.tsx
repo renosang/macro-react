@@ -1,16 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Descendant, Node } from 'slate';
+import { Descendant } from 'slate';
 import Header from '../components/Header';
 import { Macro } from '../../App';
 import './CategoryDetailPage.css';
 import HighlightText from '../components/HighlightText';
 import ContentViewer from '../components/ContentViewer';
-
-const serializeSlate = (nodes: Descendant[]): string => {
-  if (!Array.isArray(nodes)) return '';
-  return nodes.map(n => Node.string(n)).join('\n');
-};
+import CopyButtons from '../components/CopyButtons';
+import { serializeSlate } from '../../utils/slateUtils';
 
 function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
   const { categoryName } = useParams<{ categoryName: string }>();
@@ -55,6 +52,7 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
             filteredMacros.map((macro, index) => {
               const colorClasses = ['macro-color-1', 'macro-color-2', 'macro-color-3', 'macro-color-4', 'macro-color-5'];
               const colorClass = colorClasses[index % colorClasses.length];
+
               return (
                 <div key={macro.id} className={`macro-item ${colorClass}`}>
                   <h3>
@@ -62,6 +60,7 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
                   </h3>
                   <div className="macro-content-body">
                     <ContentViewer content={macro.content} highlight={searchQuery} />
+                    <CopyButtons content={macro.content} />
                   </div>
                 </div>
               );

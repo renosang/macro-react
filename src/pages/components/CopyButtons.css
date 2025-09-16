@@ -1,0 +1,28 @@
+.copy-buttons-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.copy-buttons-container button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  background-color: #f8f9fa;
+  color: #495057;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.copy-buttons-container button:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.copy-buttons-container button:active {
+  background-color: #dee2e6;
+}
