@@ -50,3 +50,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* --- LỚP CSS ĐỂ GIỚI HẠN CHIỀU RỘNG TRANG --- */
+.page-container {
+  max-width: 1200px; /* Chiều rộng tối đa của nội dung */
+  margin: 0 auto;   /* Tự động căn giữa */
+  padding: 20px 40px; /* Thêm khoảng trống bên trong */
+}

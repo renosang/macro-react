@@ -1,0 +1,10 @@
+.editor-container {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.editable-area {
+  min-height: 200px; /* Chiều cao tối thiểu */
+  outline: none; /* Bỏ viền xanh khi focus */
+}
