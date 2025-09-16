@@ -9,98 +9,66 @@ import AdminLayout from './pages/admin/AdminLayout';
 import ManageCategories from './pages/admin/ManageCategories';
 import ManageMacros from './pages/admin/ManageMacros';
 import CategoryDetailPage from './pages/dashboard/CategoryDetailPage';
+import ManageAnnouncements from './pages/admin/ManageAnnouncements';
 import './App.css';
 
 // --- ĐỊNH NGHĨA KIỂU DỮ LIỆU ---
-export interface Category {
+export interface Category { id: number; name: string; }
+export interface Macro { id: number; title: string; category: string; content: Descendant[]; }
+export interface Announcement {
   id: number;
-  name: string;
-}
-export interface Macro {
-  id: number;
-  title: string;
-  category: string;
   content: Descendant[];
+  timestamp: string;
 }
 
-// --- DỮ LIỆU BAN ĐẦU ---
 const initialCategories: Category[] = [
   { id: 1, name: 'Hướng dẫn sử dụng' },
   { id: 2, name: 'Chính sách bảo hành' },
   { id: 3, name: 'Câu hỏi thường gặp' },
 ];
 const initialMacros: Macro[] = [
-    { 
-      id: 1, 
-      title: 'Hướng dẫn cài đặt phần mềm', 
-      category: 'Hướng dẫn sử dụng', 
-      content: [{ type: 'paragraph', children: [{ text: 'Đây là nội dung chi tiết về cách cài đặt phần mềm...' }] }] 
-    },
-    { 
-      id: 2, 
-      title: 'Quy định đổi trả hàng', 
-      category: 'Chính sách bảo hành', 
-      content: [{ type: 'paragraph', children: [{ text: 'Nội dung chi tiết về chính sách đổi trả hàng...' }] }] 
-    },
+    { id: 1, title: 'Hướng dẫn cài đặt phần mềm', category: 'Hướng dẫn sử dụng', content: [{ type: 'paragraph', children: [{ text: 'Nội dung...' }] }] },
+    { id: 2, title: 'Quy định đổi trả hàng', category: 'Chính sách bảo hành', content: [{ type: 'paragraph', children: [{ text: 'Nội dung...' }] }] },
 ];
-
-// --- HÀM CHUYỂN ĐỔI DỮ LIỆU CŨ (PHIÊN BẢN ĐẦY ĐỦ) ---
 const migrateMacrosData = (data: any[]): Macro[] => {
   return data.map(macro => {
-    // Nếu content là string, chuyển nó về định dạng Slate
     if (typeof macro.content === 'string') {
-      return {
-        ...macro,
-        content: [{ type: 'paragraph', children: [{ text: macro.content }] }]
-      };
+      return { ...macro, content: [{ type: 'paragraph', children: [{ text: macro.content }] }] };
     }
-    // Nếu content không hợp lệ (null, không phải mảng), trả về content rỗng
     if (!macro.content || !Array.isArray(macro.content)) {
-       return {
-        ...macro,
-        content: [{ type: 'paragraph', children: [{ text: '' }] }]
-       };
+       return { ...macro, content: [{ type: 'paragraph', children: [{ text: '' }] }] };
     }
-    // Nếu đã đúng định dạng, trả về chính nó
     return macro;
   });
 };
-
 
 function App() {
   const [isAdmin, setIsAdmin] = useState(true);
 
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
-      const savedCategories = localStorage.getItem('categories');
-      return savedCategories ? JSON.parse(savedCategories) : initialCategories;
-    } catch (error) {
-      console.error("Failed to load categories from localStorage", error);
-      return initialCategories;
-    }
+      const saved = localStorage.getItem('categories');
+      return saved ? JSON.parse(saved) : initialCategories;
+    } catch { return initialCategories; }
   });
   
   const [macros, setMacros] = useState<Macro[]>(() => {
     try {
-      const savedMacros = localStorage.getItem('macros');
-      if (savedMacros) {
-        const parsedMacros = JSON.parse(savedMacros);
-        return migrateMacrosData(parsedMacros);
-      }
-      return initialMacros;
-    } catch (error) {
-      console.error("Failed to load macros from localStorage", error);
-      return initialMacros;
-    }
+      const saved = localStorage.getItem('macros');
+      return saved ? migrateMacrosData(JSON.parse(saved)) : initialMacros;
+    } catch { return initialMacros; }
   });
 
-  useEffect(() => {
-    localStorage.setItem('categories', JSON.stringify(categories));
-  }, [categories]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
+    try {
+      const saved = localStorage.getItem('announcements');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
 
-  useEffect(() => {
-    localStorage.setItem('macros', JSON.stringify(macros));
-  }, [macros]);
+  useEffect(() => { localStorage.setItem('categories', JSON.stringify(categories)); }, [categories]);
+  useEffect(() => { localStorage.setItem('macros', JSON.stringify(macros)); }, [macros]);
+  useEffect(() => { localStorage.setItem('announcements', JSON.stringify(announcements)); }, [announcements]);
 
   return (
     <Router>
@@ -108,7 +76,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         
-        <Route path="/dashboard" element={<DashboardPage categories={categories} macros={macros} />} />
+        <Route path="/dashboard" element={<DashboardPage categories={categories} macros={macros} announcements={announcements} />} />
         <Route path="/dashboard/category/:categoryName" element={<CategoryDetailPage allMacros={macros} />} />
 
         <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/login" />}>
@@ -119,6 +87,10 @@ function App() {
           <Route 
             path="macros" 
             element={<ManageMacros categories={categories} macros={macros} setMacros={setMacros} />} 
+          />
+          <Route 
+            path="announcements" 
+            element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />}
           />
           <Route index element={<Navigate to="categories" />} />
         </Route>
