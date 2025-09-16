@@ -14,7 +14,6 @@ const ContentViewer = ({ content, highlight }: ContentViewerProps) => {
     ? content
     : [{ type: 'paragraph', children: [{ text: '' }] }];
 
-  // Sửa lại signature của hàm decorate
   const decorate = useCallback(([node, path]: NodeEntry) => {
     const ranges: Range[] = [];
     if (highlight && Text.isText(node)) {
@@ -35,7 +34,6 @@ const ContentViewer = ({ content, highlight }: ContentViewerProps) => {
     return ranges;
   }, [highlight]);
   
-  // Sửa lại hàm renderLeaf để render thẻ <mark>
   const renderLeaf = useCallback((props: RenderLeafProps) => {
     const { attributes, children, leaf } = props;
     return (

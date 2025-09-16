@@ -2,8 +2,6 @@ import React, { useMemo, useCallback } from 'react';
 import { Slate, Editable, withReact, RenderLeafProps, RenderElementProps, useSlate } from 'slate-react';
 import { createEditor, Descendant, Editor, Text, Transforms, Element as SlateElement } from 'slate';
 import { withHistory } from 'slate-history';
-// Sử dụng text thay cho icon
-// import { FaBold, FaItalic, FaUnderline, FaAlignLeft, FaAlignCenter, FaAlignRight, FaListUl, FaListOl } from 'react-icons/fa';
 import './RichTextEditor.css';
 
 type MarkFormat = 'bold' | 'italic' | 'underline';
@@ -34,17 +32,14 @@ const CustomEditor = {
   toggleBlock(editor: Editor, format: ListFormat) {
     const isActive = CustomEditor.isBlockActive(editor, format);
     const isList = LIST_TYPES.includes(format);
-
     Transforms.unwrapNodes(editor, {
       match: n => !Editor.isEditor(n) && SlateElement.isElement(n) && LIST_TYPES.includes(n.type as ListFormat),
       split: true,
     });
-    
     const newProperties: Partial<SlateElement> = {
       type: isActive ? 'paragraph' : 'list-item',
     };
     Transforms.setNodes<SlateElement>(editor, newProperties);
-
     if (!isActive && isList) {
       const block = { type: format, children: [] };
       Transforms.wrapNodes(editor, block);
@@ -55,11 +50,14 @@ const CustomEditor = {
         match: n => SlateElement.isElement(n) && Editor.isBlock(editor, n)
     });
   },
+  setColor(editor: Editor, color: string) {
+    Editor.addMark(editor, 'color', color);
+  },
 };
 
 const MarkButton = ({ format, children }: { format: MarkFormat, children: React.ReactNode }) => {
     const editor = useSlate();
-    return <button type="button" className={`toolbar-button ${CustomEditor.isMarkActive(editor, format) ? 'active' : ''}`} onMouseDown={e => { e.preventDefault(); CustomEditor.toggleMark(editor, format); }}>{children}</button>;
+    return <button type="button" className={`toolbar-button`} onMouseDown={e => { e.preventDefault(); CustomEditor.toggleMark(editor, format); }}>{children}</button>;
 };
 const BlockButton = ({ format, children }: { format: ListFormat, children: React.ReactNode }) => {
     const editor = useSlate();
@@ -69,7 +67,10 @@ const AlignButton = ({ align, children }: { align: AlignFormat, children: React.
     const editor = useSlate();
     return <button type="button" className={`toolbar-button ${CustomEditor.isBlockActive(editor, align) ? 'active' : ''}`} onMouseDown={e => { e.preventDefault(); CustomEditor.toggleAlign(editor, align); }}>{children}</button>;
 };
-
+const ColorButton = ({ color, children }: { color: string, children: React.ReactNode }) => {
+    const editor = useSlate();
+    return <button type="button" className="toolbar-button color-button" style={{ color: color }} onMouseDown={e => { e.preventDefault(); CustomEditor.setColor(editor, color); }}>{children}</button>;
+};
 
 interface RichTextEditorProps {
   value: Descendant[];
@@ -99,6 +100,8 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
     if (props.leaf.bold) children = <strong>{children}</strong>;
     if (props.leaf.italic) children = <em>{children}</em>;
     if (props.leaf.underline) children = <u>{children}</u>;
+    // Bổ sung lại logic tô màu chữ
+    if (props.leaf.color) children = <span style={{ color: props.leaf.color }}>{children}</span>;
     return <span {...props.attributes}>{children}</span>;
   }, []);
 
@@ -116,6 +119,10 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
           <span className="toolbar-separator" />
           <BlockButton format="numbered-list">1.</BlockButton>
           <BlockButton format="bulleted-list">•</BlockButton>
+          <span className="toolbar-separator" />
+          <ColorButton color="#d9534f">A</ColorButton>
+          <ColorButton color="#007bff">A</ColorButton>
+          <ColorButton color="#28a745">A</ColorButton>
         </div>
         
         <Editable
