@@ -4,14 +4,20 @@
 }
 
 .editable-area {
-  min-height: 200px;
+  min-height: 250px; /* Tăng chiều cao một chút */
   padding: 10px 15px;
   outline: none;
   line-height: 1.6;
 }
 
-/* --- STYLE MỚI CHO TOOLBAR --- */
+/* Style cho các list item */
+.editable-area ul, .editable-area ol {
+  padding-left: 20px;
+}
+
 .toolbar {
+  display: flex;
+  align-items: center;
   padding: 8px 12px;
   border-bottom: 1px solid #dee2e6;
   background-color: #f8f9fa;
@@ -21,10 +27,12 @@
   cursor: pointer;
   border: 1px solid transparent;
   background-color: transparent;
-  padding: 4px 8px;
+  padding: 6px; /* Chỉnh lại padding cho icon */
   border-radius: 4px;
-  font-size: 1rem;
-  margin-right: 4px;
+  font-size: 16px; /* Chỉnh size cho icon */
+  margin-right: 2px;
+  display: flex;
+  align-items: center;
 }
 
 .toolbar-button:hover {
@@ -34,4 +42,11 @@
 .toolbar-button.active {
   background-color: #cfe2ff;
   border-color: #b6d4fe;
+}
+
+.toolbar-separator {
+  height: 20px;
+  width: 1px;
+  background-color: #ced4da;
+  margin: 0 8px;
 }
