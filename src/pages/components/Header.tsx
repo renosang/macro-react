@@ -1,26 +1,34 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Import Link component
+import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import useAuthStore from '../../stores/useAuthStore'; // <-- 1. Import store xác thực
 import './Header.css';
 
-// Giả sử bạn có file logo trong thư mục src/logo.png
-// Chúng ta sẽ cần import nó để Webpack/Vite xử lý
-import companyLogo from '../../logo.png'; // <-- ĐÃ BỔ SUNG DÒNG NÀY
+// Import logo
+import companyLogo from '../../logo.png';
 
-function Header() {
+const Header: React.FC = () => { // <-- 2. Thay đổi thành React.FC
+  const logoutAction = useAuthStore((state) => state.logout); // <-- 3. Lấy action logout
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logoutAction();
+    toast.success('Đã đăng xuất thành công!');
+    navigate('/login'); // <-- 4. Điều hướng về trang đăng nhập
+  };
+
   return (
     <header className="app-header">
-      <div className="header-left">
-        {/* Bọc logo trong Link để khi click sẽ điều hướng */}
-        <Link to="/dashboard" className="logo-link"> 
-          <img src={companyLogo} alt="ThienTu" className="header-logo" />
-        </Link>
-      </div>
+      <Link to="/dashboard" className="logo-link"> 
+        <img src={companyLogo} alt="ThienTu" className="header-logo" />
+      </Link>
       <div className="header-right">
         <span>Xin chào, User!</span>
-        <button className="logout-button">Đăng xuất</button>
+        {/* 5. Gắn sự kiện onClick vào nút bấm */}
+        <button onClick={handleLogout} className="logout-button">Đăng xuất</button>
       </div>
     </header>
   );
-}
+};
 
 export default Header;
