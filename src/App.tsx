@@ -12,7 +12,7 @@ import ManageMacros from './pages/admin/ManageMacros';
 import CategoryDetailPage from './pages/dashboard/CategoryDetailPage';
 import ManageAnnouncements from './pages/admin/ManageAnnouncements';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
-import ManageUsers from './pages/admin/ManageUsers'; // <-- 1. THÊM IMPORT MỚI
+import ManageUsers from './pages/admin/ManageUsers'; // <-- 1. THÊM DÒNG IMPORT NÀY
 
 import './App.css';
 
@@ -49,6 +49,7 @@ const migrateMacrosData = (data: any[]): Macro[] => {
 
 function App() {
   // --- LOGIC STATE (GIỮ NGUYÊN) ---
+  const [isAdmin, setIsAdmin] = useState(true);
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
       const saved = localStorage.getItem('categories');
@@ -103,7 +104,7 @@ function App() {
             path="announcements" 
             element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />}
           />
-          {/* 2. THÊM ROUTE CHO QUẢN LÝ THÀNH VIÊN */}
+          {/* 2. THÊM ROUTE CHO QUẢN LÝ THÀNH VIÊN TẠI ĐÂY */}
           <Route path="users" element={<ManageUsers />} />
           
           <Route index element={<Navigate to="categories" />} />
