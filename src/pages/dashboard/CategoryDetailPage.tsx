@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import {  } from 'slate';
+import { Descendant } from 'slate';
 import Header from '../components/Header';
 import { Macro } from '../../App';
 import './CategoryDetailPage.css';
