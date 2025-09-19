@@ -1,9 +1,9 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import Header from '../components/Header'; // <-- ĐƯỜNG DẪN ĐÃ THAY ĐỔI
+import Header from '../components/Header';
 import './AdminLayout.css';
 
-function AdminLayout() {
+const AdminLayout: React.FC = () => {
   return (
     <div className="admin-layout">
       <Header />
@@ -12,16 +12,17 @@ function AdminLayout() {
           <nav>
             <NavLink to="/admin/categories">Quản lý Danh mục</NavLink>
             <NavLink to="/admin/macros">Quản lý Macro</NavLink>
-            <NavLink to="/admin/users">Quản lý Thành viên</NavLink>
             <NavLink to="/admin/announcements">Quản lý Thông báo</NavLink>
+            <NavLink to="/admin/users">Quản lý Thành viên</NavLink>
           </nav>
         </aside>
         <main className="admin-content">
+          {/* Outlet sẽ render các component con như ManageUsers, ManageCategories... */}
           <Outlet /> 
         </main>
       </div>
     </div>
   );
-}
+};
 
 export default AdminLayout;

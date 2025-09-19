@@ -11,11 +11,12 @@ import ManageCategories from './pages/admin/ManageCategories';
 import ManageMacros from './pages/admin/ManageMacros';
 import CategoryDetailPage from './pages/dashboard/CategoryDetailPage';
 import ManageAnnouncements from './pages/admin/ManageAnnouncements';
-import DashboardLayout from './pages/dashboard/DashboardLayout'; // Layout mới cho Dashboard
+import DashboardLayout from './pages/dashboard/DashboardLayout';
+import ManageUsers from './pages/admin/ManageUsers'; // <-- 1. THÊM IMPORT MỚI
 
 import './App.css';
 
-// --- ĐỊNH NGHĨA KIỂU DỮ LIỆU ---
+// --- ĐỊNH NGHĨA KIỂU DỮ LIỆU (GIỮ NGUYÊN) ---
 export interface Category { id: number; name: string; }
 export interface Macro { id: number; title: string; category: string; content: Descendant[]; }
 export interface Announcement {
@@ -24,7 +25,7 @@ export interface Announcement {
   timestamp: string;
 }
 
-// --- DỮ LIỆU KHỞI TẠO VÀ HÀM MIGRATE ---
+// --- DỮ LIỆU KHỞI TẠO VÀ HÀM MIGRATE (GIỮ NGUYÊN) ---
 const initialCategories: Category[] = [
   { id: 1, name: 'Hướng dẫn sử dụng' },
   { id: 2, name: 'Chính sách bảo hành' },
@@ -47,7 +48,7 @@ const migrateMacrosData = (data: any[]): Macro[] => {
 };
 
 function App() {
-  // --- LOGIC STATE ---
+  // --- LOGIC STATE (GIỮ NGUYÊN) ---
   const [isAdmin, setIsAdmin] = useState(true);
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
@@ -77,7 +78,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         
-        {/* --- NHÓM ROUTE CHO DASHBOARD (SỬ DỤNG LAYOUT RIÊNG) --- */}
+        {/* --- NHÓM ROUTE CHO DASHBOARD (GIỮ NGUYÊN) --- */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route 
             index 
@@ -89,7 +90,7 @@ function App() {
           />
         </Route>
 
-        {/* --- NHÓM ROUTE CHO ADMIN (GIỮ NGUYÊN) --- */}
+        {/* --- NHÓM ROUTE CHO ADMIN (ĐÃ CẬP NHẬT) --- */}
         <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/login" />}>
           <Route 
             path="categories" 
@@ -103,6 +104,9 @@ function App() {
             path="announcements" 
             element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />}
           />
+          {/* 2. THÊM ROUTE CHO QUẢN LÝ THÀNH VIÊN */}
+          <Route path="users" element={<ManageUsers />} />
+          
           <Route index element={<Navigate to="categories" />} />
         </Route>
 

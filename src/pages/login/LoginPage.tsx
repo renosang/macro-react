@@ -2,35 +2,45 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/useAuthStore';
 import toast from 'react-hot-toast';
-import './LoginPage.css'; // Chúng ta sẽ tạo file CSS này
+import axios from 'axios'; // <-- Import axios
+import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Thêm trạng thái loading
   const loginAction = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     const loadingToast = toast.loading('Đang đăng nhập...');
 
-    // --- LOGIC XÁC THỰC ---
-    // Trong thực tế, bạn sẽ gọi API đến server Node.js ở đây.
-    // Hiện tại, chúng ta sẽ giả lập một cuộc gọi API.
     try {
-      // Giả lập gọi API mất 1 giây
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // --- GỌI API BACKEND THẬT SỰ ---
+      const response = await axios.post('/api/auth/login', {
+        username,
+        password,
+      });
 
-      if (username === 'admin' && password === 'admin') {
-        const fakeToken = 'jwt.token.from.backend'; // Token nhận về từ server
-        loginAction(fakeToken);
+      // Lấy token từ response của server
+      const { token } = response.data;
+
+      if (token) {
+        loginAction(token); // Lưu token vào store
         toast.success('Đăng nhập thành công!', { id: loadingToast });
-        navigate('/dashboard', { replace: true }); // Chuyển hướng về dashboard
+        navigate('/dashboard', { replace: true }); // Chuyển hướng
       } else {
-        throw new Error('Tên đăng nhập hoặc mật khẩu không đúng');
+        // Trường hợp server không trả về token dù không báo lỗi
+        throw new Error('Không nhận được token xác thực.');
       }
+
     } catch (error: any) {
-      toast.error(error.message || 'Đã có lỗi xảy ra', { id: loadingToast });
+      // Lấy thông báo lỗi từ server nếu có, không thì báo lỗi chung
+      const errorMessage = error.response?.data?.message || 'Tên đăng nhập hoặc mật khẩu không đúng!';
+      toast.error(errorMessage, { id: loadingToast });
+      setIsLoading(false);
     }
   };
 
@@ -45,6 +55,7 @@ const LoginPage: React.FC = () => {
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            disabled={isLoading}
             required
           />
         </div>
@@ -55,10 +66,13 @@ const LoginPage: React.FC = () => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
             required
           />
         </div>
-        <button type="submit">Đăng nhập</button>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Đang xử lý...' : 'Đăng nhập'}
+        </button>
       </form>
     </div>
   );
