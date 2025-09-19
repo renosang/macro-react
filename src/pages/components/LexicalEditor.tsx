@@ -1,26 +1,24 @@
+// src/pages/components/LexicalEditor.tsx
 import React, { useEffect } from 'react';
+import { $getRoot, $createTextNode, $createParagraphNode } from 'lexical';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'; // <-- SỬA LỖI Ở ĐÂY
 
 import useEditorStore from '../../stores/useEditorStore';
 import ToolbarPlugin from './ToolbarPlugin'; // Giả sử file này tồn tại
 
-// ===================================================================
-// == PLUGIN NẠP LẠI TRẠNG THÁI EDITOR (PHIÊN BẢN SỬA LỖI) ==
-// ===================================================================
+// Plugin để nạp lại nội dung đã lưu
 const LoadInitialContentPlugin: React.FC = () => {
   const [editor] = useLexicalComposerContext();
   const content = useEditorStore((state) => state.content);
 
   useEffect(() => {
-    if (!content) return; // Nếu không có content đã lưu, không làm gì cả
-
-    // Dùng một biến cờ để đảm bảo chỉ nạp 1 lần duy nhất
+    if (!content) return;
     const isContentLoaded = editor.getEditorState().isEmpty();
     if (!isContentLoaded) return;
 
@@ -34,7 +32,6 @@ const LoadInitialContentPlugin: React.FC = () => {
 
   return null;
 };
-// ===================================================================
 
 const editorConfig = {
   namespace: 'PopupEditor',
@@ -46,7 +43,6 @@ const LexicalEditor: React.FC = () => {
   const setContent = useEditorStore((state) => state.setContent);
 
   const handleOnChange = (editorState: any) => {
-    // Chuyển toàn bộ trạng thái editor thành chuỗi JSON để lưu
     const editorStateJSON = JSON.stringify(editorState);
     setContent(editorStateJSON);
   };
