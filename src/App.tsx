@@ -49,7 +49,6 @@ const migrateMacrosData = (data: any[]): Macro[] => {
 
 function App() {
   // --- LOGIC STATE (GIỮ NGUYÊN) ---
-  const [isAdmin, setIsAdmin] = useState(true);
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
       const saved = localStorage.getItem('categories');
