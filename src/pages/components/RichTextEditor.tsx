@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { Slate, Editable, withReact, RenderLeafProps, RenderElementProps, useSlate } from 'slate-react';
-import { createEditor, Descendant, Editor, Text, Transforms, Element as SlateElement } from 'slate';
+import { createEditor, Descendant, Editor, Transforms, Element as SlateElement } from 'slate';
 import { withHistory } from 'slate-history';
 import './RichTextEditor.css';
 
