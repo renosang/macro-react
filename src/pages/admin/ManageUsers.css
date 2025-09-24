@@ -8,8 +8,9 @@
 
 .controls {
     display: flex;
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center;     /* Căn giữa theo chiều dọc */
     gap: 15px;
-    align-items: center;
     margin-bottom: 25px;
     padding: 15px;
     background-color: #f8f9fa;
@@ -18,7 +19,7 @@
 }
 
 .controls .search-input {
-    flex-grow: 1;
+    width: 50%; /* Đặt chiều rộng cụ thể */
     padding: 10px 15px;
     border-radius: 6px;
     border: 1px solid #ced4da;
@@ -43,6 +44,8 @@
     font-weight: 500;
     transition: background-color 0.2s;
     white-space: nowrap;
+    margin-bottom: 0px;
+
 }
 
 .add-new-btn:hover {
@@ -70,6 +73,10 @@
 
 .users-table tbody tr:hover {
     background-color: #f1f3f5;
+}
+
+.action-header {
+  text-align: right;
 }
 
 .action-cell {
@@ -111,7 +118,7 @@
     color: #383d41;
 }
 
-/* Modal styles - Tương tự như ManageMacros */
+/* Modal styles */
 .modal-backdrop {
   position: fixed;
   top: 0;
