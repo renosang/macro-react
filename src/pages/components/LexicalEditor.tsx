@@ -1,54 +1,45 @@
-// src/pages/components/LexicalEditor.tsx
-import React, { useEffect } from 'react';
-import { $getRoot, $createTextNode, $createParagraphNode } from 'lexical';
+import React from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'; // <-- SỬA LỖI Ở ĐÂY
+import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 
 import useEditorStore from '../../stores/useEditorStore';
-import ToolbarPlugin from './ToolbarPlugin'; // Giả sử file này tồn tại
+import ToolbarPlugin from './ToolbarPlugin';
 
-// Plugin để nạp lại nội dung đã lưu
-const LoadInitialContentPlugin: React.FC = () => {
-  const [editor] = useLexicalComposerContext();
-  const content = useEditorStore((state) => state.content);
-
-  useEffect(() => {
-    if (!content) return;
-    const isContentLoaded = editor.getEditorState().isEmpty();
-    if (!isContentLoaded) return;
-
-    try {
-      const initialEditorState = editor.parseEditorState(content);
-      editor.setEditorState(initialEditorState);
-    } catch (error) {
-      console.error("Lỗi khi nạp trạng thái editor:", error);
-    }
-  }, [editor, content]);
-
-  return null;
+const editorTheme = {
+  // Bạn có thể thêm các theme tùy chỉnh cho editor tại đây
 };
 
-const editorConfig = {
-  namespace: 'PopupEditor',
-  theme: {},
-  onError(error: Error) { throw error; },
-};
+function onError(error: Error) {
+  console.error(error);
+}
 
 const LexicalEditor: React.FC = () => {
-  const setContent = useEditorStore((state) => state.setContent);
+  const { content, setContent, _hasHydrated } = useEditorStore();
 
   const handleOnChange = (editorState: any) => {
     const editorStateJSON = JSON.stringify(editorState);
     setContent(editorStateJSON);
   };
+  
+  // Rất quan trọng: Chỉ render editor khi store đã nạp xong dữ liệu từ localStorage
+  if (!_hasHydrated) {
+    return null; // Hoặc hiển thị một component loading
+  }
+
+  const initialConfig = {
+    namespace: 'PopupEditor',
+    theme: editorTheme,
+    onError,
+    // Nạp trực tiếp nội dung đã lưu vào editor khi khởi tạo
+    editorState: content,
+  };
 
   return (
-    <LexicalComposer initialConfig={editorConfig}>
+    <LexicalComposer initialConfig={initialConfig}>
       <div className="editor-container" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <ToolbarPlugin />
         <div className="editor-inner-content" style={{ flex: 1, position: 'relative', overflow: 'auto' }}>
@@ -60,7 +51,6 @@ const LexicalEditor: React.FC = () => {
         </div>
         <HistoryPlugin />
         <OnChangePlugin onChange={handleOnChange} />
-        <LoadInitialContentPlugin />
       </div>
     </LexicalComposer>
   );
