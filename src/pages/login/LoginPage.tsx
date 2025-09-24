@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/useAuthStore';
 import './LoginPage.css';
@@ -6,11 +6,30 @@ import './LoginPage.css';
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
+  // Khi component được tải, kiểm tra xem có tên đăng nhập nào đã được lưu không
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('rememberedUsername');
+    if (savedUsername) {
+      setUsername(savedUsername);
+      setRememberMe(true);
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Xử lý logic ghi nhớ tài khoản
+    if (rememberMe) {
+      localStorage.setItem('rememberedUsername', username);
+    } else {
+      localStorage.removeItem('rememberedUsername');
+    }
+
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -20,15 +39,19 @@ function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        login(data.token, data.user); // <-- Cập nhật ở đây
+        login(data.token, data.user);
         navigate('/dashboard');
       } else {
-        alert(data);
+        alert(data.message || 'Tên đăng nhập hoặc mật khẩu không đúng.');
       }
     } catch (error) {
       console.error('Lỗi đăng nhập:', error);
       alert('Đã có lỗi xảy ra. Vui lòng thử lại.');
     }
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -48,13 +71,32 @@ function LoginPage() {
           </div>
           <div className="input-group">
             <label htmlFor="password">Mật khẩu</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="password-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="toggle-password-btn"
+                onClick={toggleShowPassword}
+              >
+                {showPassword ? 'Ẩn' : 'Hiện'}
+              </button>
+            </div>
+          </div>
+          <div className="options-group">
+            <label className="remember-me-label">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              Ghi nhớ tài khoản
+            </label>
           </div>
           <button type="submit" className="login-button">
             Đăng nhập
@@ -66,3 +108,4 @@ function LoginPage() {
 }
 
 export default LoginPage;
+

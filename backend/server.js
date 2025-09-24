@@ -12,25 +12,26 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
 const macroRoutes = require('./routes/macros');
-const announcementRoutes = require('./routes/announcements'); // Đảm bảo dòng này tồn tại
+const announcementRoutes = require('./routes/announcements');
+const aiRoutes = require('./routes/ai');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/macros', macroRoutes);
-app.use('/api/announcements', announcementRoutes); // Và dòng này cũng tồn tại
+app.use('/api/announcements', announcementRoutes);
+app.use('/api/ai', aiRoutes);
 
 // --- MongoDB Connection ---
+// The MONGODB_URI should be in your .env file or Vercel environment variables
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected successfully!'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// --- Vercel Deployment Export ---
-// Dòng app.listen chỉ cần thiết cho local development
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
-}
+// --- Start Server for Local Development ---
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
+// --- Vercel Deployment Export ---
 module.exports = app;
 

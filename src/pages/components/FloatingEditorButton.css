@@ -6,7 +6,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: #007bff;
+  background-color: #6c757d; /* Thay đổi màu để phân biệt */
   color: white;
   border: none;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -15,10 +15,11 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  z-index: 999;
+  z-index: 999; /* Nằm dưới nút Chat AI */
   transition: transform 0.2s ease;
 }
 
 .fab:hover {
   transform: scale(1.1);
+  background-color: #5a6268;
 }
