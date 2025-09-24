@@ -22,7 +22,7 @@ function Header() {
         </Link>
       </div>
       <div className="header-right">
-        <span>Xin chào, User!</span>
+        <span>Xin chào, Chúc bạn làm việc hiệu quả ❤️</span>
         <button className="logout-button" onClick={handleLogout}>
           Đăng xuất
         </button>

@@ -9,9 +9,21 @@ import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import useEditorStore from '../../stores/useEditorStore';
 import ToolbarPlugin from './ToolbarPlugin';
 
+// Thêm theme để có thể tùy chỉnh CSS cho các node văn bản
 const editorTheme = {
-  // Bạn có thể thêm các theme tùy chỉnh cho editor tại đây
+  paragraph: 'editor-paragraph',
 };
+
+// Component chứa CSS để reset margin cho đoạn văn bản
+function EditorThemeStyles() {
+  return (
+    <style>{`
+      .editor-paragraph {
+        margin: 0;
+      }
+    `}</style>
+  );
+}
 
 function onError(error: Error) {
   console.error(error);
@@ -32,7 +44,7 @@ const LexicalEditor: React.FC = () => {
 
   const initialConfig = {
     namespace: 'PopupEditor',
-    theme: editorTheme,
+    theme: editorTheme, // <-- Áp dụng theme
     onError,
     // Nạp trực tiếp nội dung đã lưu vào editor khi khởi tạo
     editorState: content,
@@ -40,6 +52,8 @@ const LexicalEditor: React.FC = () => {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
+      {/* Thêm component CSS vào đây */}
+      <EditorThemeStyles />
       <div className="editor-container" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <ToolbarPlugin />
         <div className="editor-inner-content" style={{ flex: 1, position: 'relative', overflow: 'auto' }}>
@@ -57,3 +71,4 @@ const LexicalEditor: React.FC = () => {
 };
 
 export default LexicalEditor;
+
