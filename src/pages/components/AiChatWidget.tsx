@@ -31,21 +31,27 @@ const AiChatWidget: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Dòng này đã được cập nhật để gọi đến backend API
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: currentInput }),
       });
 
-      if (!response.ok) {
-        // Lấy lỗi từ backend nếu có
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Network response was not ok');
+      // Kiểm tra xem phản hồi có phải là JSON hay không
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await response.json();
+        if (!response.ok) {
+          // Nếu backend trả về lỗi JSON, hiển thị lỗi đó
+          throw new Error(data.error || 'Network response was not ok');
+        }
+        setMessages(prev => [...prev, { sender: 'ai', text: data.reply }]);
+      } else {
+        // Nếu không phải JSON (ví dụ: lỗi server 500), hiển thị nội dung text để gỡ lỗi
+        const textError = await response.text();
+        throw new Error(textError || 'An unknown server error occurred.');
       }
-
-      const data = await response.json();
-      setMessages(prev => [...prev, { sender: 'ai', text: data.reply }]);
+      
     } catch (error: any) {
       console.error('Error fetching AI response:', error);
       setMessages(prev => [...prev, {
