@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Descendant } from 'slate';
-import { Announcement } from '../../App';
+import { Announcement } from '../../types'; // <-- Sửa đường dẫn import
 import RichTextEditor from '../components/RichTextEditor';
 import ContentViewer from '../components/ContentViewer';
 import './ManageAnnouncements.css';
@@ -17,7 +17,6 @@ function ManageAnnouncements({ announcements, setAnnouncements }: Props) {
   const [content, setContent] = useState<Descendant[]>(emptyContent);
 
   const handlePublish = () => {
-    // Kiểm tra nội dung có rỗng không
     const isEditorEmpty = content.length === 1 && 
       (content[0] as any).children.length === 1 && 
       (content[0] as any).children[0].text === '';
@@ -33,7 +32,7 @@ function ManageAnnouncements({ announcements, setAnnouncements }: Props) {
       timestamp: new Date().toLocaleString('vi-VN'),
     };
     setAnnouncements(prev => [newAnnouncement, ...prev]);
-    setContent(emptyContent); // Xóa trắng editor
+    setContent(emptyContent);
     toast.success('Đã đăng thông báo!');
   };
 

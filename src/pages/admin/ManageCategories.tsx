@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import './ManageCategories.css';
-import { Category } from '../../App';
+import { Category } from '../../types';
 
 interface ManageCategoriesProps {
   categories: Category[];
@@ -14,43 +14,83 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingName, setEditingName] = useState('');
 
-  const handleAddNew = () => {
+  // HÀM TẠO MỚI (ĐÃ CẬP NHẬT XỬ LÝ LỖI)
+  const handleAddNew = async () => {
     if (newCategoryName.trim() === '') {
       toast.error('Tên danh mục không được để trống!');
       return;
     }
-    const newCategory = { id: Date.now(), name: newCategoryName };
-    setCategories([...categories, newCategory]);
-    setNewCategoryName('');
-    setIsAdding(false);
-    toast.success('Thêm danh mục thành công!');
-  };
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCategoryName }),
+      });
 
-  const handleDelete = (id: number) => {
-    const isConfirmed = window.confirm('Bạn có chắc chắn muốn xóa danh mục này không?');
-    if (isConfirmed) {
-      setCategories(prev => prev.filter(category => category.id !== id));
-      toast.success('Đã xóa danh mục thành công!');
+      // Xử lý lỗi tốt hơn
+      if (!res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Lỗi từ server');
+        } else {
+          throw new Error(`Lỗi server: ${res.status} ${res.statusText}. Phản hồi không phải là JSON.`);
+        }
+      }
+      
+      const newCategory = await res.json();
+      setCategories([...categories, newCategory].sort((a, b) => a.name.localeCompare(b.name)));
+      setNewCategoryName('');
+      setIsAdding(false);
+      toast.success('Thêm danh mục thành công!');
+    } catch (error: any) {
+      toast.error(`Lỗi: ${error.message}`);
     }
   };
 
+  // HÀM XÓA
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này không?')) {
+      try {
+        await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+        setCategories(prev => prev.filter(category => category._id !== id));
+        toast.success('Đã xóa danh mục thành công!');
+      } catch (error: any) {
+        toast.error(`Lỗi: ${error.message}`);
+      }
+    }
+  };
+  
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setEditingName(category.name);
   };
 
-  const handleSaveEdit = () => {
+  // HÀM LƯU SAU KHI SỬA
+  const handleSaveEdit = async () => {
     if (!editingCategory || editingName.trim() === '') {
       toast.error('Tên danh mục không được để trống!');
       return;
     }
-    setCategories(prev => 
-      prev.map(cat => 
-        cat.id === editingCategory.id ? { ...cat, name: editingName } : cat
-      )
-    );
-    toast.success('Cập nhật danh mục thành công!');
-    setEditingCategory(null);
+    try {
+      const res = await fetch(`/api/categories/${editingCategory._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editingName }),
+      });
+      if (!res.ok) throw new Error('Cập nhật thất bại');
+      
+      const updatedCategory = await res.json();
+      setCategories(prev => 
+        prev.map(cat => 
+          cat._id === editingCategory._id ? updatedCategory : cat
+        )
+      );
+      toast.success('Cập nhật danh mục thành công!');
+      setEditingCategory(null);
+    } catch (error: any) {
+      toast.error(`Lỗi: ${error.message}`);
+    }
   };
   
   const handleCancelEdit = () => {
@@ -85,9 +125,9 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
         </thead>
         <tbody>
           {categories.map((category) => (
-            <tr key={category.id}>
+            <tr key={category._id}>
               <td>
-                {editingCategory?.id === category.id ? (
+                {editingCategory?._id === category._id ? (
                   <input 
                     type="text" 
                     value={editingName} 
@@ -99,7 +139,7 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
                 )}
               </td>
               <td>
-                {editingCategory?.id === category.id ? (
+                {editingCategory?._id === category._id ? (
                   <>
                     <button className="action-btn save-btn" onClick={handleSaveEdit}>Lưu</button>
                     <button className="action-btn cancel-btn" onClick={handleCancelEdit}>Hủy</button>
@@ -107,7 +147,7 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
                 ) : (
                   <>
                     <button className="action-btn edit-btn" onClick={() => handleEdit(category)}>Sửa</button>
-                    <button className="action-btn delete-btn" onClick={() => handleDelete(category.id)}>Xóa</button>
+                    <button className="action-btn delete-btn" onClick={() => handleDelete(category._id)}>Xóa</button>
                   </>
                 )}
               </td>

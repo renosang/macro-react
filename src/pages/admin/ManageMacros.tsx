@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import './ManageMacros.css';
 import RichTextEditor from '../components/RichTextEditor';
 import HighlightText from '../components/HighlightText';
-import { Category, Macro } from '../../App';
+import { Category, Macro } from '../../types'; // <-- Sửa đường dẫn import
 import { Descendant } from 'slate';
 
 interface ManageMacrosProps {
@@ -52,21 +52,21 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       toast.error("Tiêu đề không được để trống!");
       return;
     }
-    if (currentMacro.id) {
-      setMacros(prev => prev.map(m => m.id === currentMacro.id ? (currentMacro as Macro) : m));
+    if (currentMacro._id) { // <-- Sửa thành _id
+      setMacros(prev => prev.map(m => m._id === currentMacro._id ? (currentMacro as Macro) : m)); // <-- Sửa thành _id
       toast.success("Cập nhật macro thành công!");
     } else {
-      const newMacro: Macro = { ...currentMacro, id: Date.now() } as Macro;
+      const newMacro: Macro = { ...currentMacro, _id: String(Date.now()) } as Macro; // <-- Sửa thành _id
       setMacros(prev => [...prev, newMacro]);
       toast.success("Thêm macro thành công!");
     }
     handleCloseModal();
   };
   
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => { // <-- Sửa thành string
     const isConfirmed = window.confirm('Bạn có chắc chắn muốn xóa macro này không?');
     if (isConfirmed) {
-      setMacros(prev => prev.filter(macro => macro.id !== id));
+      setMacros(prev => prev.filter(macro => macro._id !== id)); // <-- Sửa thành _id
       toast.success('Đã xóa macro thành công!');
     }
   };
@@ -77,7 +77,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       <div className="controls">
         <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
           <option value="all">Tất cả danh mục</option>
-          {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
+          {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
         </select>
         <input 
           type="text" 
@@ -98,12 +98,12 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
         </thead>
         <tbody>
           {finalFilteredMacros.map((macro) => (
-            <tr key={macro.id}>
+            <tr key={macro._id}> {/* <-- Sửa thành _id */}
               <td><HighlightText text={macro.title} highlight={searchQuery} /></td>
               <td>{macro.category}</td>
               <td>
                 <button className="action-btn edit-btn" onClick={() => handleOpenEditModal(macro)}>Sửa</button>
-                <button className="action-btn delete-btn" onClick={() => handleDelete(macro.id)}>Xóa</button>
+                <button className="action-btn delete-btn" onClick={() => handleDelete(macro._id)}>Xóa</button> {/* <-- Sửa thành _id */}
               </td>
             </tr>
           ))}
@@ -112,7 +112,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       {isModalOpen && currentMacro && (
         <div className="modal-backdrop">
           <div className="modal-content">
-            <h3>{currentMacro.id ? 'Chỉnh sửa Macro' : 'Thêm Macro mới'}</h3>
+            <h3>{currentMacro._id ? 'Chỉnh sửa Macro' : 'Thêm Macro mới'}</h3> {/* <-- Sửa thành _id */}
             <div className="form-group">
               <label>Tiêu đề</label>
               <input 
@@ -127,7 +127,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
                 value={currentMacro.category}
                 onChange={e => setCurrentMacro({...currentMacro, category: e.target.value})}
               >
-                {categories.map(cat => <option key={cat.id}>{cat.name}</option>)}
+                {categories.map(cat => <option key={cat._id}>{cat.name}</option>)}
               </select>
             </div>
             <div className="form-group">

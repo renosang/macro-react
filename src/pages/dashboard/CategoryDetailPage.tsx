@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Descendant } from 'slate';
 import Header from '../components/Header';
-import { Macro } from '../../App';
+import { Macro } from '../../types'; // <-- Sửa đường dẫn import
 import './CategoryDetailPage.css';
 import HighlightText from '../components/HighlightText';
 import ContentViewer from '../components/ContentViewer';
@@ -54,7 +53,7 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
               const colorClass = colorClasses[index % colorClasses.length];
 
               return (
-                <div key={macro.id} className={`macro-item ${colorClass}`}>
+                <div key={macro._id} className={`macro-item ${colorClass}`}> {/* <-- Sửa thành _id */}
                   <h3>
                     <HighlightText text={macro.title} highlight={searchQuery} />
                   </h3>

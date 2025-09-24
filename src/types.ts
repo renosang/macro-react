@@ -1,19 +1,19 @@
 import { Descendant } from 'slate';
 
 export interface Category {
-  id: number;
+  _id: string;
   name: string;
 }
 
 export interface Macro {
-  id: number;
+  _id: string; // <-- Sửa từ id: number
   title: string;
   category: string;
   content: Descendant[];
 }
 
 export interface Announcement {
-  id: number;
+  id: number; // Tạm giữ vì chưa chuyển qua DB
   content: Descendant[];
   timestamp: string;
 }

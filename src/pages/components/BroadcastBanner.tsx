@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { Announcement } from '../../App';
+import { Announcement } from '../../types'; // <-- Sửa đường dẫn import
 import ContentViewer from './ContentViewer';
 import './BroadcastBanner.css';
 

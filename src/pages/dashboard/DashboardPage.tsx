@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import './DashboardPage.css';
-import { Category, Macro, Announcement } from '../../App';
+import { Category, Macro, Announcement } from '../../types'; // <-- Sửa đường dẫn import
 import BroadcastBanner from '../components/BroadcastBanner';
 
 interface DashboardPageProps {
@@ -42,7 +42,7 @@ function DashboardPage({ categories, macros, announcements }: DashboardPageProps
             const colorClass = colorClasses[index % colorClasses.length];
             return (
               <Link 
-                key={category.id} 
+                key={category._id} // <-- Sửa thành _id
                 to={`/dashboard/category/${encodeURIComponent(category.name)}`} 
                 className={`category-card ${colorClass}`}
               >

@@ -13,54 +13,31 @@ import CategoryDetailPage from './pages/dashboard/CategoryDetailPage';
 import ManageAnnouncements from './pages/admin/ManageAnnouncements';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import ManageUsersPage from './pages/admin/ManageUsersPage';
-import ProtectedRoute from './pages/components/ProtectedRoute'; // <-- Import ProtectedRoute
+import ProtectedRoute from './pages/components/ProtectedRoute'; // Import ProtectedRoute
 
 import './App.css';
-
-// --- ĐỊNH NGHĨA KIỂU DỮ LIỆU ---
-export interface Category { id: number; name: string; }
-export interface Macro { id: number; title: string; category: string; content: Descendant[]; }
-export interface Announcement {
-  id: number;
-  content: Descendant[];
-  timestamp: string;
-}
-
-// --- DỮ LIỆU KHỞI TẠO VÀ HÀM MIGRATE ---
-const initialCategories: Category[] = [
-  { id: 1, name: 'Hướng dẫn sử dụng' },
-  { id: 2, name: 'Chính sách bảo hành' },
-  { id: 3, name: 'Câu hỏi thường gặp' },
-];
-const initialMacros: Macro[] = [
-    { id: 1, title: 'Hướng dẫn cài đặt phần mềm', category: 'Hướng dẫn sử dụng', content: [{ type: 'paragraph', children: [{ text: 'Nội dung...' }] }] },
-    { id: 2, title: 'Quy định đổi trả hàng', category: 'Chính sách bảo hành', content: [{ type: 'paragraph', children: [{ text: 'Nội dung...' }] }] },
-];
-const migrateMacrosData = (data: any[]): Macro[] => {
-  return data.map(macro => {
-    if (typeof macro.content === 'string') {
-      return { ...macro, content: [{ type: 'paragraph', children: [{ text: macro.content }] }] };
-    }
-    if (!macro.content || !Array.isArray(macro.content)) {
-        return { ...macro, content: [{ type: 'paragraph', children: [{ text: '' }] }] };
-    }
-    return macro;
-  });
-};
+import { Category, Macro, Announcement } from './types'; // Import từ file types chính
 
 function App() {
-  const [isAdmin] = useState(true); // Tạm thời vẫn giữ logic isAdmin
-  const [categories, setCategories] = useState<Category[]>(() => {
-    try {
-      const saved = localStorage.getItem('categories');
-      return saved ? JSON.parse(saved) : initialCategories;
-    } catch { return initialCategories; }
-  });
+  const [isAdmin] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]); // Khởi tạo mảng rỗng
   const [macros, setMacros] = useState<Macro[]>(() => {
     try {
       const saved = localStorage.getItem('macros');
-      return saved ? migrateMacrosData(JSON.parse(saved)) : initialMacros;
-    } catch { return initialMacros; }
+      // Logic migrate dữ liệu cũ (nếu cần)
+      const parsed = saved ? JSON.parse(saved) : [];
+      return parsed.map((macro: any) => {
+        if (typeof macro.content === 'string') {
+          return { ...macro, content: [{ type: 'paragraph', children: [{ text: macro.content }] }] };
+        }
+        if (!macro.content || !Array.isArray(macro.content)) {
+            return { ...macro, content: [{ type: 'paragraph', children: [{ text: '' }] }] };
+        }
+        return macro;
+      });
+    } catch { 
+      return []; 
+    }
   });
   const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
     try {
@@ -69,7 +46,15 @@ function App() {
     } catch { return []; }
   });
 
-  useEffect(() => { localStorage.setItem('categories', JSON.stringify(categories)); }, [categories]);
+  // Fetch categories từ API khi ứng dụng khởi động
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(res => res.json())
+      .then(data => setCategories(data))
+      .catch(err => console.error("Lỗi khi tải danh mục:", err));
+  }, []);
+
+  // Các state khác vẫn lưu vào localStorage
   useEffect(() => { localStorage.setItem('macros', JSON.stringify(macros)); }, [macros]);
   useEffect(() => { localStorage.setItem('announcements', JSON.stringify(announcements)); }, [announcements]);
 
@@ -114,8 +99,8 @@ function App() {
           </Route>
         </Route>
 
-        {/* Route mặc định */}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        {/* Route mặc định, nên trỏ về login hoặc dashboard tùy thuộc vào trạng thái đăng nhập */}
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );
