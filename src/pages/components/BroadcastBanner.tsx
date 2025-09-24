@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { Announcement } from '../../types'; // <-- Sửa đường dẫn import
+import { Announcement } from '../../types'; // Sửa đường dẫn import
 import ContentViewer from './ContentViewer';
 import './BroadcastBanner.css';
 
@@ -14,7 +14,8 @@ const BroadcastBanner = ({ announcement }: Props) => {
   useEffect(() => {
     if (announcement) {
       const dismissedId = localStorage.getItem('dismissedAnnouncementId');
-      if (String(announcement.id) !== dismissedId) {
+      // Sử dụng `_id` để khớp với dữ liệu từ MongoDB
+      if (String(announcement._id) !== dismissedId) {
         setIsVisible(true);
       } else {
         setIsVisible(false);
@@ -26,7 +27,8 @@ const BroadcastBanner = ({ announcement }: Props) => {
 
   const handleDismiss = () => {
     if (announcement) {
-      localStorage.setItem('dismissedAnnouncementId', String(announcement.id));
+      // Sử dụng `_id` để lưu vào localStorage
+      localStorage.setItem('dismissedAnnouncementId', String(announcement._id));
       setIsVisible(false);
       toast.success('Đã ẩn thông báo.');
     }
@@ -47,3 +49,4 @@ const BroadcastBanner = ({ announcement }: Props) => {
 };
 
 export default BroadcastBanner;
+

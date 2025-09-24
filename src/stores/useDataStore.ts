@@ -1,9 +1,9 @@
-// src/stores/useDataStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Category, Macro } from '../types';
 
-// Dữ liệu này không còn là nguồn chính, chỉ để dự phòng
+// Dữ liệu khởi tạo không còn cần thiết và được thay bằng mảng rỗng
+// để tránh lỗi kiểu dữ liệu. Dữ liệu thực sẽ được fetch từ API.
 const initialCategories: Category[] = [];
 const initialMacros: Macro[] = [];
 

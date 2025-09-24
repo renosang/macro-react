@@ -6,7 +6,7 @@ export interface Category {
 }
 
 export interface Macro {
-  _id: string; 
+  _id: string;
   title: string;
   category: string;
   content: Descendant[];
@@ -14,7 +14,7 @@ export interface Macro {
 
 export interface Announcement {
   _id: string;
-  content: Desscsendant[];
+  content: Descendant[]; // Sửa lỗi gõ chữ ở đây
   timestamp: string;
 }
 
@@ -23,3 +23,4 @@ export interface User {
   username: string;
   role: 'user' | 'admin';
 }
+
