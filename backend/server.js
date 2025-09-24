@@ -1,4 +1,3 @@
-// backend/server.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -11,11 +10,13 @@ app.use(express.json());
 // --- Routes ---
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
-const categoryRoutes = require('./routes/categories'); // <-- THÊM DÒNG NÀY
+const categoryRoutes = require('./routes/categories');
+const macroRoutes = require('./routes/macros'); // <-- THÊM DÒNG NÀY
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/categories', categoryRoutes); // <-- THÊM DÒNG NÀY
+app.use('/api/categories', categoryRoutes);
+app.use('/api/macros', macroRoutes); // <-- THÊM DÒNG NÀY
 
 // --- MongoDB Connection ---
 mongoose.connect(process.env.MONGODB_URI)

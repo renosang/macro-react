@@ -6,7 +6,7 @@ export interface Category {
 }
 
 export interface Macro {
-  _id: string; // <-- Sửa từ id: number
+  _id: string; 
   title: string;
   category: string;
   content: Descendant[];
