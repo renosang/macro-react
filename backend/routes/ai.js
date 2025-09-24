@@ -1,5 +1,5 @@
 const express = require('express');
-const fetch = require('node-fetch'); // <-- THÊM DÒNG NÀY ĐỂ TĂNG TÍNH ỔN ĐỊNH
+const fetch = require('node-fetch');
 const router = express.Router();
 
 /**
@@ -13,7 +13,8 @@ async function runChat(message) {
     throw new Error("GEMINI_API_KEY is not set in environment variables.");
   }
   
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+  const modelName = "gemini-2.5-flash-preview-05-20"; // Đã cập nhật theo yêu cầu
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
   const payload = {
     contents: [{ parts: [{ text: message }] }],
@@ -26,13 +27,13 @@ async function runChat(message) {
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error("Gemini API Error:", errorBody);
-      throw new Error(`Google AI API request failed with status ${response.status}`);
-    }
-
     const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Gemini API Error:", data);
+      const errorMessage = data?.error?.message || `Google AI API request failed with status ${response.status}`;
+      throw new Error(errorMessage);
+    }
     
     if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
       return data.candidates[0].content.parts[0].text;
@@ -55,7 +56,6 @@ router.post('/chat', async (req, res) => {
     const aiResponse = await runChat(message);
     res.json({ reply: aiResponse });
   } catch (error) {
-    // Trả về lỗi rõ ràng hơn
     res.status(500).json({ error: error.message || 'Xin lỗi, tôi đang gặp sự cố. Vui lòng thử lại sau.' });
   }
 });
