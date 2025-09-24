@@ -11,7 +11,8 @@ import ManageCategories from './pages/admin/ManageCategories';
 import ManageMacros from './pages/admin/ManageMacros';
 import CategoryDetailPage from './pages/dashboard/CategoryDetailPage';
 import ManageAnnouncements from './pages/admin/ManageAnnouncements';
-import DashboardLayout from './pages/dashboard/DashboardLayout'; // Layout mới cho Dashboard
+import DashboardLayout from './pages/dashboard/DashboardLayout';
+import ManageUsersPage from './pages/admin/ManageUsersPage'; // Import trang quản lý user
 
 import './App.css';
 
@@ -102,6 +103,10 @@ function App() {
           <Route 
             path="announcements" 
             element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />}
+          />
+          <Route 
+            path="users" 
+            element={<ManageUsersPage />} 
           />
           <Route index element={<Navigate to="categories" />} />
         </Route>

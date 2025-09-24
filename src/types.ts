@@ -17,3 +17,9 @@ export interface Announcement {
   content: Descendant[];
   timestamp: string;
 }
+
+export interface User {
+  _id: string;
+  username: string;
+  role: 'user' | 'admin';
+}
