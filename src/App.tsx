@@ -12,7 +12,8 @@ import ManageMacros from './pages/admin/ManageMacros';
 import CategoryDetailPage from './pages/dashboard/CategoryDetailPage';
 import ManageAnnouncements from './pages/admin/ManageAnnouncements';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
-import ManageUsersPage from './pages/admin/ManageUsersPage'; // Import trang quản lý user
+import ManageUsersPage from './pages/admin/ManageUsersPage';
+import ProtectedRoute from './pages/components/ProtectedRoute'; // <-- Import ProtectedRoute
 
 import './App.css';
 
@@ -48,8 +49,7 @@ const migrateMacrosData = (data: any[]): Macro[] => {
 };
 
 function App() {
-  // --- LOGIC STATE ---
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin] = useState(true); // Tạm thời vẫn giữ logic isAdmin
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
       const saved = localStorage.getItem('categories');
@@ -68,6 +68,7 @@ function App() {
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
+
   useEffect(() => { localStorage.setItem('categories', JSON.stringify(categories)); }, [categories]);
   useEffect(() => { localStorage.setItem('macros', JSON.stringify(macros)); }, [macros]);
   useEffect(() => { localStorage.setItem('announcements', JSON.stringify(announcements)); }, [announcements]);
@@ -76,41 +77,44 @@ function App() {
     <Router>
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>
+        {/* Route công khai */}
         <Route path="/login" element={<LoginPage />} />
-        
-        {/* --- NHÓM ROUTE CHO DASHBOARD (SỬ DỤNG LAYOUT RIÊNG) --- */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route 
-            index 
-            element={<DashboardPage categories={categories} macros={macros} announcements={announcements} />} 
-          />
-          <Route 
-            path="category/:categoryName" 
-            element={<CategoryDetailPage allMacros={macros} />} 
-          />
+
+        {/* Các route được bảo vệ */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route 
+              index 
+              element={<DashboardPage categories={categories} macros={macros} announcements={announcements} />} 
+            />
+            <Route 
+              path="category/:categoryName" 
+              element={<CategoryDetailPage allMacros={macros} />} 
+            />
+          </Route>
+
+          <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
+            <Route 
+              path="categories" 
+              element={<ManageCategories categories={categories} setCategories={setCategories} />} 
+            />
+            <Route 
+              path="macros" 
+              element={<ManageMacros categories={categories} macros={macros} setMacros={setMacros} />} 
+            />
+            <Route 
+              path="announcements" 
+              element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />}
+            />
+            <Route 
+              path="users" 
+              element={<ManageUsersPage />} 
+            />
+            <Route index element={<Navigate to="categories" />} />
+          </Route>
         </Route>
 
-        {/* --- NHÓM ROUTE CHO ADMIN (GIỮ NGUYÊN) --- */}
-        <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/login" />}>
-          <Route 
-            path="categories" 
-            element={<ManageCategories categories={categories} setCategories={setCategories} />} 
-          />
-          <Route 
-            path="macros" 
-            element={<ManageMacros categories={categories} macros={macros} setMacros={setMacros} />} 
-          />
-          <Route 
-            path="announcements" 
-            element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />}
-          />
-          <Route 
-            path="users" 
-            element={<ManageUsersPage />} 
-          />
-          <Route index element={<Navigate to="categories" />} />
-        </Route>
-
+        {/* Route mặc định */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>
