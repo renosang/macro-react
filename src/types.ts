@@ -10,11 +10,13 @@ export interface Macro {
   title: string;
   category: string;
   content: Descendant[];
+  status: 'pending' | 'approved';
+  submittedBy?: string; // <-- Thuộc tính đã được thêm vào
 }
 
 export interface Announcement {
   _id: string;
-  content: Descendant[]; // Sửa lỗi gõ chữ ở đây
+  content: Descendant[];
   timestamp: string;
 }
 

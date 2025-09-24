@@ -1,21 +1,20 @@
 const mongoose = require('mongoose');
 
 const macroSchema = new mongoose.Schema({
-  title: { 
+  title: { type: String, required: true },
+  category: { type: String, required: true },
+  content: { type: Array, required: true },
+  // Thêm các trường mới
+  status: { 
     type: String, 
-    required: true,
-    trim: true 
+    enum: ['pending', 'approved'], 
+    default: 'approved' 
   },
-  category: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  content: {
-    // Sử dụng 'Mixed' để lưu trữ cấu trúc JSON phức tạp của SlateJS
-    type: mongoose.Schema.Types.Mixed,
-    required: true
+  submittedBy: { 
+    type: String, 
+    required: false 
   }
 });
 
 module.exports = mongoose.model('Macro', macroSchema);
+

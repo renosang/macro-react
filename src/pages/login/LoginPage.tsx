@@ -1,4 +1,3 @@
-// src/pages/login/LoginPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/useAuthStore';
@@ -21,7 +20,7 @@ function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        login(data.token);
+        login(data.token, data.user); // <-- Cập nhật ở đây
         navigate('/dashboard');
       } else {
         alert(data);

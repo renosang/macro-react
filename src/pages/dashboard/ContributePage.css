@@ -1,0 +1,103 @@
+.contribute-container {
+    max-width: 800px;
+}
+
+.contribute-container h1 {
+    /* Căn lề trái giống trang admin */
+    text-align: left;
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.contribute-container p {
+    /* Căn lề trái */
+    text-align: left;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+  
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #495057;
+}
+  
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background-color: white;
+    font-size: 1rem;
+}
+
+/* --- BỔ SUNG CSS CHO TRÌNH SOẠN THẢO --- */
+.form-group .editor-container .editable-area {
+    position: relative; /* Cần thiết để định vị placeholder */
+    text-align: left; /* Đảm bảo văn bản luôn căn trái */
+}
+
+/* Style cho placeholder text để căn chỉnh với dấu nháy */
+.form-group .editor-container .editable-area[data-slate-placeholder="true"]::before {
+    content: attr(data-slate-placeholder);
+    position: absolute;
+    top: 10px; /* Phải khớp với padding-top của .editable-area */
+    left: 15px; /* Phải khớp với padding-left của .editable-area */
+    color: #aaa;
+    pointer-events: none; /* Cho phép click xuyên qua placeholder */
+    display: block;
+}
+
+.form-group .editor-container .editable-area p {
+    margin-top: 0; /* Xóa margin mặc định để dấu nháy đúng vị trí */
+    margin-bottom: 0; /* Sửa lỗi khoảng cách lớn khi xuống dòng */
+    padding: 0; /* Xóa padding nếu có */
+    border: none; /* Sửa lỗi đường kẻ ngang */
+    line-height: 1.6; /* Giữ lại chiều cao dòng hợp lý */
+}
+/* --- KẾT THÚC BỔ SUNG --- */
+
+.contribute-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.contribute-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submit-btn {
+    background-color: #007bff;
+    color: white;
+}
+.submit-btn:hover {
+    background-color: #0056b3;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+}
+.cancel-btn:hover {
+    background-color: #5a6268;
+}
+

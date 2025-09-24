@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import Header from '../components/Header'; // <-- ĐƯỜNG DẪN ĐÃ THAY ĐỔI
+import Header from '../components/Header';
 import './AdminLayout.css';
 
 function AdminLayout() {
@@ -12,7 +12,8 @@ function AdminLayout() {
           <nav>
             <NavLink to="/admin/categories">Quản lý Danh mục</NavLink>
             <NavLink to="/admin/macros">Quản lý Macro</NavLink>
-            <NavLink to="/admin/users">Quản lý Thành viên</NavLink> {/* Thêm dòng này */}
+            <NavLink to="/admin/review">Kiểm duyệt Macro</NavLink> {/* <-- THÊM DÒNG NÀY */}
+            <NavLink to="/admin/users">Quản lý Thành viên</NavLink>
             <NavLink to="/admin/announcements">Quản lý Thông báo</NavLink>
           </nav>
         </aside>

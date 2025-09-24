@@ -1,0 +1,76 @@
+.review-macros h2 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+.pending-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.pending-item {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.pending-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.pending-item-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.pending-item-header span {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.pending-item-content {
+    padding: 20px;
+}
+
+.pending-item-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.pending-item-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.approve-btn {
+    background-color: #28a745;
+    color: white;
+}
+.approve-btn:hover {
+    background-color: #218838;
+}
+
+.reject-btn {
+    background-color: #dc3545;
+    color: white;
+}
+.reject-btn:hover {
+    background-color: #c82333;
+}
