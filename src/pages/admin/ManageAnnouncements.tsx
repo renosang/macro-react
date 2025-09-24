@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Descendant } from 'slate';
-import { Announcement } from '../../types'; // <-- Sửa đường dẫn import
+import { Announcement } from '../../types';
 import RichTextEditor from '../components/RichTextEditor';
 import ContentViewer from '../components/ContentViewer';
 import './ManageAnnouncements.css';
@@ -16,7 +16,7 @@ const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }
 function ManageAnnouncements({ announcements, setAnnouncements }: Props) {
   const [content, setContent] = useState<Descendant[]>(emptyContent);
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     const isEditorEmpty = content.length === 1 && 
       (content[0] as any).children.length === 1 && 
       (content[0] as any).children[0].text === '';
@@ -26,21 +26,32 @@ function ManageAnnouncements({ announcements, setAnnouncements }: Props) {
       return;
     }
 
-    const newAnnouncement: Announcement = {
-      id: Date.now(),
-      content,
-      timestamp: new Date().toLocaleString('vi-VN'),
-    };
-    setAnnouncements(prev => [newAnnouncement, ...prev]);
-    setContent(emptyContent);
-    toast.success('Đã đăng thông báo!');
+    try {
+      const res = await fetch('/api/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+      if (!res.ok) throw new Error('Đăng thông báo thất bại');
+
+      const newAnnouncement = await res.json();
+      setAnnouncements(prev => [newAnnouncement, ...prev]);
+      setContent(emptyContent);
+      toast.success('Đã đăng thông báo!');
+    } catch (error: any) {
+      toast.error(`Lỗi: ${error.message}`);
+    }
   };
 
-  const handleDelete = (id: number) => {
-    const isConfirmed = window.confirm('Bạn có chắc chắn muốn xóa thông báo này?');
-    if (isConfirmed) {
-        setAnnouncements(prev => prev.filter(ann => ann.id !== id));
-        toast.success('Đã xóa thông báo.');
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa thông báo này?')) {
+        try {
+            await fetch(`/api/announcements/${id}`, { method: 'DELETE' });
+            setAnnouncements(prev => prev.filter(ann => ann._id !== id));
+            toast.success('Đã xóa thông báo.');
+        } catch (error: any) {
+            toast.error(`Lỗi: ${error.message}`);
+        }
     }
   };
 
@@ -56,13 +67,13 @@ function ManageAnnouncements({ announcements, setAnnouncements }: Props) {
       <div className="history-list">
         {announcements.length > 0 ? (
           announcements.map(ann => (
-            <div key={ann.id} className="history-item">
+            <div key={ann._id} className="history-item">
               <div className="history-item-content">
                 <ContentViewer content={ann.content} />
               </div>
               <div className="history-item-meta">
-                <span>Đã đăng: {ann.timestamp}</span>
-                <button className="delete-btn" onClick={() => handleDelete(ann.id)}>Xóa</button>
+                <span>Đã đăng: {new Date(ann.timestamp).toLocaleString('vi-VN')}</span>
+                <button className="delete-btn" onClick={() => handleDelete(ann._id)}>Xóa</button>
               </div>
             </div>
           ))
@@ -75,3 +86,4 @@ function ManageAnnouncements({ announcements, setAnnouncements }: Props) {
 }
 
 export default ManageAnnouncements;
+

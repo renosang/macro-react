@@ -13,8 +13,8 @@ export interface Macro {
 }
 
 export interface Announcement {
-  id: number; // Tạm giữ vì chưa chuyển qua DB
-  content: Descendant[];
+  _id: string;
+  content: Desscsendant[];
   timestamp: string;
 }
 

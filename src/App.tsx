@@ -20,15 +20,10 @@ import { Category, Macro, Announcement } from './types';
 function App() {
   const [isAdmin] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [macros, setMacros] = useState<Macro[]>([]); // <-- Khởi tạo mảng rỗng
-  const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
-    try {
-      const saved = localStorage.getItem('announcements');
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
+  const [macros, setMacros] = useState<Macro[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
-  // Fetch categories và macros từ API khi ứng dụng khởi động
+  // Fetch tất cả dữ liệu từ API khi ứng dụng khởi động
   useEffect(() => {
     fetch('/api/categories')
       .then(res => res.json())
@@ -39,10 +34,12 @@ function App() {
       .then(res => res.json())
       .then(data => setMacros(data))
       .catch(err => console.error("Lỗi khi tải macros:", err));
-  }, []);
 
-  // Chỉ còn lưu announcements vào localStorage
-  useEffect(() => { localStorage.setItem('announcements', JSON.stringify(announcements)); }, [announcements]);
+    fetch('/api/announcements')
+      .then(res => res.json())
+      .then(data => setAnnouncements(data))
+      .catch(err => console.error("Lỗi khi tải thông báo:", err));
+  }, []);
 
   return (
     <Router>
@@ -90,3 +87,4 @@ function App() {
 }
 
 export default App;
+
