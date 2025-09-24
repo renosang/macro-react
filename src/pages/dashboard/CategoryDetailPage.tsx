@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Header from '../components/Header';
-import { Macro } from '../../types'; // <-- Sửa đường dẫn import
+import { Macro } from '../../types';
 import './CategoryDetailPage.css';
 import HighlightText from '../components/HighlightText';
 import ContentViewer from '../components/ContentViewer';
@@ -31,7 +30,6 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
 
   return (
     <div className="category-detail-container">
-      <Header />
       <main className="page-container">
         <div className="breadcrumb">
           <Link to="/dashboard">Dashboard</Link> &gt; {decodedCategoryName}
@@ -53,7 +51,7 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
               const colorClass = colorClasses[index % colorClasses.length];
 
               return (
-                <div key={macro._id} className={`macro-item ${colorClass}`}> {/* <-- Sửa thành _id */}
+                <div key={macro._id} className={`macro-item ${colorClass}`}>
                   <h3>
                     <HighlightText text={macro.title} highlight={searchQuery} />
                   </h3>
@@ -74,3 +72,4 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
 }
 
 export default CategoryDetailPage;
+
