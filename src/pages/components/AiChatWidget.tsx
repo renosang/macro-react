@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import useChatStore from '../../stores/useChatStore';
 import './AiChatWidget.css';
 
@@ -37,17 +38,14 @@ const AiChatWidget: React.FC = () => {
         body: JSON.stringify({ message: currentInput }),
       });
 
-      // Kiểm tra xem phản hồi có phải là JSON hay không
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.indexOf("application/json") !== -1) {
         const data = await response.json();
         if (!response.ok) {
-          // Nếu backend trả về lỗi JSON, hiển thị lỗi đó
           throw new Error(data.error || 'Network response was not ok');
         }
         setMessages(prev => [...prev, { sender: 'ai', text: data.reply }]);
       } else {
-        // Nếu không phải JSON (ví dụ: lỗi server 500), hiển thị nội dung text để gỡ lỗi
         const textError = await response.text();
         throw new Error(textError || 'An unknown server error occurred.');
       }
@@ -66,7 +64,24 @@ const AiChatWidget: React.FC = () => {
   return (
     <>
       <button className={`chat-fab ${isOpen ? 'hidden' : ''}`} onClick={toggleChat} title="Chat với AI">
-        💬
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 8V4H8" />
+          <rect width="16" height="12" x="4" y="8" rx="2" />
+          <path d="M2 14h2" />
+          <path d="M20 14h2" />
+          <path d="M15 13v2" />
+          <path d="M9 13v2" />
+        </svg>
       </button>
       <div className={`chat-window ${isOpen ? 'open' : ''}`}>
         <div className="chat-header">
@@ -78,7 +93,11 @@ const AiChatWidget: React.FC = () => {
         <div className="chat-messages">
           {messages.map((msg, index) => (
             <div key={index} className={`message-bubble ${msg.sender}`}>
-              <p>{msg.text}</p>
+              {msg.sender === 'ai' ? (
+                <ReactMarkdown>{msg.text}</ReactMarkdown>
+              ) : (
+                <p>{msg.text}</p>
+              )}
             </div>
           ))}
           {isLoading && (
@@ -108,4 +127,3 @@ const AiChatWidget: React.FC = () => {
 };
 
 export default AiChatWidget;
-
