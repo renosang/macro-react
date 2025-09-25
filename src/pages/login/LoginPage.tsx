@@ -10,7 +10,7 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
-  const [user, setUser] = useState('');
+ // const [user, setUser] = useState('');
 
   // Khi component được tải, kiểm tra xem có tên đăng nhập nào đã được lưu không
   useEffect(() => {
@@ -38,7 +38,7 @@ function LoginPage() {
         body: JSON.stringify({ username, password }),
       });
       const data = await response.json();
-      setUser(data.user);
+      //setUser(data.user);
       console.log('Login response data:', data); // Kiểm tra dữ liệu phản hồi 
 
       if (response.ok) {
