@@ -166,3 +166,8 @@
   cursor: not-allowed;
 }
 
+.message-bubble p {
+  white-space: pre-wrap; /* Giúp hiển thị các ký tự xuống dòng */
+  word-wrap: break-word; /* Đảm bảo từ dài không làm vỡ layout */
+  margin: 0;
+}
