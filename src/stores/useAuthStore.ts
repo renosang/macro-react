@@ -1,41 +1,36 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface UserInfo {
+interface User {
+  id: string;
   username: string;
-  role: 'user' | 'admin';
+  role: string;
 }
 
-export interface AuthState {
-  isAuthenticated: boolean;
+interface AuthState {
+  user: User | null;
   token: string | null;
-  user: UserInfo | null;
-  _hasHydrated: boolean; // Flag to indicate hydration is complete
-  login: (token: string, user: UserInfo) => void;
+  login: (user: User, token: string) => void;
   logout: () => void;
-  setHasHydrated: (state: boolean) => void; // Action to set the flag
 }
 
 const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      isAuthenticated: false,
-      token: null,
       user: null,
-      _hasHydrated: false, // Initial value
-      login: (token, user) => set({ isAuthenticated: true, token, user }),
-      logout: () => set({ isAuthenticated: false, token: null, user: null }),
-      setHasHydrated: (state) => set({ _hasHydrated: state }),
+      token: null,
+      login: (user, token) => {
+        set({ user, token });
+      },
+      logout: () => {
+        set({ user: null, token: null });
+        localStorage.removeItem('token'); // Đảm bảo token cũng được xóa khỏi localStorage
+      },
     }),
-    { 
-      name: 'auth-storage',
-      onRehydrateStorage: () => (state) => {
-        // When rehydration is done, call the action to update the flag
-        state?.setHasHydrated(true);
-      }
+    {
+      name: 'auth-storage', // Tên để lưu trong localStorage
     }
   )
 );
 
 export default useAuthStore;
-
