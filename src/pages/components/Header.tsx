@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/useAuthStore';
 import './Header.css';
@@ -8,12 +8,22 @@ function Header() {
     user: state.user,
     logout: state.logout,
   }));
+
+  console.log('Current user:', user); // Kiểm tra thông tin user
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+  const [userRole, setUserRole] = useState('');
+  useEffect(() => {
+const urlParams = new URLSearchParams(window.location.search);
+const userRole = urlParams.get('userrole');
+setUserRole(userRole || '');
+
+console.log(userRole); // Sẽ in ra "user"
+  }, [user]);
 
   return (
     <header className="app-header">
@@ -25,7 +35,7 @@ function Header() {
       <div className="header-right">
         <span className="user-greeting">Xin chào, Chúc bạn làm việc hiệu quả ❤️</span>        
         {/* Chỉ hiển thị nút này cho user thường */}
-        {user?.role === 'user' && (
+        {userRole === 'user' && (
              <button className="contribute-button" onClick={() => navigate('/dashboard/contribute')}>
                 Đóng góp Macro
              </button>
