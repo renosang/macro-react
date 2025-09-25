@@ -52,13 +52,25 @@ router.post('/contribute', async (req, res) => {
 
 // ADMIN TẠO MACRO MỚI (MẶC ĐỊNH LÀ ĐÃ DUYỆT)
 router.post('/', async (req, res) => {
-  const { title, category, content } = req.body;
-  const newMacro = new Macro({ title, category, content, status: 'approved' });
   try {
+    const { title, content, category, keywords } = req.body;
+    const createdBy = req.user._id; // Lấy user ID từ middleware xác thực
+    const lastModifiedBy = req.user._id; // Lấy user ID từ middleware xác thực
+
+    const newMacro = new Macro({
+      title,
+      content,
+      category,
+      keywords,
+      createdBy,
+      lastModifiedBy,
+      status: 'pending', // Mặc định là pending khi tạo mới
+    });
+
     const savedMacro = await newMacro.save();
     res.status(201).json(savedMacro);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
