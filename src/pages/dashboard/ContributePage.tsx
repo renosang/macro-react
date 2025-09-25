@@ -1,119 +1,133 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { Descendant } from 'slate';
-import RichTextEditor from '../components/RichTextEditor';
-import { Category } from '../../types';
+import { Descendant, Element as SlateElement, Text } from 'slate'; 
 import useAuthStore from '../../stores/useAuthStore';
+import useDataStore from '../../stores/useDataStore';
+import RichTextEditor from '../components/RichTextEditor';
 import './ContributePage.css';
 
-const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }] }];
+const initialEditorValue: Descendant[] = [
+  { type: 'paragraph', children: [{ text: '' }] }
+];
 
-function ContributePage() {
+const ContributePage: React.FC = () => {
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [content, setContent] = useState<Descendant[]>(initialEditorValue);
   const [category, setCategory] = useState('');
-  const [content, setContent] = useState<Descendant[]>(emptyContent);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const user = useAuthStore(state => state.user);
-  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const token = useAuthStore((state) => state.token);
+  const { categories, fetchCategories } = useDataStore((state) => ({
+    categories: state.categories,
+    fetchCategories: state.fetchCategories,
+  }));
 
   useEffect(() => {
-    // Sử dụng URL đầy đủ để fetch categories
-    fetch('https://macro-react-xi.vercel.app/api/categories')
-      .then(res => res.json())
-      .then(data => {
-        setCategories(data);
-        if (data.length > 0) {
-          setCategory(data[0].name);
-        }
-      });
-  }, []);
-  
-  // SỬA ĐỔI CHÍNH BẮT ĐẦU TỪ ĐÂY
+    if (fetchCategories) {
+      fetchCategories();
+    }
+  }, [fetchCategories]);
+
+  const isEditorEmpty = (value: Descendant[]) => {
+    const firstNode = value[0];
+    if (
+      value.length === 1 &&
+      SlateElement.isElement(firstNode) &&
+      firstNode.children.length === 1
+    ) {
+      const firstChild = firstNode.children[0];
+      return Text.isText(firstChild) && firstChild.text === '';
+    }
+    return false;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    
-    if (!user) {
-        toast.error('Bạn cần đăng nhập để thực hiện chức năng này.');
-        navigate('/login');
-        return;
-    }
+    setError(null);
+    setSuccess(null);
 
-    if (!title.trim() || !category) {
-      toast.error('Vui lòng nhập tiêu đề và chọn danh mục.');
+    if (!title || !description || isEditorEmpty(content) || !category) {
+      setError('Vui lòng điền đầy đủ các trường.');
       return;
     }
 
     try {
-      const response = await fetch('https://macro-react-xi.vercel.app/api/macros', {
+      const response = await fetch('/api/macros', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ title, content, category }),
+        body: JSON.stringify({
+          title,
+          description,
+          content: JSON.stringify(content),
+          category,
+        }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Gửi đóng góp thất bại.');
+        throw new Error(data.message || 'Có lỗi xảy ra, vui lòng thử lại.');
       }
 
-      toast.success('Cảm ơn bạn đã đóng góp! Macro của bạn đã được gửi để xét duyệt.');
-      // Reset lại form sau khi gửi thành công
+      setSuccess('Đóng góp của bạn đã được gửi để xét duyệt. Cảm ơn bạn!');
       setTitle('');
-      setContent(emptyContent);
-      if (categories.length > 0) {
-        setCategory(categories[0].name);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Đã xảy ra lỗi không xác định.");
-      }
+      setDescription('');
+      setContent(initialEditorValue);
+      setCategory('');
+    } catch (err: any) {
+      setError(err.message);
     }
   };
-  // KẾT THÚC SỬA ĐỔI
 
   return (
-    <div className="contribute-container page-container">
+    <div className="contribute-page">
       <h2>Đóng góp Macro</h2>
-      <p>Chia sẻ kiến thức của bạn với cộng đồng!</p>
-      <form onSubmit={handleSubmit}>
+      <p>Chia sẻ kiến thức của bạn với cộng đồng. Macro của bạn sẽ được quản trị viên xem xét trước khi được duyệt.</p>
+      <form onSubmit={handleSubmit} className="contribute-form">
+        {error && <p className="error-message">{error}</p>}
+        {success && <p className="success-message">{success}</p>}
         <div className="form-group">
-          <label>Tiêu đề</label>
-          <input 
-            type="text" 
+          <label htmlFor="title">Tiêu đề Macro</label>
+          <input
+            id="title"
+            type="text"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Ví dụ: Cách tạo chữ ký email chuyên nghiệp"
           />
         </div>
-        
         <div className="form-group">
-          <label>Danh mục</label>
-          <select 
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-          >
-            <option value="" disabled>-- Chọn danh mục --</option>
-            {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
+          <label htmlFor="description">Mô tả ngắn</label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Mô tả ngắn gọn nội dung của macro"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="category">Chuyên mục</label>
+          <select id="category" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="">-- Chọn chuyên mục --</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat._id}>
+                {cat.name}
+              </option>
+            ))}
           </select>
         </div>
-        
         <div className="form-group">
-          <label>Nội dung</label>
-          <RichTextEditor 
-            value={content}
-            onChange={setContent}
-          />
+          <label>Nội dung chi tiết</label>
+          <RichTextEditor value={content} onChange={setContent} />
         </div>
-
-        <button type="submit" className="submit-btn">Gửi đóng góp</button>
+        <button type="submit" className="submit-button">Gửi đi</button>
       </form>
     </div>
   );
-}
+};
 
 export default ContributePage;
