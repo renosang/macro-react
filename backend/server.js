@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // --- Routes ---
-const authRoutes = require('./routes/auth');
+const { router: authRoutes } = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
 const macroRoutes = require('./routes/macros');
