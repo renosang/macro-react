@@ -68,8 +68,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       }
     }
   };
-  
-  // SỬA ĐỔI CHÍNH BẮT ĐẦU TỪ ĐÂY
+
   const handleSave = async () => {
     if (!currentMacro || !currentMacro.title?.trim()) {
       toast.error("Tiêu đề không được để trống!");
@@ -83,10 +82,10 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
     }
 
     const isUpdating = !!currentMacro._id;
-    const url = isUpdating 
+    const url = isUpdating
       ? `https://macro-react-xi.vercel.app/api/macros/${currentMacro._id}`
       : 'https://macro-react-xi.vercel.app/api/macros';
-    
+
     const method = isUpdating ? 'PUT' : 'POST';
 
     try {
@@ -123,7 +122,6 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
         }
     }
   };
-  // KẾT THÚC SỬA ĐỔI
 
   return (
     <div className="manage-macros-container">
@@ -173,15 +171,15 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
             <h3>{currentMacro._id ? 'Chỉnh sửa Macro' : 'Thêm Macro mới'}</h3>
             <div className="form-group">
               <label>Tiêu đề</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={currentMacro.title}
                 onChange={e => setCurrentMacro({...currentMacro, title: e.target.value})}
               />
             </div>
             <div className="form-group">
               <label>Danh mục</label>
-              <select 
+              <select
                 value={currentMacro.category}
                 onChange={e => setCurrentMacro({...currentMacro, category: e.target.value})}
               >
@@ -190,7 +188,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
             </div>
             <div className="form-group">
               <label>Nội dung</label>
-              <RichTextEditor 
+              <RichTextEditor
                 value={currentMacro.content || emptyContent}
                 onChange={newContent => setCurrentMacro({...currentMacro, content: newContent})}
               />
