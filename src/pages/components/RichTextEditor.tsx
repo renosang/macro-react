@@ -125,7 +125,7 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
         </div>
 
         <Editable
-          className="editable-area"
+          className="editable-area" 
           placeholder="Nhập nội dung macro..."
           renderElement={renderElement}
           renderLeaf={renderLeaf}

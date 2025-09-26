@@ -1,103 +1,165 @@
+/* Sử dụng biến để dễ dàng quản lý theme */
+:root {
+  --background-color: #f7f7f8;
+  --form-background-color: #ffffff;
+  --text-color: #1a1a1a;
+  --label-color: #4f4f4f;
+  --placeholder-color: #a9a9a9;
+  --border-color: #e0e0e0;
+  --primary-color: #007aff;
+  --primary-hover-color: #0056b3;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --border-radius: 12px;
+  --transition-speed: 0.3s;
+}
+
+/* Kiểu dáng chung cho trang */
+.contribute-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  background-color: var(--background-color);
+  min-height: 100vh;
+}
+
+/* Container chính của form */
 .contribute-container {
-    max-width: 800px;
+  width: 100%;
+  max-width: 800px;
+  background-color: var(--form-background-color);
+  padding: 30px 40px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 15px var(--shadow-color);
+  border: 1px solid var(--border-color);
 }
 
-.contribute-container h1 {
-    /* Căn lề trái giống trang admin */
-    text-align: left;
-    font-size: 1.8rem;
-    color: #2c3e50;
-    margin-bottom: 10px;
-    font-weight: 600;
+/* Phần header */
+.contribute-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.contribute-container p {
-    /* Căn lề trái */
-    text-align: left;
-    color: #666;
-    margin-bottom: 30px;
-    font-size: 1rem;
-    border-bottom: 1px solid #dee2e6;
-    padding-bottom: 20px;
+.contribute-header h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 8px;
 }
 
+.contribute-header p {
+  color: var(--label-color);
+  font-size: 1rem;
+}
+
+/* Các nhóm trong form */
 .form-group {
-    margin-bottom: 20px;
+  margin-bottom: 24px;
 }
-  
+
 .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #495057;
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--label-color);
+  font-size: 0.9rem;
 }
-  
+
+/* Ô input và select */
 .form-group input,
 .form-group select {
-    width: 100%;
-    padding: 10px 15px;
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    background-color: white;
-    font-size: 1rem;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+  font-size: 1rem;
+  color: var(--text-color);
+  transition: all var(--transition-speed);
 }
 
-/* --- BỔ SUNG CSS CHO TRÌNH SOẠN THẢO --- */
-.form-group .editor-container .editable-area {
-    position: relative; /* Cần thiết để định vị placeholder */
-    text-align: left; /* Đảm bảo văn bản luôn căn trái */
+.form-group input::placeholder {
+  color: var(--placeholder-color);
 }
 
-/* Style cho placeholder text để căn chỉnh với dấu nháy */
-.form-group .editor-container .editable-area[data-slate-placeholder="true"]::before {
-    content: attr(data-slate-placeholder);
-    position: absolute;
-    top: 10px; /* Phải khớp với padding-top của .editable-area */
-    left: 15px; /* Phải khớp với padding-left của .editable-area */
-    color: #aaa;
-    pointer-events: none; /* Cho phép click xuyên qua placeholder */
-    display: block;
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  background-color: #fff;
 }
 
-.form-group .editor-container .editable-area p {
-    margin-top: 0; /* Xóa margin mặc định để dấu nháy đúng vị trí */
-    margin-bottom: 0; /* Sửa lỗi khoảng cách lớn khi xuống dòng */
-    padding: 0; /* Xóa padding nếu có */
-    border: none; /* Sửa lỗi đường kẻ ngang */
-    line-height: 1.6; /* Giữ lại chiều cao dòng hợp lý */
-}
-/* --- KẾT THÚC BỔ SUNG --- */
+/* --- CSS ĐÃ SỬA LỖI CHO TRÌNH SOẠN THẢO --- */
 
-.contribute-actions {
-    margin-top: 30px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+/* Khung bao ngoài trình soạn thảo */
+.editor-wrapper {
+  border-radius: 8px;
+  height: 300px; /* Chiều cao cố định, không tự phóng to */
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-speed);
+  overflow: hidden; /* Quan trọng để thanh công cụ cố định hoạt động đúng */
 }
 
-.contribute-actions button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
+.editor-wrapper:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
 }
 
-.submit-btn {
-    background-color: #007bff;
-    color: white;
-}
-.submit-btn:hover {
-    background-color: #0056b3;
-}
-
-.cancel-btn {
-    background-color: #6c757d;
-    color: white;
-}
-.cancel-btn:hover {
-    background-color: #5a6268;
+/* Thanh công cụ */
+.editor-wrapper .toolbar {
+  position: sticky; /* Cố định thanh công cụ ở trên cùng */
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
+/* Vùng nhập liệu */
+.editor-wrapper .editable-area {
+  flex-grow: 1;
+  overflow-y: auto; /* Thêm thanh cuộn dọc khi nội dung dài */
+  overflow-x: hidden; /* Ẩn thanh cuộn ngang */
+  padding: 12px 16px;
+  height: 300px; 
+  line-height: 1.6;
+  color: var(--text-color);
+  position: relative; /* Cần thiết để định vị placeholder */
+}
+
+/* Nút bấm */
+.submit-button {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--primary-color);
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: var(--primary-hover-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.submit-button:disabled {
+  background-color: #a9cce3;
+  cursor: not-allowed;
+}

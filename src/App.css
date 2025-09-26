@@ -1,6 +1,23 @@
 .App {
   text-align: center;
 }
+/* Thêm vào đầu file src/App.css */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f6f6f6; /* Màu nền xám nhạt của macOS */
+}
+
+:root {
+  --macos-blue: #007aff;
+  --macos-light-gray: #f0f0f0;
+  --macos-border-color: #dcdcdc;
+  --macos-text-color: #333;
+}
 
 .App-logo {
   height: 40vmin;
