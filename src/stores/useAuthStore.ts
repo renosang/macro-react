@@ -24,7 +24,6 @@ const useAuthStore = create<AuthState>()(
       },
       logout: () => {
         set({ user: null, token: null });
-        localStorage.removeItem('token'); // Đảm bảo token cũng được xóa khỏi localStorage
       },
     }),
     {
