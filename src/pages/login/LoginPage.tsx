@@ -1,109 +1,99 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAuthStore from '../../stores/useAuthStore';
+import toast from 'react-hot-toast';
 import './LoginPage.css';
+import useAuthStore from '../../stores/useAuthStore';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
- // const [user, setUser] = useState('');
+  
+  // Lấy hàm login và giá trị token từ store
+  const { login, token } = useAuthStore();
 
-  // Khi component được tải, kiểm tra xem có tên đăng nhập nào đã được lưu không
+  // --- LOGIC CHUYỂN HƯỚNG TỰ ĐỘNG ---
   useEffect(() => {
-    const savedUsername = localStorage.getItem('rememberedUsername');
-    if (savedUsername) {
-      setUsername(savedUsername);
-      setRememberMe(true);
+    // Nếu trong store đã có token (nghĩa là người dùng đã đăng nhập)
+    if (token) {
+      // Chuyển hướng ngay lập tức về trang chủ
+      // { replace: true } để người dùng không thể nhấn "Back" quay lại trang login
+      navigate('/dashboard', { replace: true });
     }
-  }, []);
+    // Effect này sẽ chạy mỗi khi giá trị token thay đổi hoặc khi component được tải lần đầu
+  }, [token, navigate]);
+  // ------------------------------------
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Xử lý logic ghi nhớ tài khoản
-    if (rememberMe) {
-      localStorage.setItem('rememberedUsername', username);
-    } else {
-      localStorage.removeItem('rememberedUsername');
+    if (!username || !password) {
+      toast.error('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
+      return;
     }
 
     try {
-      const response = await fetch('https://macro-react-xi.vercel.app/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
+
       const data = await response.json();
-      //setUser(data.user);
-      console.log('Login response data:', data); // Kiểm tra dữ liệu phản hồi 
 
       if (response.ok) {
-        login(data.token, data.user);
-        navigate('/dashboard?userrole=' + data.user.role);
+        const user = { id: data.id, username: data.username, role: data.role };
+        // Gọi hàm login để lưu thông tin vào store
+        login(user, data.token);
+
+        toast.success('Đăng nhập thành công!');
+        // Chuyển hướng đến trang chủ sau khi đăng nhập thành công
+        navigate('/dashboard');
       } else {
-        alert(data.message || 'Tên đăng nhập hoặc mật khẩu không đúng.');
+        throw new Error(data.message || 'Đăng nhập thất bại.');
       }
     } catch (error) {
-      console.error('Lỗi đăng nhập:', error);
-      alert('Đã có lỗi xảy ra. Vui lòng thử lại.');
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Đã có lỗi xảy ra.');
+      }
     }
   };
 
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
+  // Nếu đã có token, không cần render form, dù chỉ trong một khoảnh khắc
+  if (token) {
+    return null;
+  }
 
   return (
-    <div className="login-page">
-      <div className="login-form-container">
-        <h2>Đăng nhập hệ thống</h2>
-        <form onSubmit={handleSubmit}>
+    <div className="login-container">
+      <div className="login-box">
+        <img src="/logo.png" alt="Logo" className="login-logo" />
+        <h2>Đăng nhập</h2>
+        <form onSubmit={handleLogin}>
           <div className="input-group">
             <label htmlFor="username">Tên đăng nhập</label>
             <input
-              type="text"
               id="username"
+              type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              required
+              placeholder="Nhập tên đăng nhập"
+              autoComplete="username"
             />
           </div>
           <div className="input-group">
             <label htmlFor="password">Mật khẩu</label>
-            <div className="password-wrapper">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="toggle-password-btn"
-                onClick={toggleShowPassword}
-              >
-                {showPassword ? 'Ẩn' : 'Hiện'}
-              </button>
-            </div>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Nhập mật khẩu"
+              autoComplete="current-password"
+            />
           </div>
-          <div className="options-group">
-            <label className="remember-me-label">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              Ghi nhớ tài khoản
-            </label>
-          </div>
-          <button type="submit" className="login-button">
-            Đăng nhập
-          </button>
+          <button type="submit" className="login-btn">Đăng nhập</button>
         </form>
       </div>
     </div>
@@ -111,4 +101,3 @@ function LoginPage() {
 }
 
 export default LoginPage;
-
