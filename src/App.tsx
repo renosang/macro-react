@@ -14,6 +14,7 @@ import ProtectedRoute from './pages/components/ProtectedRoute';
 import ContributePage from './pages/dashboard/ContributePage';
 import './App.css';
 import { Category, Macro, Announcement } from './types';
+import AdminRoute from './pages/components/AdminRoute'; 
 
 function App() {
   const [isAdmin] = useState(true);
@@ -56,13 +57,14 @@ function App() {
             <Route path="category/:categoryName" element={<CategoryDetailPage allMacros={macros} />} />
             <Route path="contribute" element={<ContributePage />} />
           </Route>
-
+         <Route element={<AdminRoute />}>
           <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
             <Route path="categories" element={<ManageCategories categories={categories} setCategories={setCategories} />} />
             <Route path="macros" element={<ManageMacros categories={categories} macros={macros} setMacros={setMacros} />} />
             <Route path="announcements" element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />} />
             <Route path="users" element={<ManageUsersPage />} />
             <Route index element={<Navigate to="categories" />} />
+          </Route>
           </Route>
         </Route>
 

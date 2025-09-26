@@ -7,22 +7,15 @@ import useAuthStore from '../../stores/useAuthStore';
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  
-  // Lấy hàm login và giá trị token từ store
   const { login, token } = useAuthStore();
 
-  // --- LOGIC CHUYỂN HƯỚNG TỰ ĐỘNG ---
   useEffect(() => {
-    // Nếu trong store đã có token (nghĩa là người dùng đã đăng nhập)
     if (token) {
-      // Chuyển hướng ngay lập tức về trang chủ
-      // { replace: true } để người dùng không thể nhấn "Back" quay lại trang login
       navigate('/dashboard', { replace: true });
     }
-    // Effect này sẽ chạy mỗi khi giá trị token thay đổi hoặc khi component được tải lần đầu
   }, [token, navigate]);
-  // ------------------------------------
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,11 +35,8 @@ function LoginPage() {
 
       if (response.ok) {
         const user = { id: data.id, username: data.username, role: data.role };
-        // Gọi hàm login để lưu thông tin vào store
         login(user, data.token);
-
         toast.success('Đăng nhập thành công!');
-        // Chuyển hướng đến trang chủ sau khi đăng nhập thành công
         navigate('/dashboard');
       } else {
         throw new Error(data.message || 'Đăng nhập thất bại.');
@@ -60,7 +50,6 @@ function LoginPage() {
     }
   };
 
-  // Nếu đã có token, không cần render form, dù chỉ trong một khoảnh khắc
   if (token) {
     return null;
   }
@@ -68,31 +57,45 @@ function LoginPage() {
   return (
     <div className="login-container">
       <div className="login-box">
-        <img src="/logo.png" alt="Logo" className="login-logo" />
-        <h2>Đăng nhập</h2>
+        {/* Đã xóa logo */}
+        <h2>Welcome Back</h2>
+        <p className="login-subtitle">Đăng nhập để tiếp tục</p>
         <form onSubmit={handleLogin}>
           <div className="input-group">
-            <label htmlFor="username">Tên đăng nhập</label>
             <input
               id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Nhập tên đăng nhập"
+              placeholder="Tên đăng nhập"
               autoComplete="username"
             />
           </div>
-          <div className="input-group">
-            <label htmlFor="password">Mật khẩu</label>
+          <div className="input-group password-group">
             <input
               id="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu"
+              placeholder="Mật khẩu"
               autoComplete="current-password"
             />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? 'Ẩn' : 'Hiện'}
+            </button>
           </div>
+
+          <div className="extra-options">
+            <div className="remember-me">
+              <input type="checkbox" id="remember" />
+              <label htmlFor="remember">Ghi nhớ mật khẩu</label>
+            </div>
+          </div>
+          
           <button type="submit" className="login-btn">Đăng nhập</button>
         </form>
       </div>
