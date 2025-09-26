@@ -1,197 +1,216 @@
-.manage-macros {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+/* --- General Container Styling --- */
+.manage-macros-container {
+  padding: 2rem;
+  background-color: #f4f7f9;
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-.manage-macros h2 {
+.manage-macros-container h2 {
   font-size: 1.8rem;
-  color: #2c3e50;
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
   font-weight: 600;
 }
 
-/* --- KHU VỰC ĐIỀU KHIỂN --- */
+/* --- Card Layout for Controls & Table --- */
+.controls, .macros-table-wrapper {
+  background-color: #ffffff;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Controls Section --- */
 .controls {
   display: flex;
-  gap: 15px;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
+  margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filter-controls { flex: 1; min-width: 200px; }
+.search-controls { flex: 2; text-align: center; padding: 0 1rem; }
+.add-controls { flex: 1; text-align: right; min-width: 200px; }
+
+.filter-controls select,
+.search-controls input[type="text"] {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-}
-
-.controls select,
-.controls .search-input {
-  flex-grow: 1;
-  padding: 10px 15px;
-  border-radius: 6px;
-  border: 1px solid #ced4da;
-  background-color: white;
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.controls select:focus,
-.controls .search-input:focus {
+.filter-controls select:focus,
+.search-controls input[type="text"]:focus {
   outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.add-new-btn {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
+/* --- Buttons --- */
+.add-btn, .action-btn {
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
   font-weight: 500;
-  transition: background-color 0.2s;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: capitalize;
   white-space: nowrap;
 }
 
-.add-new-btn:hover {
-  background-color: #0056b3;
+.add-btn:hover, .action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* --- BẢNG DỮ LIỆU --- */
-.macros-table {
-  width: 100%;
-  border-collapse: collapse;
+.add-btn {
+  background: linear-gradient(45deg, #3b82f6, #60a5fa);
+  color: white;
+  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.2);
 }
+
+/* --- Table Styling --- */
+.macros-table-wrapper { overflow-x: auto; }
+.macros-table { width: 100%; border-collapse: collapse; }
 
 .macros-table th,
 .macros-table td {
-  padding: 15px;
+  padding: 1.2rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
 }
 
-.macros-table thead th {
-  background-color: #f8f9fa;
-  color: #495057;
+.macros-table th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  background-color: #f9fafb;
+}
+
+.macros-table td { color: #374151; font-weight: 500; }
+.macros-table tr:last-child td { border-bottom: none; }
+.macros-table tr:hover { background-color: #f7faff; }
+
+/* --- Column Widths & Alignment --- */
+.th-title { width: 50%; }
+.th-category { width: 20%; }
+.th-status { width: 15%; }
+.th-actions { text-align: right; }
+
+.td-actions { text-align: right; white-space: nowrap; }
+
+/* --- Status Badge --- */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
   font-weight: 600;
-  border-top: 1px solid #e9ecef;
+  text-transform: capitalize;
 }
+.status-pending { background-color: #fef3c7; color: #b45309; }
+.status-approved { background-color: #d1fae5; color: #065f46; }
 
-.macros-table tbody tr:hover {
-  background-color: #f1f3f5;
-}
+/* --- Table action buttons --- */
+.action-btn { padding: 0.5rem 1rem; margin-left: 0.5rem; box-shadow: none; }
+.action-btn:hover { transform: scale(1.05); }
+.edit-btn { background-color: #f3f4f6; color: #374151; }
+.edit-btn:hover { background-color: #e5e7eb; }
+.delete-btn { background-color: #fee2e2; color: #ef4444; }
+.delete-btn:hover { background-color: #fecaca; color: #dc2626; }
 
-.action-header {
-  text-align: right;
-}
-
-.action-cell {
-  text-align: right;
-  width: 150px;
-}
-
-.action-btn {
-  padding: 6px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 500;
-  margin-left: 5px;
-  transition: all 0.2s;
-}
-
-.edit-btn { background-color: transparent; color: #007bff; border: 1px solid transparent; }
-.edit-btn:hover { background-color: #e7f3ff; border-color: #cce3ff; }
-
-.delete-btn { background-color: transparent; color: #dc3545; border: 1px solid transparent; }
-.delete-btn:hover { background-color: #fdeaea; border-color: #f8d7da; }
-
-/* --- GIAO DIỆN MODAL ĐÃ ĐƯỢC NÂNG CẤP --- */
-.modal-backdrop {
+/* --- Modal Form --- */
+.modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(17, 24, 39, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
   background-color: white;
-  padding: 25px 30px;
-  border-radius: 8px;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   width: 90%;
-  max-width: 700px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.4s ease-out;
 }
 
 .modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 25px;
   font-size: 1.5rem;
-  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  color: #111827;
+  text-align: center;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
+.form-group { margin-bottom: 1.5rem; }
+.form-group-row { display: flex; gap: 1.5rem; }
+.form-group-row .form-group { flex: 1; }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #495057;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-size: 0.9rem;
 }
 
-/* Áp dụng style nhất quán cho input, select */
-.form-group input,
-.form-group select,
-.form-group .editor-container {
+.form-group input[type="text"],
+.form-group select {
   width: 100%;
-  padding: 10px 15px;
-  border-radius: 6px;
-  border: 1px solid #ced4da;
-  background-color: white;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
-}
-.form-group .editor-container {
-  padding: 0; /* Bỏ padding mặc định để Editable control */
+  box-sizing: border-box;
+  background-color: #fff;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group .editor-container:focus-within { /* Style khi focus vào editor */
+.form-group input[type="text"]:focus,
+.form-group select:focus {
   outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .modal-actions {
-  margin-top: 30px;
+  margin-top: 2rem;
   display: flex;
-  justify-content: flex-end; /* Căn các nút về bên phải */
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
 }
 
-.modal-actions .save-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-}
-.modal-actions .save-btn:hover {
-  background-color: #218838;
-}
+.save-btn { background: linear-gradient(45deg, #10b981, #34d399); color: white; }
+.save-btn:hover { background-color: #059669; }
+.cancel-btn { background-color: #f3f4f6; color: #374151; }
+.cancel-btn:hover { background-color: #e5e7eb; }
 
-.modal-actions .cancel-btn {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-}
-.modal-actions .cancel-btn:hover {
-  background-color: #5a6268;
-}
+/* --- Animations --- */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

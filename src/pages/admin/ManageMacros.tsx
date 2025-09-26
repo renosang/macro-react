@@ -33,7 +33,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
   }, [categoryFilteredMacros, searchQuery]);
 
   const handleAddNew = () => {
-    setCurrentMacro({ title: '', category: categories[0]?.name || '', content: emptyContent, status: 'approved' });
+    setCurrentMacro({ title: '', category: categories[0]?.name || '', content: emptyContent, status: 'pending' });
     setIsModalOpen(true);
   };
 
@@ -50,13 +50,9 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
   const handleDelete = async (id?: string) => {
     if (!id) return;
     if (window.confirm('Bạn có chắc chắn muốn xóa macro này không?')) {
-      const token = localStorage.getItem('token');
       try {
-        const response = await fetch(`https://macro-react-xi.vercel.app/api/macros/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        const response = await fetch(`/api/macros/${id}`, {
+          method: 'DELETE'
         });
         if (!response.ok) {
           throw new Error('Xóa macro thất bại');
@@ -75,16 +71,10 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error("Bạn chưa đăng nhập hoặc phiên đã hết hạn.");
-      return;
-    }
-
     const isUpdating = !!currentMacro._id;
     const url = isUpdating
-      ? `https://macro-react-xi.vercel.app/api/macros/${currentMacro._id}`
-      : 'https://macro-react-xi.vercel.app/api/macros';
+      ? `/api/macros/${currentMacro._id}`
+      : '/api/macros';
 
     const method = isUpdating ? 'PUT' : 'POST';
 
@@ -92,8 +82,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       const response = await fetch(url, {
         method: method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(currentMacro),
       });
@@ -122,40 +111,53 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
         }
     }
   };
+  
+  const getStatusComponent = (status: 'approved' | 'pending' | undefined) => {
+    if (status === 'approved') {
+      return <span className="status-badge status-approved">Đã xét duyệt</span>;
+    }
+    return <span className="status-badge status-pending">Chờ xét duyệt</span>;
+  };
 
   return (
     <div className="manage-macros-container">
       <h2>Quản lý Macros</h2>
-      <div className="controls">
-        <button className="add-btn" onClick={handleAddNew}>Thêm Macro mới</button>
+       <div className="controls">
         <div className="filter-controls">
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo tiêu đề..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
             <option value="all">Tất cả danh mục</option>
             {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
           </select>
         </div>
+        <div className="search-controls">
+           <input
+            type="text"
+            placeholder="Tìm kiếm theo tiêu đề..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="add-controls">
+           <button className="add-btn" onClick={handleAddNew}>Thêm Macro mới</button>
+        </div>
       </div>
-      <div className="macros-table">
-        <table>
+      <div className="macros-table-wrapper">
+        <table className="macros-table">
           <thead>
             <tr>
-              <th>Tiêu đề</th>
-              <th>Danh mục</th>
-              <th>Hành động</th>
+              <th className="th-title">Tiêu đề</th>
+              <th className="th-category">Danh mục</th>
+              <th className="th-status">Trạng thái</th>
+              <th className="th-actions">Hành động</th>
             </tr>
           </thead>
           <tbody>
             {finalFilteredMacros.map(macro => (
               <tr key={macro._id}>
-                <td><HighlightText text={macro.title} highlight={searchQuery} /></td>
-                <td>{macro.category}</td>
-                <td>
+                <td className="td-title"><HighlightText text={macro.title} highlight={searchQuery} /></td>
+                <td className="td-category">{macro.category}</td>
+                <td className="td-status">{getStatusComponent(macro.status)}</td>
+                <td className="td-actions">
                   <button className="action-btn edit-btn" onClick={() => handleEdit(macro)}>Sửa</button>
                   <button className="action-btn delete-btn" onClick={() => handleDelete(macro._id)}>Xóa</button>
                 </td>
@@ -177,14 +179,26 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
                 onChange={e => setCurrentMacro({...currentMacro, title: e.target.value})}
               />
             </div>
-            <div className="form-group">
-              <label>Danh mục</label>
-              <select
-                value={currentMacro.category}
-                onChange={e => setCurrentMacro({...currentMacro, category: e.target.value})}
-              >
-                {categories.map(cat => <option key={cat._id}>{cat.name}</option>)}
-              </select>
+             <div className="form-group-row">
+              <div className="form-group">
+                <label>Danh mục</label>
+                <select
+                  value={currentMacro.category}
+                  onChange={e => setCurrentMacro({...currentMacro, category: e.target.value})}
+                >
+                  {categories.map(cat => <option key={cat._id}>{cat.name}</option>)}
+                </select>
+              </div>
+               <div className="form-group">
+                <label>Trạng thái</label>
+                <select
+                  value={currentMacro.status}
+                  onChange={e => setCurrentMacro({...currentMacro, status: e.target.value as 'pending' | 'approved'})}
+                >
+                  <option value="pending">Chờ xét duyệt</option>
+                  <option value="approved">Đã xét duyệt</option>
+                </select>
+              </div>
             </div>
             <div className="form-group">
               <label>Nội dung</label>
