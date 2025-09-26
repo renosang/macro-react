@@ -59,7 +59,7 @@ const ContributePage: React.FC = () => {
             return;
         }
 
-        if (!title.trim() || !description.trim() || isEditorEmpty(content) || !category) { // Thêm .trim()
+        if (!title.trim() || isEditorEmpty(content) || !category) { // Thêm .trim()
             setError('Vui lòng điền đầy đủ các trường.');
             setLoading(false);
             return;
