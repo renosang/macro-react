@@ -12,7 +12,6 @@ import DashboardLayout from './pages/dashboard/DashboardLayout';
 import ManageUsersPage from './pages/admin/ManageUsersPage';
 import ProtectedRoute from './pages/components/ProtectedRoute';
 import ContributePage from './pages/dashboard/ContributePage';
-import ReviewMacrosPage from './pages/admin/ReviewMacrosPage';
 import './App.css';
 import { Category, Macro, Announcement } from './types';
 
@@ -61,7 +60,6 @@ function App() {
           <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
             <Route path="categories" element={<ManageCategories categories={categories} setCategories={setCategories} />} />
             <Route path="macros" element={<ManageMacros categories={categories} macros={macros} setMacros={setMacros} />} />
-            <Route path="review" element={<ReviewMacrosPage />} />
             <Route path="announcements" element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />} />
             <Route path="users" element={<ManageUsersPage />} />
             <Route index element={<Navigate to="categories" />} />

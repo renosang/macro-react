@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const macroSchema = new mongoose.Schema({
   title: { type: String, required: true },
   category: { type: String, required: true },
-  content: { type: Array, required: true },
+  content: { type: mongoose.Schema.Types.Mixed, required: true }, // <-- THAY ĐỔI QUAN TRỌNG Ở ĐÂY
   status: {
     type: String,
     enum: ['pending', 'approved'],
-    default: 'pending' // <-- THAY ĐỔI Ở ĐÂY
+    default: 'pending'
   },
   submittedBy: {
     type: String,

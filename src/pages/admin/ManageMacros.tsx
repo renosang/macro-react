@@ -38,7 +38,28 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
   };
 
   const handleEdit = (macro: Macro) => {
-    setCurrentMacro(macro);
+    let safeContent = macro.content;
+
+    // --- CƠ CHẾ XỬ LÝ LỖI MỚI ---
+    // Xử lý trường hợp `content` là một chuỗi JSON hoặc một mảng chứa một chuỗi JSON
+    if (typeof safeContent === 'string') {
+      try {
+        safeContent = JSON.parse(safeContent);
+      } catch (e) {
+        safeContent = emptyContent;
+      }
+    } else if (Array.isArray(safeContent) && safeContent.length > 0 && typeof safeContent[0] === 'string') {
+       try {
+        safeContent = JSON.parse(safeContent[0]);
+      } catch (e) {
+        safeContent = emptyContent;
+      }
+    } else if (!Array.isArray(safeContent)) {
+      // Nếu không phải là mảng, đặt lại về trạng thái trống
+      safeContent = emptyContent;
+    }
+
+    setCurrentMacro({ ...macro, content: safeContent });
     setIsModalOpen(true);
   };
 

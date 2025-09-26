@@ -12,7 +12,6 @@ function AdminLayout() {
           <nav>
             <NavLink to="/admin/categories">Quản lý Danh mục</NavLink>
             <NavLink to="/admin/macros">Quản lý Macro</NavLink>
-            <NavLink to="/admin/review">Kiểm duyệt Macro</NavLink> {/* <-- THÊM DÒNG NÀY */}
             <NavLink to="/admin/users">Quản lý Thành viên</NavLink>
             <NavLink to="/admin/announcements">Quản lý Thông báo</NavLink>
           </nav>
