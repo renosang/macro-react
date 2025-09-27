@@ -63,7 +63,7 @@ function DashboardPage({ categories, macros, announcements }: DashboardPageProps
                 <span className="category-name">
                    <HighlightText text={category.name} highlight={searchQuery} />
                 </span>
-                <span className="macro-count">({macroCount} sản phẩm)</span>
+                <span className="macro-count">({macroCount} Macro)</span>
               </Link>
             );
           })}
