@@ -22,7 +22,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const userRole = urlParams.get('userrole');
 setUserRole(userRole || '');
 
-console.log(userRole); // Sẽ in ra "user"
   }, [user]);
 
   return (
@@ -35,11 +34,11 @@ console.log(userRole); // Sẽ in ra "user"
       <div className="header-right">
         <span className="user-greeting">Xin chào, Chúc bạn làm việc hiệu quả ❤️</span>        
         {/* Chỉ hiển thị nút này cho user thường */}
-        {userRole === 'user' && (
+        {/* {userRole === 'user' && ( */}
              <button className="contribute-button" onClick={() => navigate('/dashboard/contribute')}>
                 Đóng góp Macro
              </button>
-        )}
+        {/* )} */}
         <button className="logout-button" onClick={handleLogout}>
           Đăng xuất
         </button>
