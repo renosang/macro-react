@@ -4,7 +4,7 @@
 }
 
 .editable-area {
-  min-height: 250px; /* Tăng chiều cao một chút */
+  min-height: 350px; /* Tăng chiều cao một chút */
   padding: 10px 15px;
   outline: none;
   line-height: 1.6;
@@ -49,4 +49,24 @@
   width: 1px;
   background-color: #ced4da;
   margin: 0 8px;
+}
+.editable-area {
+  padding: 12px;
+  min-height: 150px;
+  outline: none;
+  position: relative;
+}
+
+/* --- Vô hiệu hóa lề mặc định của đoạn văn bên trong trình soạn thảo --- */
+.editable-area p {
+  margin: 0;
+}
+
+[data-slate-placeholder="true"] {
+  top: 12px !important;
+}
+
+/* --- Thêm đoạn CSS này để bỏ min-height tự động --- */
+[data-slate-editor="true"] {
+  min-height: unset !important; /* Ghi đè style nội tuyến của Slate */
 }
