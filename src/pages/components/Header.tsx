@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../stores/useAuthStore';
 import './Header.css';
@@ -19,7 +19,7 @@ function Header() {
   // const [userRole, setUserRole] = useState('');
   useEffect(() => {
 const urlParams = new URLSearchParams(window.location.search);
-const userRole = urlParams.get('userrole');
+// const userRole = urlParams.get('userrole');
 // setUserRole(userRole || '');
 
   }, [user]);
