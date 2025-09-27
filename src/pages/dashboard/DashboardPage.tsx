@@ -5,6 +5,7 @@ import { Category, Macro, Announcement } from '../../types';
 import BroadcastBanner from '../components/BroadcastBanner';
 import HighlightText from '../components/HighlightText';
 
+
 interface DashboardPageProps {
   categories: Category[];
   macros: Macro[];
