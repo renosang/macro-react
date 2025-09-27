@@ -6,14 +6,13 @@
 .main-title {
   text-align: center;
   font-size: 2.5rem;
-  margin-bottom: 10px;
+  margin-bottom: -5px;
 }
 
 .main-description {
   text-align: center;
   font-size: 1.1rem;
   color: #666;
-  margin-bottom: 30px;
 }
 
 .search-bar-container {
@@ -45,7 +44,6 @@
 /* --- CSS CHO TIÊU ĐỀ "DANH MỤC" --- */
 .category-title {
   font-size: 1.5rem;
-  margin-bottom: 25px;
   text-align: center; /* Căn giữa */
   color: #333;
 }
