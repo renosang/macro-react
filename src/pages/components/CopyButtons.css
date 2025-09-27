@@ -3,7 +3,7 @@
   gap: 10px;
   margin-top: 20px;
   border-top: 1px solid #eee;
-  padding-top: 15px;
+  padding-top: 10px;
 }
 
 .copy-buttons-container button {
@@ -25,4 +25,5 @@
 
 .copy-buttons-container button:active {
   background-color: #dee2e6;
+  
 }
