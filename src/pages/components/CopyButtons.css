@@ -1,17 +1,17 @@
 .copy-buttons-container {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 15px;
   border-top: 1px solid #eee;
   padding-top: 10px;
 }
 
 .copy-buttons-container button {
-  padding: 8px 12px;
+  padding: 5px 10px; /* Tăng nhẹ padding ngang cho dễ nhấn hơn */
   font-size: 0.9rem;
   font-weight: 500;
   border-radius: 6px;
-  border: 1px solid #ced4da;
+  border: 1px solid #d1d5db;
   background-color: #f8f9fa;
   color: #495057;
   cursor: pointer;
@@ -21,6 +21,11 @@
 .copy-buttons-container button:hover {
   background-color: #e9ecef;
   border-color: #adb5bd;
+}
+
+.copy-buttons-container button:focus {
+  outline: 2px solid #007bff4d;
+  outline-offset: 1px;
 }
 
 .copy-buttons-container button:active {
