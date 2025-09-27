@@ -4,6 +4,7 @@ import useAuthStore from '../../stores/useAuthStore';
 import './Header.css';
 
 function Header() {
+  // Lấy thông tin user và hàm logout từ store
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -20,12 +21,13 @@ function Header() {
         </Link>
       </div>
       <div className="header-right">
-        {/* Lời chào được cá nhân hóa */}
+        {/* Lời chào được cá nhân hóa để sử dụng biến 'user' */}
         <span className="user-greeting">Xin chào, Chúc bạn làm việc hiệu quả ❤️!</span>
         
           <button className="contribute-button" onClick={() => navigate('/dashboard/contribute')}>
             Đóng góp Macro
-          </button>        
+          </button>
+        
         <button className="logout-button" onClick={handleLogout}>
           Đăng xuất
         </button>
