@@ -16,11 +16,11 @@ function Header() {
     logout();
     navigate('/login');
   };
-  const [userRole, setUserRole] = useState('');
+  // const [userRole, setUserRole] = useState('');
   useEffect(() => {
 const urlParams = new URLSearchParams(window.location.search);
 const userRole = urlParams.get('userrole');
-setUserRole(userRole || '');
+// setUserRole(userRole || '');
 
   }, [user]);
 
