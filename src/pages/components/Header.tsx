@@ -5,7 +5,7 @@ import './Header.css';
 
 function Header() {
   // Lấy thông tin user và hàm logout từ store
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {
