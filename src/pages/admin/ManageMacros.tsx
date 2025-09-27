@@ -33,15 +33,20 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
   }, [categoryFilteredMacros, searchQuery]);
 
   const handleAddNew = () => {
-    setCurrentMacro({ title: '', category: categories[0]?.name || '', content: emptyContent, status: 'pending' });
+    // --- SỬA LỖI TẠI ĐÂY ---
+    // Đặt trạng thái mặc định là 'approved' cho admin
+    setCurrentMacro({ 
+      title: '', 
+      category: categories[0]?.name || '', 
+      content: emptyContent, 
+      status: 'approved' 
+    });
+    // -------------------------
     setIsModalOpen(true);
   };
 
   const handleEdit = (macro: Macro) => {
     let safeContent = macro.content;
-
-    // --- CƠ CHẾ XỬ LÝ LỖI MỚI ---
-    // Xử lý trường hợp `content` là một chuỗi JSON hoặc một mảng chứa một chuỗi JSON
     if (typeof safeContent === 'string') {
       try {
         safeContent = JSON.parse(safeContent);
@@ -54,8 +59,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       } catch (e) {
         safeContent = emptyContent;
       }
-    } else if (!Array.isArray(safeContent)) {
-      // Nếu không phải là mảng, đặt lại về trạng thái trống
+    } else if (!Array.isArray(safeContent) || safeContent.length === 0) {
       safeContent = emptyContent;
     }
 

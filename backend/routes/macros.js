@@ -16,15 +16,20 @@ router.get('/', async (req, res) => {
 // TẠO MACRO MỚI
 router.post('/', async (req, res) => {
   try {
-    const { title, content, category, keywords } = req.body;
+    // --- SỬA LỖI TẠI ĐÂY ---
+    // Lấy thêm trường 'status' từ request body
+    const { title, content, category, keywords, status } = req.body;
 
     const newMacro = new Macro({
       title,
       content,
       category,
       keywords,
-      status: 'pending', // <-- THAY ĐỔI Ở ĐÂY
+      // Sử dụng trạng thái được gửi từ frontend,
+      // nếu không có thì mặc định là 'pending'
+      status: status || 'pending',
     });
+    // -------------------------
 
     const savedMacro = await newMacro.save();
     res.status(201).json(savedMacro);

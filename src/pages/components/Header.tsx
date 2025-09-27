@@ -18,12 +18,6 @@ function Header() {
         <Link to="/dashboard" className="logo-link">
           <img src={process.env.PUBLIC_URL + '/logo.png'} alt="ThienTu" className="header-logo" />
         </Link>
-        <nav className="header-nav">
-          {/* Liên kết này chỉ hiển thị khi người dùng là admin */}
-          {user?.role === 'admin' && (
-            <Link to="/admin">Trang quản trị</Link>
-          )}
-        </nav>
       </div>
       <div className="header-right">
         {/* Lời chào được cá nhân hóa */}
