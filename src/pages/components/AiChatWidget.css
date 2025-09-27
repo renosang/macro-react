@@ -204,7 +204,8 @@
     left: 5%;   /* Cách lề trái 5%, tự động tạo ra 5% lề phải */
     right: 5%;  /* Ghi đè thuộc tính right cũ để đảm bảo căn lề */
     bottom: 20px; /* Giảm khoảng cách dưới cho đẹp hơn */
-    height: 70vh; /* Chiều cao linh hoạt theo màn hình */
+    height: 60dvh; 
+    max-height: 80dvh;
 
     /* --- Giữ lại các thuộc tính cũ của bạn --- */
     position: fixed;
