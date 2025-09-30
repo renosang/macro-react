@@ -4,13 +4,15 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
+  // THÊM TRƯỜNG fullName VÀO ĐÂY
+  fullName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' }
 });
 
-// Băm mật khẩu trước khi lưu - ĐÃ CẬP NHẬT
+// Băm mật khẩu trước khi lưu
 userSchema.pre('save', async function(next) {
-  // Chỉ băm mật khẩu nếu nó được thay đổi (hoặc là người dùng mới)
   if (!this.isModified('password')) return next();
 
   try {
@@ -18,7 +20,6 @@ userSchema.pre('save', async function(next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
-    // Chuyển lỗi cho Mongoose xử lý
     next(error);
   }
 });

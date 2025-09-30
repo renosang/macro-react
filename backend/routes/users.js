@@ -15,40 +15,49 @@ router.get('/', async (req, res) => {
 
 // Tạo người dùng mới
 router.post('/', async (req, res) => {
-  const { username, password, role } = req.body;
+  // Thêm 'fullName'
+  const { username, fullName, email, password, role } = req.body;
   try {
-    const newUser = new User({ username, password, role });
+    const newUser = new User({ username, fullName, email, password, role });
     await newUser.save();
-    res.status(201).json({_id: newUser._id, username: newUser.username, role: newUser.role});
+    res.status(201).json({_id: newUser._id, username: newUser.username, fullName: newUser.fullName, email: newUser.email, role: newUser.role});
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Cập nhật thông tin người dùng (phân quyền)
+// Cập nhật thông tin người dùng
 router.put('/:id', async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, { role: req.body.role }, { new: true }).select('-password');
-    if (!user) return res.status(404).send('Không tìm thấy người dùng.');
-    res.json(user);
+    // Thêm 'fullName'
+    const { fullName, email, role, password } = req.body;
+    const userToUpdate = await User.findById(req.params.id);
+
+    if (!userToUpdate) {
+      return res.status(404).send('Không tìm thấy người dùng.');
+    }
+
+    if (fullName) userToUpdate.fullName = fullName;
+    if (email) userToUpdate.email = email;
+    if (role) userToUpdate.role = role;
+    if (password) {
+      userToUpdate.password = password;
+    }
+
+    const updatedUser = await userToUpdate.save();
+    
+    res.json({
+      _id: updatedUser._id,
+      username: updatedUser.username,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      role: updatedUser.role
+    });
+
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
-
-// Đặt lại mật khẩu
-router.post('/:id/reset-password', async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) return res.status(404).send('Không tìm thấy người dùng.');
-        user.password = req.body.password;
-        await user.save();
-        res.send('Mật khẩu đã được đặt lại thành công.');
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
-});
-
 
 // Xóa người dùng
 router.delete('/:id', async (req, res) => {

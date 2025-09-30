@@ -23,6 +23,8 @@ export interface Announcement {
 export interface User {
   _id: string;
   username: string;
+  fullName: string; 
+  email: string;
   role: 'user' | 'admin';
 }
 
