@@ -4,7 +4,7 @@
 }
 
 .editable-area {
-  min-height: 350px; /* Tăng chiều cao một chút */
+  min-height: 350px !important; /* Tăng chiều cao một chút */
   padding: 10px 15px;
   outline: none;
   line-height: 1.6;
@@ -85,4 +85,11 @@
 
 div[data-slate-editor="true"] > p {
   margin: 0;
+}
+
+.editable-area [data-slate-placeholder="true"] {
+  /* Ghi đè lại các thuộc tính mặc định của slate */
+  top: 12px !important;
+  left: 15px !important;
+  opacity: 0.5 !important;
 }
