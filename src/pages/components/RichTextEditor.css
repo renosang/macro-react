@@ -82,3 +82,7 @@
 .toolbar i.format.code-block { background-image: url('https://img.icons8.com/ios-glyphs/30/000000/code-file.png'); }
 .toolbar i.format.undo { background-image: url('https://img.icons8.com/ios-glyphs/30/000000/undo.png'); }
 .toolbar i.format.redo { background-image: url('https://img.icons8.com/ios-glyphs/30/000000/redo.png'); }
+
+div[data-slate-editor="true"] > p {
+  margin: 0;
+}
