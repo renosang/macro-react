@@ -12,11 +12,15 @@ const CopyButtons = ({ content }: CopyButtonsProps) => {
   const handleCopy = (mode: 'default' | 'anh' | 'chi') => {
     let textToCopy = serializeSlate(content);
 
-    // SỬA LỖI: Thêm cờ "i" vào regex để không phân biệt hoa/thường
+    // SỬA LỖI: Xử lý riêng biệt cho trường hợp viết hoa và viết thường
     if (mode === 'anh') {
-      textToCopy = textToCopy.replace(/Anh\/Chị/gi, 'Anh');
+      textToCopy = textToCopy
+        .replace(/Anh\/Chị/g, 'Anh')   // Thay thế "Anh/Chị" thành "Anh"
+        .replace(/anh\/chị/g, 'anh'); // Thay thế "anh/chị" thành "anh"
     } else if (mode === 'chi') {
-      textToCopy = textToCopy.replace(/Anh\/Chị/gi, 'Chị');
+      textToCopy = textToCopy
+        .replace(/Anh\/Chị/g, 'Chị')   // Thay thế "Anh/Chị" thành "Chị"
+        .replace(/anh\/chị/g, 'chị'); // Thay thế "anh/chị" thành "chị"
     }
 
     navigator.clipboard.writeText(textToCopy).then(() => {
