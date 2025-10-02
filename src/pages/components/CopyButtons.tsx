@@ -13,15 +13,22 @@ const CopyButtons = ({ content }: CopyButtonsProps) => {
     let textToCopy = serializeSlate(content);
 
     // SỬA LỖI: Xử lý riêng biệt cho trường hợp viết hoa và viết thường
-    if (mode === 'anh') {
-      textToCopy = textToCopy
-        .replace(/Anh\/Chị/g, 'Anh')   // Thay thế "Anh/Chị" thành "Anh"
-        .replace(/anh\/chị/g, 'anh'); // Thay thế "anh/chị" thành "anh"
-    } else if (mode === 'chi') {
-      textToCopy = textToCopy
-        .replace(/Anh\/Chị/g, 'Chị')   // Thay thế "Anh/Chị" thành "Chị"
-        .replace(/anh\/chị/g, 'chị'); // Thay thế "anh/chị" thành "chị"
-    }
+// SỬA LỖI: Xử lý riêng biệt cho trường hợp viết hoa và viết thường
+if (mode === 'anh') {
+  textToCopy = textToCopy
+    .replace(/Anh\/Chị/g, 'Anh')   // Trường hợp gốc
+    .replace(/anh\/chị/g, 'anh')   // Trường hợp gốc
+    .replace(/Anh\/chị/g, 'Anh')   // Bổ sung theo yêu cầu
+    .replace(/ANh\/Chị/g, 'Anh');  // Bổ sung theo yêu cầu
+    .replace(/ANH\/CHỊ/g, 'Anh');  // Bổ sung theo yêu cầu  
+} else if (mode === 'chi') {
+  textToCopy = textToCopy
+    .replace(/Anh\/Chị/g, 'Chị')   // Trường hợp gốc
+    .replace(/anh\/chị/g, 'chị')   // Trường hợp gốc
+    .replace(/Anh\/chị/g, 'Chị')   // Bổ sung theo yêu cầu
+    .replace(/ANh\/Chị/g, 'Chị');  // Bổ sung theo yêu cầu
+    .replace(/ANH\/CHỊ/g, 'Chị');  // Bổ sung theo yêu cầu
+}
 
     navigator.clipboard.writeText(textToCopy).then(() => {
       toast.success('Đã sao chép vào bộ nhớ tạm!');
