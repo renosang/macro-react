@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import localForage from 'localforage'; // 1. Import localForage
 import { Category, Macro, Announcement } from '../types';
 
 export interface DataState {
   categories: Category[];
   macros: Macro[];
   announcements: Announcement[];
-  dataLoaded: boolean; // Thêm trạng thái này
   fetchCategories: () => Promise<void>;
   fetchMacros: () => Promise<void>;
   fetchAnnouncements: () => Promise<void>;
@@ -15,15 +15,12 @@ export interface DataState {
 
 const useDataStore = create<DataState>()(
   persist(
-    (set, get) => ({ // Sử dụng get để truy cập state hiện tại
+    (set) => ({
       categories: [],
       macros: [],
       announcements: [],
-      dataLoaded: false, // Giá trị khởi tạo
 
       fetchCategories: async () => {
-        // Chỉ fetch nếu dataLoaded là false
-        if (get().dataLoaded) return;
         try {
           const response = await fetch('/api/categories');
           if (!response.ok) throw new Error('Failed to fetch categories');
@@ -35,7 +32,6 @@ const useDataStore = create<DataState>()(
       },
 
       fetchMacros: async () => {
-        if (get().dataLoaded) return;
         try {
           const response = await fetch('/api/macros');
           if (!response.ok) throw new Error('Failed to fetch macros');
@@ -47,13 +43,11 @@ const useDataStore = create<DataState>()(
       },
       
       fetchAnnouncements: async () => {
-        if (get().dataLoaded) return;
         try {
             const response = await fetch('/api/announcements');
             if (!response.ok) throw new Error('Failed to fetch announcements');
             const data = await response.json();
-            // Sau khi fetch thành công lần đầu, đánh dấu là đã load
-            set({ announcements: data, dataLoaded: true }); 
+            set({ announcements: data });
         } catch (error) {
             console.error('Error fetching announcements:', error);
         }
@@ -63,8 +57,8 @@ const useDataStore = create<DataState>()(
     }),
     { 
       name: 'data-storage',
-      // Khi người dùng logout và login lại, bạn có thể muốn reset trạng thái dataLoaded
-      // Bằng cách xóa item này khỏi localStorage khi logout.
+      // 2. Thay thế storage mặc định bằng localForage
+      storage: createJSONStorage(() => localForage),
     }
   )
 );
