@@ -1,64 +1,71 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import localForage from 'localforage'; // 1. Import localForage
+import localForage from 'localforage';
 import { Category, Macro, Announcement } from '../types';
 
 export interface DataState {
   categories: Category[];
   macros: Macro[];
   announcements: Announcement[];
-  fetchCategories: () => Promise<void>;
-  fetchMacros: () => Promise<void>;
-  fetchAnnouncements: () => Promise<void>;
+  _hasHydrated: boolean; // Thêm flag này
+  setHasHydrated: (hydrated: boolean) => void;
+  fetchInitialData: () => Promise<void>; // Gom các hàm fetch lại
   setMacros: (macros: Macro[]) => void;
 }
 
 const useDataStore = create<DataState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       categories: [],
       macros: [],
       announcements: [],
+      _hasHydrated: false, // Ban đầu là false
 
-      fetchCategories: async () => {
-        try {
-          const response = await fetch('/api/categories');
-          if (!response.ok) throw new Error('Failed to fetch categories');
-          const data = await response.json();
-          set({ categories: data });
-        } catch (error) {
-          console.error('Error fetching categories:', error);
-        }
+      setHasHydrated: (hydrated) => {
+        set({ _hasHydrated: hydrated });
       },
 
-      fetchMacros: async () => {
-        try {
-          const response = await fetch('/api/macros');
-          if (!response.ok) throw new Error('Failed to fetch macros');
-          const data = await response.json();
-          set({ macros: data });
-        } catch (error) {
-          console.error('Error fetching macros:', error);
+      // Gom các hàm fetch lại để gọi một lần
+      fetchInitialData: async () => {
+        // Chỉ fetch khi chưa có dữ liệu
+        if (get().categories.length > 0 && get().macros.length > 0) {
+          return;
         }
-      },
-      
-      fetchAnnouncements: async () => {
         try {
-            const response = await fetch('/api/announcements');
-            if (!response.ok) throw new Error('Failed to fetch announcements');
-            const data = await response.json();
-            set({ announcements: data });
+          const [categoriesRes, macrosRes, announcementsRes] = await Promise.all([
+            fetch('/api/categories'),
+            fetch('/api/macros'),
+            fetch('/api/announcements')
+          ]);
+
+          if (!categoriesRes.ok || !macrosRes.ok || !announcementsRes.ok) {
+            throw new Error('Failed to fetch initial data');
+          }
+
+          const categoriesData = await categoriesRes.json();
+          const macrosData = await macrosRes.json();
+          const announcementsData = await announcementsRes.json();
+
+          set({ 
+            categories: categoriesData, 
+            macros: macrosData, 
+            announcements: announcementsData 
+          });
         } catch (error) {
-            console.error('Error fetching announcements:', error);
+          console.error('Error fetching initial data:', error);
         }
       },
 
       setMacros: (newMacros) => set({ macros: newMacros }),
     }),
-    { 
+    {
       name: 'data-storage',
-      // 2. Thay thế storage mặc định bằng localForage
       storage: createJSONStorage(() => localForage),
+      // Đây là phần quan trọng:
+      onRehydrateStorage: () => (state) => {
+        // Khi quá trình phục hồi hoàn tất, gọi action để cập nhật flag
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

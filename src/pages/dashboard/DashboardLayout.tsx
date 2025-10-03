@@ -1,26 +1,35 @@
-import React from 'react';
+// Ví dụ trong src/pages/dashboard/DashboardLayout.tsx
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/Header';
-import EditorPopup from '../components/EditorPopup';
-import FloatingEditorButton from '../components/FloatingEditorButton';
-import AiChatWidget from '../components/AiChatWidget'; // <-- Đảm bảo đã import
+import useDataStore from '../../stores/useDataStore';
+import AiChatWidget from '../components/AiChatWidget'; // Giả sử bạn có component này
+import BroadcastBanner from '../components/BroadcastBanner'; // Giả sử bạn có component này
 
-const DashboardLayout: React.FC = () => {
+function DashboardLayout() {
+  const { fetchInitialData, _hasHydrated } = useDataStore();
+
+  useEffect(() => {
+    // Chỉ thực hiện logic khi quá trình hydration đã hoàn tất
+    if (_hasHydrated) {
+      fetchInitialData();
+    }
+  }, [_hasHydrated, fetchInitialData]); // Phụ thuộc vào _hasHydrated
+
+  // Để không có độ trễ thị giác, bạn có thể hiển thị một layout trống hoặc skeleton
+  // trong khi chờ hydration. Nhưng với localForage, việc này cực nhanh.
+  // Thường thì bạn không cần một màn hình loading riêng cho việc này.
+
   return (
-    <div>
-      <Header /> {/* <-- Thêm Header vào layout chung */}
-      <main>
-        <Outlet /> {/* <-- Nội dung trang con sẽ hiển thị ở đây */}
+    <div className="dashboard-layout">
+      <Header />
+      <BroadcastBanner />
+      <main className="dashboard-content">
+        <Outlet />
       </main>
-      
-      {/* Các component nổi sẽ luôn hiển thị ở góc màn hình */}
-      <FloatingEditorButton />
-      <AiChatWidget /> {/* <-- Thêm AiChatWidget để nó được render */}
-      
-      <EditorPopup />
+      <AiChatWidget />
     </div>
   );
-};
+}
 
 export default DashboardLayout;
-
