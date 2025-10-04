@@ -79,7 +79,7 @@ const AiChatWidget: React.FC = () => {
 
   return (
     <>
-      <button className={`chat-fab ${isOpen ? 'hidden' : ''}`} onClick={toggleChat} title="Chat với AI">
+      <button id="tour-ai-chat" className={`chat-fab ${isOpen ? 'hidden' : ''}`} onClick={toggleChat} title="Chat với AI">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="28"

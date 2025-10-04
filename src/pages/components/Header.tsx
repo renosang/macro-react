@@ -44,7 +44,7 @@ function Header() {
         
         {/* Các nút hiển thị trên desktop */}
         <div className="desktop-actions">
-            <Link to="/dashboard/contribute" className="contribute-btn">Đóng góp</Link>
+            <Link to="/dashboard/contribute" id="tour-contribute-link" className="contribute-btn">Đóng góp</Link>
           <button onClick={handleLogout} className="logout-btn">
             Đăng xuất
           </button>
@@ -63,7 +63,7 @@ function Header() {
 
           {isUserMenuOpen && (
             <div className="user-menu-dropdown">
-                <Link to="/dashboard/contribute" onClick={() => setIsUserMenuOpen(false)}>Đóng góp Macro</Link>
+                <Link  to="/dashboard/contribute" onClick={() => setIsUserMenuOpen(false)}>Đóng góp Macro</Link>
               <button onClick={handleLogout}>Đăng xuất</button>
             </div>
           )}

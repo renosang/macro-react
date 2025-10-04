@@ -8,7 +8,7 @@ const FloatingEditorButton: React.FC = () => {
   const toggleEditor = useEditorStore((state) => state.toggleEditor);
 
   return (
-    <button className="fab" onClick={toggleEditor} title="Mở trình soạn thảo">
+    <button id="tour-editor-button" className="fab" onClick={toggleEditor} title="Mở trình soạn thảo">
       ✍️
     </button>
   );
