@@ -4,6 +4,21 @@ import toast from 'react-hot-toast';
 import './ManageUsers.css';
 import { User } from '../../types';
 
+
+const formatDate = (dateString: string | null | undefined) => {
+  // Logic hiện tại đã xử lý đúng trường hợp null/undefined rồi
+  if (!dateString) return 'Chưa đăng nhập';
+  
+  const date = new Date(dateString);
+  return date.toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 function ManageUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -150,6 +165,7 @@ function ManageUsersPage() {
             <th>Họ và tên</th>
             <th>Email</th>
             <th>Quyền</th>
+            <th>Truy cập lần cuối</th>
             <th>Hành động</th>
           </tr>
         </thead>
@@ -161,6 +177,7 @@ function ManageUsersPage() {
               <td>{user.fullName}</td> 
               <td>{user.email}</td>
               <td><span className={`role-badge role-${user.role}`}>{user.role}</span></td>
+              <td>{formatDate(user.lastLogin)}</td>
               <td>
                 <button className="action-btn edit-btn" onClick={() => handleOpenModal(user)}>Sửa</button>
                 <button className="action-btn delete-btn" onClick={() => handleDeleteUser(user._id)}>Xóa</button>

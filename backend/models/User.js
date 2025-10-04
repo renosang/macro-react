@@ -4,11 +4,12 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  // THÊM TRƯỜNG fullName VÀO ĐÂY
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' }
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  // Thêm trường lastLogin vào đây
+  lastLogin: { type: Date, default: null }
 });
 
 // Băm mật khẩu trước khi lưu
@@ -18,7 +19,7 @@ userSchema.pre('save', async function(next) {
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
+    next(error);
   } catch (error) {
     next(error);
   }

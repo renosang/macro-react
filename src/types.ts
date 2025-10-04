@@ -26,5 +26,7 @@ export interface User {
   fullName: string; 
   email: string;
   role: 'user' | 'admin';
+  password?: string;
+  lastLogin?: string | null;
 }
 
