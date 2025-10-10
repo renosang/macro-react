@@ -4,21 +4,6 @@ import toast from 'react-hot-toast';
 import './ManageUsers.css';
 import { User } from '../../types';
 
-
-const formatDate = (dateString: string | null | undefined) => {
-  // Logic hiện tại đã xử lý đúng trường hợp null/undefined rồi
-  if (!dateString) return 'Chưa đăng nhập';
-  
-  const date = new Date(dateString);
-  return date.toLocaleString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
 function ManageUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,34 +11,26 @@ function ManageUsersPage() {
   const [newPassword, setNewPassword] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchUsers = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/users', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data = await res.json();
-      setUsers(data);
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-      toast.error('Không thể tải danh sách người dùng.');
-    }
-  };
-
   useEffect(() => {
-    fetchUsers();
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => setUsers(data));
   }, []);
 
-  const filteredUsers = useMemo(() =>
-    users.filter(user =>
-      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (user.fullName && user.fullName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase()))
-    ), [users, searchQuery]);
+  // ---- ĐÃ SỬA LỖI TẠI ĐÂY ----
+  const filteredUsers = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return users.filter(user =>
+      // Thêm kiểm tra an toàn: nếu trường không tồn tại, coi nó là chuỗi rỗng ''
+      (user.username?.toLowerCase() || '').includes(query) ||
+      (user.fullName?.toLowerCase() || '').includes(query) ||
+      (user.email?.toLowerCase() || '').includes(query)
+    );
+  }, [users, searchQuery]);
+  // ---- KẾT THÚC SỬA LỖI ----
 
-  const handleOpenModal = (user: User | null = null) => {
-    setCurrentUser(user ? { ...user } : { username: '', fullName: '', email: '', role: 'user' });
+  const handleOpenModal = (user: Partial<User> | null = null) => {
+    setCurrentUser(user ? { ...user } : { username: '', role: 'user', fullName: '', email: '' });
     setNewPassword('');
     setIsModalOpen(true);
   };
@@ -65,96 +42,78 @@ function ManageUsersPage() {
 
   const handleSave = async () => {
     if (!currentUser) return;
-
-    const isCreating = !currentUser._id;
-    const url = isCreating ? '/api/users' : `/api/users/${currentUser._id}`;
-    const method = isCreating ? 'POST' : 'PUT';
+  
+    const url = currentUser._id ? `/api/users/${currentUser._id}` : '/api/users';
+    const method = currentUser._id ? 'PUT' : 'POST';
     
     const body: any = {
-        username: currentUser.username,
-        fullName: currentUser.fullName, // Gửi fullName đi
-        email: currentUser.email,
-        role: currentUser.role
+      username: currentUser.username,
+      fullName: currentUser.fullName,
+      email: currentUser.email,
+      role: currentUser.role,
     };
-
-    if (newPassword) {
-        body.password = newPassword;
-    } else if (isCreating) {
-        toast.error('Mật khẩu là bắt buộc khi tạo người dùng mới.');
-        return;
+    if (method === 'POST') {
+      body.password = newPassword;
     }
 
     try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(body)
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+  
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Có lỗi xảy ra');
+      }
+  
+      if (currentUser._id && newPassword) {
+        const resetRes = await fetch(`/api/users/${currentUser._id}/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: newPassword }),
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Thao tác thất bại.');
+        if (!resetRes.ok) {
+           const errorData = await resetRes.json();
+           throw new Error(errorData.message || 'Lỗi reset mật khẩu');
         }
-
-        toast.success(`Đã ${isCreating ? 'thêm' : 'cập nhật'} thành công!`);
-        fetchUsers();
-        handleCloseModal();
-
+      }
+  
+      const updatedUsers = await fetch('/api/users').then(res => res.json());
+      setUsers(updatedUsers);
+      toast.success(currentUser._id ? 'Cập nhật thành công!' : 'Tạo thành viên thành công!');
+      handleCloseModal();
     } catch (error: any) {
-        console.error('Lỗi khi lưu:', error);
-        toast.error(error.message || 'Đã có lỗi xảy ra.');
+      toast.error(`Lỗi: ${error.message}`);
     }
   };
-  
-  const handleDeleteUser = async (userId: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này không?')) {
+
+  const handleDelete = async (userId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa thành viên này?')) {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`/api/users/${userId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Xóa thất bại.');
-        }
-
-        toast.success('Đã xóa người dùng thành công!');
-        fetchUsers();
+        await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+        setUsers(users.filter(user => user._id !== userId));
+        toast.success('Xóa thành viên thành công!');
       } catch (error: any) {
-        toast.error(error.message);
+        toast.error(`Lỗi: ${error.message}`);
       }
     }
   };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    if (!currentUser) return;
-    const { name, value } = e.target;
-    setCurrentUser({
-      ...currentUser,
-      [name]: value
-    });
-  };
-
+  
   return (
-    <div className="manage-users-container">
-      <h2>Quản lý người dùng</h2>
+    <div className="manage-users">
+      <h2>Quản lý Thành viên</h2>
       <div className="controls">
         <input
           type="text"
+          placeholder="Tìm theo tên, email..."
           className="search-input"
-          placeholder="Tìm kiếm..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
         />
-        <button className="add-btn" onClick={() => handleOpenModal()}>
-          + Thêm nhân viên
+        <button className="add-new-btn" onClick={() => handleOpenModal()}>
+          Thêm thành viên
         </button>
       </div>
 
@@ -162,10 +121,9 @@ function ManageUsersPage() {
         <thead>
           <tr>
             <th>Tên đăng nhập</th>
-            <th>Họ và tên</th>
+            <th>Họ và Tên</th>
             <th>Email</th>
             <th>Quyền</th>
-            <th>Truy cập lần cuối</th>
             <th>Hành động</th>
           </tr>
         </thead>
@@ -173,38 +131,53 @@ function ManageUsersPage() {
           {filteredUsers.map(user => (
             <tr key={user._id}>
               <td>{user.username}</td>
-              {/* Hiển thị fullName */}
-              <td>{user.fullName}</td> 
+              <td>{user.fullName}</td>
               <td>{user.email}</td>
-              <td><span className={`role-badge role-${user.role}`}>{user.role}</span></td>
-              <td>{formatDate(user.lastLogin)}</td>
               <td>
+                <span className={`role-badge role-${user.role}`}>
+                  {user.role}
+                </span>
+              </td>
+              <td className="action-cell">
                 <button className="action-btn edit-btn" onClick={() => handleOpenModal(user)}>Sửa</button>
-                <button className="action-btn delete-btn" onClick={() => handleDeleteUser(user._id)}>Xóa</button>
+                <button className="action-btn delete-btn" onClick={() => handleDelete(user._id)}>Xóa</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {isModalOpen && currentUser && (
+      {isModalOpen && (
         <div className="modal-backdrop">
           <div className="modal-content">
-            <h3>{currentUser._id ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}</h3>
-            
+            <h3>{currentUser?._id ? 'Chỉnh sửa' : 'Thêm mới'} thành viên</h3>
             <div className="form-group">
               <label>Tên đăng nhập</label>
               <input
                 type="text"
-                name="username"
-                value={currentUser.username}
-                onChange={handleInputChange}
-                disabled={!!currentUser._id}
+                value={currentUser?.username || ''}
+                onChange={e => setCurrentUser({ ...currentUser, username: e.target.value })}
+                disabled={!!currentUser?._id}
               />
             </div>
-
+             <div className="form-group">
+              <label>Họ và Tên</label>
+              <input
+                type="text"
+                value={currentUser?.fullName || ''}
+                onChange={e => setCurrentUser({ ...currentUser, fullName: e.target.value })}
+              />
+            </div>
             <div className="form-group">
-              <label>Mật khẩu {currentUser._id ? '(Để trống nếu không đổi)' : ''}</label>
+              <label>Email</label>
+              <input
+                type="email"
+                value={currentUser?.email || ''}
+                onChange={e => setCurrentUser({ ...currentUser, email: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label>Mật khẩu {currentUser?._id ? '(Để trống nếu không đổi)' : ''}</label>
               <input
                 type="password"
                 placeholder="Nhập mật khẩu..."
@@ -212,41 +185,16 @@ function ManageUsersPage() {
                 onChange={e => setNewPassword(e.target.value)}
               />
             </div>
-            
-            <div className="form-group">
-              <label>Họ và tên</label>
-              <input
-                type="text"
-                name="fullName" // Đổi name thành "fullName"
-                placeholder='Nhập họ và tên...'
-                value={currentUser.fullName} // Gắn với state.fullName
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                placeholder='Nhập email...'
-                value={currentUser.email}
-                onChange={handleInputChange}
-              />
-            </div>
-
             <div className="form-group">
               <label>Quyền</label>
               <select
-                name="role"
-                value={currentUser.role}
-                onChange={handleInputChange}
+                value={currentUser?.role}
+                onChange={e => setCurrentUser({ ...currentUser, role: e.target.value as 'user' | 'admin' })}
               >
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
-
             <div className="modal-actions">
               <button className="action-btn cancel-btn" onClick={handleCloseModal}>Hủy</button>
               <button className="action-btn save-btn" onClick={handleSave}>Lưu</button>
