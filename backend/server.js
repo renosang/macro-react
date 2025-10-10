@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const analyticsRoutes = require('./routes/analytics');
 
 const app = express();
 app.use(cors());
@@ -21,6 +22,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/macros', macroRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // --- MongoDB Connection ---
 // The MONGODB_URI should be in your .env file or Vercel environment variables

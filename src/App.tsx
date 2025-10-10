@@ -12,9 +12,11 @@ import DashboardLayout from './pages/dashboard/DashboardLayout';
 import ManageUsersPage from './pages/admin/ManageUsersPage';
 import ProtectedRoute from './pages/components/ProtectedRoute';
 import ContributePage from './pages/dashboard/ContributePage';
+import AnalyticsDashboard from './pages/admin/AnalyticsDashboard';
 import './App.css';
 import { Category, Macro, Announcement } from './types';
-import AdminRoute from './pages/components/AdminRoute'; 
+import AdminRoute from './pages/components/AdminRoute';
+ 
 
 function App() {
   const [isAdmin] = useState(true);
@@ -62,6 +64,7 @@ function App() {
             <Route path="categories" element={<ManageCategories categories={categories} setCategories={setCategories} />} />
             <Route path="macros" element={<ManageMacros categories={categories} macros={macros} setMacros={setMacros} />} />
             <Route path="announcements" element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />} />
+             <Route path="analytics" element={<AnalyticsDashboard />} />
             <Route path="users" element={<ManageUsersPage />} />
             <Route index element={<Navigate to="categories" />} />
           </Route>

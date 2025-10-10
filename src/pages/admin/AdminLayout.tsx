@@ -14,6 +14,7 @@ function AdminLayout() {
             <NavLink to="/admin/macros">Quản lý Macro</NavLink>
             <NavLink to="/admin/users">Quản lý Thành viên</NavLink>
             <NavLink to="/admin/announcements">Quản lý Thông báo</NavLink>
+            <NavLink to="/admin/analytics">Phân tích đánh giá</NavLink>
           </nav>
         </aside>
         <main className="admin-content">

@@ -1,3 +1,5 @@
+const MacroUsage = require('../models/MacroUsage');
+const Category = require('../models/Category');
 const express = require('express');
 const Macro = require('../models/Macro');
 
@@ -70,18 +72,26 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// TĂNG SỐ LƯỢT SỬ DỤNG MACRO
 router.put('/:id/increment-usage', async (req, res) => {
   try {
-    const updatedMacro = await Macro.findByIdAndUpdate(
+    const macro = await Macro.findByIdAndUpdate(
       req.params.id,
-      { $inc: { useCount: 1 } }, // Tăng useCount lên 1
+      { $inc: { useCount: 1 } },
       { new: true }
     );
-    if (!updatedMacro) {
+
+    if (!macro) {
       return res.status(404).send('Không tìm thấy macro.');
     }
-    res.json(updatedMacro);
+
+    // Tạo bản ghi lịch sử sử dụng
+    const usage = new MacroUsage({
+      macro: macro._id,
+      category: macro.category
+    });
+    await usage.save();
+
+    res.json(macro);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
