@@ -36,7 +36,7 @@
 }
 
 /* Nút "Thêm thành viên" */
-.add-new-btn {
+.add-new-btn-user {
   padding: 0.75rem 1.5rem;
   background: linear-gradient(to right, #007bff, #0056b3);
   color: white;

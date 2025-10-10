@@ -149,7 +149,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
           />
         </div>
         <div className="add-controls">
-          <button className="add-new-btn" onClick={() => handleOpenModal()}>
+          <button className="add-new-btn-user" onClick={() => handleOpenModal()}>
             Thêm Macro
           </button>
         </div>
