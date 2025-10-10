@@ -13,7 +13,7 @@ async function runChat(message) {
     throw new Error("GEMINI_API_KEY is not set in environment variables.");
   }
   
-  const modelName = "gemini-2.5-flash-preview-05-20"; // Đã cập nhật theo yêu cầu
+  const modelName = "gemini-2.5-flash-lite"; // Đã cập nhật theo yêu cầu
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
   const payload = {
