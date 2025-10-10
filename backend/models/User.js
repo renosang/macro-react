@@ -5,17 +5,18 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  // ---- BỔ SUNG ----
   fullName: { type: String, required: [true, 'Họ và tên là bắt buộc'] },
-  email: { 
-    type: String, 
-    required: [true, 'Email là bắt buộc'], 
+  email: {
+    type: String,
+    required: [true, 'Email là bắt buộc'],
     unique: true,
     match: [/.+\@.+\..+/, 'Vui lòng nhập một địa chỉ email hợp lệ']
   },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  // ---- BỔ SUNG ----
+  lastLogin: { type: Date, default: null }
   // ---- KẾT THÚC BỔ SUNG ----
-  role: { type: String, enum: ['user', 'admin'], default: 'user' }
-});
+}, { timestamps: true }); // Thêm timestamps để có createdAt và updatedAt
 
 // Băm mật khẩu trước khi lưu
 userSchema.pre('save', async function(next) {

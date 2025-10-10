@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
 
-// Register a new user
+// Register a new user (Không thay đổi)
 router.post('/register', async (req, res) => {
     try {
         const { username, password, role } = req.body;
@@ -30,26 +30,29 @@ router.post('/login', async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ message: 'Tên đăng nhập hoặc mật khẩu không đúng' });
         }
-        await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
+
+        // ---- BỔ SUNG CẬP NHẬT LASTLOGIN TẠI ĐÂY ----
+        user.lastLogin = new Date();
+        await user.save();
+        // ---- KẾT THÚC BỔ SUNG ----
+
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
             expiresIn: '1h',
         });
         
-        // --- SỬA LỖI TẠI ĐÂY ---
-        // Trả về đầy đủ thông tin user, bao gồm cả role
         res.json({ 
             token, 
             id: user._id,
             username: user.username,
-            role: user.role // Đảm bảo trường 'role' được gửi về cho frontend
+            role: user.role
         });
-        // -------------------------
 
     } catch (error) {
         res.status(500).json({ message: 'Lỗi máy chủ' });
     }
 });
 
+// verifyToken middleware (Không thay đổi)
 const verifyToken = (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {

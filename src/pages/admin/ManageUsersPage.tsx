@@ -16,18 +16,29 @@ function ManageUsersPage() {
       .then(res => res.json())
       .then(data => setUsers(data));
   }, []);
+  
+  // ---- BỔ SUNG HÀM FORMAT DATE ----
+  const formatDateTime = (isoString: string | null | undefined) => {
+    if (!isoString) return 'Chưa đăng nhập';
+    const date = new Date(isoString);
+    return date.toLocaleString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+  // ---- KẾT THÚC BỔ SUNG ----
 
-  // ---- ĐÃ SỬA LỖI TẠI ĐÂY ----
   const filteredUsers = useMemo(() => {
     const query = searchQuery.toLowerCase();
     return users.filter(user =>
-      // Thêm kiểm tra an toàn: nếu trường không tồn tại, coi nó là chuỗi rỗng ''
       (user.username?.toLowerCase() || '').includes(query) ||
       (user.fullName?.toLowerCase() || '').includes(query) ||
       (user.email?.toLowerCase() || '').includes(query)
     );
   }, [users, searchQuery]);
-  // ---- KẾT THÚC SỬA LỖI ----
 
   const handleOpenModal = (user: Partial<User> | null = null) => {
     setCurrentUser(user ? { ...user } : { username: '', role: 'user', fullName: '', email: '' });
@@ -39,35 +50,30 @@ function ManageUsersPage() {
     setIsModalOpen(false);
     setCurrentUser(null);
   };
+  
+  // Các hàm handleSave và handleDelete giữ nguyên, không cần thay đổi
 
   const handleSave = async () => {
     if (!currentUser) return;
-  
     const url = currentUser._id ? `/api/users/${currentUser._id}` : '/api/users';
     const method = currentUser._id ? 'PUT' : 'POST';
-    
     const body: any = {
       username: currentUser.username,
       fullName: currentUser.fullName,
       email: currentUser.email,
       role: currentUser.role,
     };
-    if (method === 'POST') {
-      body.password = newPassword;
-    }
-
+    if (method === 'POST') body.password = newPassword;
     try {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-  
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Có lỗi xảy ra');
       }
-  
       if (currentUser._id && newPassword) {
         const resetRes = await fetch(`/api/users/${currentUser._id}/reset-password`, {
           method: 'POST',
@@ -79,7 +85,6 @@ function ManageUsersPage() {
            throw new Error(errorData.message || 'Lỗi reset mật khẩu');
         }
       }
-  
       const updatedUsers = await fetch('/api/users').then(res => res.json());
       setUsers(updatedUsers);
       toast.success(currentUser._id ? 'Cập nhật thành công!' : 'Tạo thành viên thành công!');
@@ -119,13 +124,16 @@ function ManageUsersPage() {
 
       <table className="users-table">
         <thead>
+          {/* ---- CẬP NHẬT BẢNG ---- */}
           <tr>
             <th>Tên đăng nhập</th>
             <th>Họ và Tên</th>
             <th>Email</th>
             <th>Quyền</th>
+            <th>Truy cập gần nhất</th>
             <th>Hành động</th>
           </tr>
+          {/* ---- KẾT THÚC CẬP NHẬT ---- */}
         </thead>
         <tbody>
           {filteredUsers.map(user => (
@@ -138,6 +146,9 @@ function ManageUsersPage() {
                   {user.role}
                 </span>
               </td>
+              {/* ---- CẬP NHẬT BẢNG ---- */}
+              <td>{formatDateTime(user.lastLogin)}</td>
+              {/* ---- KẾT THÚC CẬP NHẬT ---- */}
               <td className="action-cell">
                 <button className="action-btn edit-btn" onClick={() => handleOpenModal(user)}>Sửa</button>
                 <button className="action-btn delete-btn" onClick={() => handleDelete(user._id)}>Xóa</button>
@@ -146,7 +157,8 @@ function ManageUsersPage() {
           ))}
         </tbody>
       </table>
-
+      
+      {/* Modal không thay đổi */}
       {isModalOpen && (
         <div className="modal-backdrop">
           <div className="modal-content">
