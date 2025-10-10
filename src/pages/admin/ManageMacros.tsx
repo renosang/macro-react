@@ -14,42 +14,66 @@ interface ManageMacrosProps {
 
 const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }] }];
 
-// ---- BỔ SUNG: Type cho bộ lọc trạng thái ----
 type StatusFilter = 'all' | 'pending' | 'approved';
+
+// --- BỔ SUNG: Type cho trạng thái sắp xếp ---
+type SortOrder = 'asc' | 'desc' | 'none';
 
 function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMacro, setCurrentMacro] = useState<Partial<Macro> | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // ---- BỔ SUNG: State cho bộ lọc trạng thái ----
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  
+  // --- BỔ SUNG: State để quản lý sắp xếp ---
+  const [sortOrder, setSortOrder] = useState<SortOrder>('none');
 
-  // ---- CẬP NHẬT: Chuỗi logic lọc để thêm bộ lọc trạng thái ----
-  const filteredMacros = useMemo(() => {
-    let filtered = macros;
+  const filteredAndSortedMacros = useMemo(() => {
+    // Tạo một bản sao để không thay đổi mảng gốc khi sắp xếp
+    let filtered = [...macros];
 
-    // 1. Lọc theo danh mục
+    // 1. Lọc theo danh mục (Giữ nguyên logic của bạn)
     if (filterCategory !== 'all') {
       filtered = filtered.filter(macro => macro.category === filterCategory);
     }
 
-    // 2. Lọc theo trạng thái
+    // 2. Lọc theo trạng thái (Giữ nguyên logic của bạn)
     if (statusFilter !== 'all') {
       filtered = filtered.filter(macro => macro.status === statusFilter);
     }
     
-    // 3. Lọc theo từ khóa tìm kiếm
+    // 3. Lọc theo từ khóa tìm kiếm (Giữ nguyên logic của bạn)
     if (searchQuery) {
       filtered = filtered.filter(macro =>
         macro.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    return filtered;
-  }, [macros, filterCategory, statusFilter, searchQuery]);
+    // --- BỔ SUNG: Logic sắp xếp ---
+    if (sortOrder !== 'none') {
+      filtered.sort((a, b) => {
+        const countA = a.useCount || 0;
+        const countB = b.useCount || 0;
+        // Sắp xếp giảm dần cho 'desc', tăng dần cho 'asc'
+        return sortOrder === 'asc' ? countA - countB : countB - countA;
+      });
+    }
 
+    return filtered;
+    // --- CẬP NHẬT: Thêm `sortOrder` vào mảng dependency của useMemo ---
+  }, [macros, filterCategory, statusFilter, searchQuery, sortOrder]);
+
+  // --- BỔ SUNG: Hàm xử lý khi người dùng nhấp vào tiêu đề cột để sắp xếp ---
+  const handleSortByUseCount = () => {
+    if (sortOrder === 'none') {
+      setSortOrder('desc'); // Lần đầu nhấp, sắp xếp giảm dần (nhiều nhất lên trên)
+    } else if (sortOrder === 'desc') {
+      setSortOrder('asc'); // Lần hai, sắp xếp tăng dần
+    } else {
+      setSortOrder('none'); // Lần ba, trở về trạng thái ban đầu
+    }
+  };
 
   const handleOpenModal = (macro: Partial<Macro> | null = null) => {
     if (macro) {
@@ -124,7 +148,6 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
     <div className="manage-macros-container">
       <h2>Quản lý Macro</h2>
       <div className="controls">
-        {/* ---- CẬP NHẬT: Giao diện bộ lọc ---- */}
         <div className="filter-controls">
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
             <option value="all">Tất cả danh mục</option>
@@ -132,7 +155,6 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
               <option key={cat._id} value={cat.name}>{cat.name}</option>
             ))}
           </select>
-          {/* ---- BỔ SUNG: Bộ lọc trạng thái ---- */}
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as StatusFilter)}>
             <option value="all">Tất cả trạng thái</option>
             <option value="pending">Chờ xét duyệt</option>
@@ -162,13 +184,16 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
               <th>Tiêu đề</th>
               <th>Danh mục</th>
               <th>Trạng thái</th>
-              <th>Lượt sử dụng</th>
+              {/* --- CẬP NHẬT: Thêm sự kiện onClick và style cho tiêu đề cột --- */}
+              <th onClick={handleSortByUseCount} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                Lượt sử dụng {sortOrder === 'desc' ? '▼' : sortOrder === 'asc' ? '▲' : '⇅'}
+              </th>
               <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {/* ---- CẬP NHẬT: Dùng mảng đã lọc cuối cùng ---- */}
-            {filteredMacros.map(macro => (
+            {/* --- CẬP NHẬT: Sử dụng mảng đã được lọc và sắp xếp --- */}
+            {filteredAndSortedMacros.map(macro => (
               <tr key={macro._id}>
                 <td><HighlightText text={macro.title} highlight={searchQuery} /></td>
                 <td>{macro.category}</td>
@@ -177,10 +202,11 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
                     {macro.status === 'approved' ? 'Đã xét duyệt' : 'Chờ xét duyệt'}
                   </span>
                 </td>
+                {/* --- SỬA LỖI NHỎ: Đổi `usageCount` thành `useCount` --- */}
                 <td>{macro.useCount || 0}</td>
                 <td className="action-cell">
                   <button className="action-btn edit-btn" onClick={() => handleOpenModal(macro)}>Sửa</button>
-                  <button className="action-btn delete-btn" onClick={() => handleDelete(macro._id)}>Xóa</button>
+                  <button className="action-btn delete-btn" onClick={() => handleDelete(macro._id!)}>Xóa</button>
                 </td>
               </tr>
             ))}
