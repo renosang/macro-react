@@ -1,197 +1,237 @@
-/* src/pages/admin/ManageUsers.css */
+.manage-users {
+  padding: 2rem;
+  background-color: #f4f7f9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
 .manage-users h2 {
-    font-size: 1.8rem;
-    color: #2c3e50;
-    margin-bottom: 20px;
-    font-weight: 600;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+  font-weight: 600;
 }
 
+/* --- BẮT ĐẦU SỬA LỖI --- */
+
+/* Thiết lập Flexbox cho khu vực control */
 .controls {
-    display: flex;
-    justify-content: center; /* Căn giữa theo chiều ngang */
-    align-items: center;     /* Căn giữa theo chiều dọc */
-    gap: 15px;
-    margin-bottom: 25px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
+  display: flex;
+  justify-content: space-between; /* Đẩy các phần tử ra 2 bên */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  gap: 1.5rem; /* Khoảng cách giữa các phần tử */
+  margin-bottom: 2rem;
+  background-color: #ffffff;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-.controls .search-input {
-    width: 50%; /* Đặt chiều rộng cụ thể */
-    padding: 10px 15px;
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+/* Cho phép ô tìm kiếm chiếm phần lớn không gian */
+.search-input {
+  flex-grow: 1; 
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
-.controls .search-input:focus {
-    outline: none;
-    border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
+/* Nút "Thêm thành viên" */
 .add-new-btn {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: background-color 0.2s;
-    white-space: nowrap;
-    margin-bottom: 20px;
-
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(to right, #007bff, #0056b3);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .add-new-btn:hover {
-    background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
 }
 
-/* Bảng dữ liệu */
+/* --- KẾT THÚC SỬA LỖI --- */
+
+
+/* --- Table Styling --- */
 .users-table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  overflow: hidden; /* Giúp bo góc table */
 }
 
 .users-table th,
 .users-table td {
-    padding: 15px;
-    text-align: left;
-    border-bottom: 1px solid #e9ecef;
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.users-table thead th {
-    background-color: #f8f9fa;
-    color: #495057;
-    font-weight: 600;
+/* Giãn cách các cột */
+.users-table th:nth-child(1), .users-table td:nth-child(1) { width: 35%; } /* Tên đăng nhập */
+.users-table th:nth-child(2), .users-table td:nth-child(2) { width: 25%; } /* Họ và Tên */
+.users-table th:nth-child(3), .users-table td:nth-child(3) { width: 25%; } /* Email */
+.users-table th:nth-child(4), .users-table td:nth-child(4) { width: 15%; } /* Quyền */
+
+
+.users-table th {
+  background-color: #f9fafb;
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.users-table tbody tr:hover {
-    background-color: #f1f3f5;
+.users-table tr:last-child td {
+  border-bottom: none;
 }
 
-.action-header {
-  text-align: right;
+.role-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.role-badge.role-admin {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.role-badge.role-user {
+  background-color: #fef3c7;
+  color: #92400e;
 }
 
 .action-cell {
-    text-align: right;
-    width: 150px;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .action-btn {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: 500;
-    margin-left: 5px;
-    transition: all 0.2s;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: white;
+  transition: background-color 0.2s;
 }
 
-.edit-btn { background-color: #ffc107; color: #212529; }
-.edit-btn:hover { background-color: #e0a800; }
+.edit-btn { background-color: #3b82f6; }
+.delete-btn { background-color: #ef4444; }
+.save-btn { background-color: #10b981; }
+.cancel-btn { background-color: #6b7280; }
 
-.delete-btn { background-color: #dc3545; color: white; }
-.delete-btn:hover { background-color: #c82333; }
+.edit-btn:hover { background-color: #2563eb; }
+.delete-btn:hover { background-color: #dc2626; }
 
-.role-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: capitalize;
-}
 
-.role-admin {
-    background-color: #d1ecf1;
-    color: #0c5460;
-}
-
-.role-user {
-    background-color: #e2e3e5;
-    color: #383d41;
-}
-
-/* Modal styles */
+/* --- Modal Styling --- */
 .modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  right: 0;
+  bottom: 0;
+  background-color: rgba(17, 24, 39, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-content {
-  background-color: white;
-  padding: 25px 30px;
-  border-radius: 8px;
-  width: 70%;
-  max-width: 70%;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  background-color: #ffffff;
+  padding: 2rem 2.5rem;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px; 
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.4s ease-out;
 }
 
 .modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 25px;
   font-size: 1.5rem;
-  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  color: #111827;
+  text-align: center;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
+.form-group { margin-bottom: 1.5rem; }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #495057;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-size: 0.9rem;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 10px 15px;
-  border-radius: 6px;
-  border: 1px solid #ced4da;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .modal-actions {
-  margin-top: 30px;
+  margin-top: 2rem;
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-}
-.modal-actions .save-btn {
-  background-color: #28a745;
-  color: white;
-}
-.modal-actions .save-btn:hover {
-  background-color: #218838;
+  gap: 1rem;
 }
 
-.modal-actions .cancel-btn {
-  background-color: #6c757d;
-  color: white;
-}
-.modal-actions .cancel-btn:hover {
-  background-color: #5a6268;
+/* --- Tinh chỉnh độ rộng các cột cho bảng thành viên --- */
+/* (Tên đăng nhập) */
+.manage-users .users-table th:nth-child(1),
+.manage-users .users-table td:nth-child(1) {
+  width: 20%; 
 }
 
-.users-table th:nth-child(5),
-.users-table td:nth-child(5) {
-  text-align: center;
-  width: 180px; /* Tùy chỉnh chiều rộng nếu cần */
+/* (Họ và Tên) */
+.manage-users .users-table th:nth-child(2),
+.manage-users .users-table td:nth-child(2) {
+  width: 20%;
+}
+
+/* (Email) */
+.manage-users .users-table th:nth-child(3),
+.manage-users .users-table td:nth-child(3) {
+  width: 20%;
+}
+
+/* (Quyền) */
+.manage-users .users-table th:nth-child(4),
+.manage-users .users-table td:nth-child(4) {
+  width: 10%;
+}
+
+/* (Truy cập gần nhất) - Mở rộng */
+.manage-users .users-table th:nth-child(5),
+.manage-users .users-table td:nth-child(5) {
+  width: 20%; 
+}
+
+/* (Hành động) */
+.manage-users .users-table th:nth-child(6),
+.manage-users .users-table td:nth-child(6) {
+  width: 10%;
 }

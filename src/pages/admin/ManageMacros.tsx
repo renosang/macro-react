@@ -14,56 +14,54 @@ interface ManageMacrosProps {
 
 const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }] }];
 
+// ---- BỔ SUNG: Type cho bộ lọc trạng thái ----
+type StatusFilter = 'all' | 'pending' | 'approved';
+
 function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMacro, setCurrentMacro] = useState<Partial<Macro> | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // ---- BỔ SUNG: State cho bộ lọc trạng thái ----
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  const categoryFilteredMacros = useMemo(() => {
-    if (filterCategory === 'all') return macros;
-    return macros.filter(macro => macro.category === filterCategory);
-  }, [macros, filterCategory]);
+  // ---- CẬP NHẬT: Chuỗi logic lọc để thêm bộ lọc trạng thái ----
+  const filteredMacros = useMemo(() => {
+    let filtered = macros;
 
-  const finalFilteredMacros = useMemo(() => {
-    if (!searchQuery) return categoryFilteredMacros;
-    return categoryFilteredMacros.filter(macro =>
-      macro.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [categoryFilteredMacros, searchQuery]);
-
-  const handleAddNew = () => {
-    // --- SỬA LỖI TẠI ĐÂY ---
-    // Đặt trạng thái mặc định là 'approved' cho admin
-    setCurrentMacro({ 
-      title: '', 
-      category: categories[0]?.name || '', 
-      content: emptyContent, 
-      status: 'approved' 
-    });
-    // -------------------------
-    setIsModalOpen(true);
-  };
-
-  const handleEdit = (macro: Macro) => {
-    let safeContent = macro.content;
-    if (typeof safeContent === 'string') {
-      try {
-        safeContent = JSON.parse(safeContent);
-      } catch (e) {
-        safeContent = emptyContent;
-      }
-    } else if (Array.isArray(safeContent) && safeContent.length > 0 && typeof safeContent[0] === 'string') {
-       try {
-        safeContent = JSON.parse(safeContent[0]);
-      } catch (e) {
-        safeContent = emptyContent;
-      }
-    } else if (!Array.isArray(safeContent) || safeContent.length === 0) {
-      safeContent = emptyContent;
+    // 1. Lọc theo danh mục
+    if (filterCategory !== 'all') {
+      filtered = filtered.filter(macro => macro.category === filterCategory);
     }
 
-    setCurrentMacro({ ...macro, content: safeContent });
+    // 2. Lọc theo trạng thái
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(macro => macro.status === statusFilter);
+    }
+    
+    // 3. Lọc theo từ khóa tìm kiếm
+    if (searchQuery) {
+      filtered = filtered.filter(macro =>
+        macro.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [macros, filterCategory, statusFilter, searchQuery]);
+
+
+  const handleOpenModal = (macro: Partial<Macro> | null = null) => {
+    if (macro) {
+      setCurrentMacro({ ...macro });
+    } else {
+      setCurrentMacro({
+        title: '',
+        category: categories.length > 0 ? categories[0].name : '',
+        content: emptyContent,
+        status: 'pending',
+      });
+    }
     setIsModalOpen(true);
   };
 
@@ -72,90 +70,78 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
     setCurrentMacro(null);
   };
 
-  const handleDelete = async (id?: string) => {
-    if (!id) return;
-    if (window.confirm('Bạn có chắc chắn muốn xóa macro này không?')) {
-      try {
-        const response = await fetch(`/api/macros/${id}`, {
-          method: 'DELETE'
-        });
-        if (!response.ok) {
-          throw new Error('Xóa macro thất bại');
-        }
-        setMacros(macros.filter(m => m._id !== id));
-        toast.success('Đã xóa macro thành công');
-      } catch (error) {
-        toast.error((error as Error).message);
-      }
-    }
-  };
-
   const handleSave = async () => {
-    if (!currentMacro || !currentMacro.title?.trim()) {
-      toast.error("Tiêu đề không được để trống!");
+    if (!currentMacro || !currentMacro.title || !currentMacro.category) {
+      toast.error('Vui lòng điền đầy đủ tiêu đề và danh mục!');
       return;
     }
 
-    const isUpdating = !!currentMacro._id;
-    const url = isUpdating
-      ? `/api/macros/${currentMacro._id}`
-      : '/api/macros';
-
-    const method = isUpdating ? 'PUT' : 'POST';
+    const url = currentMacro._id ? `/api/macros/${currentMacro._id}` : '/api/macros';
+    const method = currentMacro._id ? 'PUT' : 'POST';
 
     try {
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(currentMacro),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || (isUpdating ? 'Cập nhật macro thất bại.' : 'Thêm macro thất bại.'));
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Có lỗi xảy ra.');
       }
-
-      const savedMacro: Macro = await response.json();
-
-      if (isUpdating) {
-        setMacros(prev => prev.map(m => m._id === savedMacro._id ? savedMacro : m));
-        toast.success("Cập nhật macro thành công!");
-      } else {
+      
+      const savedMacro = await res.json();
+      
+      if (method === 'POST') {
         setMacros(prev => [...prev, savedMacro]);
-        toast.success("Thêm macro thành công!");
+        toast.success('Tạo macro thành công!');
+      } else {
+        setMacros(prev => prev.map(m => m._id === savedMacro._id ? savedMacro : m));
+        toast.success('Cập nhật macro thành công!');
       }
-
       handleCloseModal();
-    } catch (error) {
-        if (error instanceof Error) {
-            toast.error(error.message);
-        } else {
-            toast.error("Đã xảy ra lỗi không xác định.");
-        }
+
+    } catch (error: any) {
+      toast.error(`Lỗi: ${error.message}`);
     }
   };
-  
-  const getStatusComponent = (status: 'approved' | 'pending' | undefined) => {
-    if (status === 'approved') {
-      return <span className="status-badge status-approved">Đã xét duyệt</span>;
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa macro này?')) {
+      try {
+        const res = await fetch(`/api/macros/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Xóa thất bại');
+        setMacros(prev => prev.filter(m => m._id !== id));
+        toast.success('Xóa macro thành công!');
+      } catch (error: any) {
+        toast.error(`Lỗi: ${error.message}`);
+      }
     }
-    return <span className="status-badge status-pending">Chờ xét duyệt</span>;
   };
 
   return (
     <div className="manage-macros-container">
-      <h2>Quản lý Macros</h2>
-       <div className="controls">
+      <h2>Quản lý Macro</h2>
+      <div className="controls">
+        {/* ---- CẬP NHẬT: Giao diện bộ lọc ---- */}
         <div className="filter-controls">
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
             <option value="all">Tất cả danh mục</option>
-            {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
+            {categories.map(cat => (
+              <option key={cat._id} value={cat.name}>{cat.name}</option>
+            ))}
+          </select>
+          {/* ---- BỔ SUNG: Bộ lọc trạng thái ---- */}
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as StatusFilter)}>
+            <option value="all">Tất cả trạng thái</option>
+            <option value="pending">Chờ xét duyệt</option>
+            <option value="approved">Đã xét duyệt</option>
           </select>
         </div>
+
         <div className="search-controls">
-           <input
+          <input
             type="text"
             placeholder="Tìm kiếm theo tiêu đề..."
             value={searchQuery}
@@ -163,27 +149,35 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
           />
         </div>
         <div className="add-controls">
-           <button className="add-btn" onClick={handleAddNew}>Thêm Macro mới</button>
+          <button className="add-new-btn" onClick={() => handleOpenModal()}>
+            Thêm Macro
+          </button>
         </div>
       </div>
+
       <div className="macros-table-wrapper">
         <table className="macros-table">
           <thead>
             <tr>
-              <th className="th-title">Tiêu đề</th>
-              <th className="th-category">Danh mục</th>
-              <th className="th-status">Trạng thái</th>
-              <th className="th-actions">Hành động</th>
+              <th>Tiêu đề</th>
+              <th>Danh mục</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {finalFilteredMacros.map(macro => (
+            {/* ---- CẬP NHẬT: Dùng mảng đã lọc cuối cùng ---- */}
+            {filteredMacros.map(macro => (
               <tr key={macro._id}>
-                <td className="td-title"><HighlightText text={macro.title} highlight={searchQuery} /></td>
-                <td className="td-category">{macro.category}</td>
-                <td className="td-status">{getStatusComponent(macro.status)}</td>
-                <td className="td-actions">
-                  <button className="action-btn edit-btn" onClick={() => handleEdit(macro)}>Sửa</button>
+                <td><HighlightText text={macro.title} highlight={searchQuery} /></td>
+                <td>{macro.category}</td>
+                <td>
+                  <span className={`status-badge status-${macro.status}`}>
+                    {macro.status === 'approved' ? 'Đã xét duyệt' : 'Chờ xét duyệt'}
+                  </span>
+                </td>
+                <td className="action-cell">
+                  <button className="action-btn edit-btn" onClick={() => handleOpenModal(macro)}>Sửa</button>
                   <button className="action-btn delete-btn" onClick={() => handleDelete(macro._id)}>Xóa</button>
                 </td>
               </tr>
@@ -193,7 +187,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       </div>
 
       {isModalOpen && currentMacro && (
-        <div className="modal-overlay">
+        <div className="modal-backdrop">
           <div className="modal-content">
             <h3>{currentMacro._id ? 'Chỉnh sửa Macro' : 'Thêm Macro mới'}</h3>
             <div className="form-group">
@@ -204,14 +198,14 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
                 onChange={e => setCurrentMacro({...currentMacro, title: e.target.value})}
               />
             </div>
-             <div className="form-group-row">
+            <div className="form-group-row">
               <div className="form-group">
                 <label>Danh mục</label>
                 <select
                   value={currentMacro.category}
                   onChange={e => setCurrentMacro({...currentMacro, category: e.target.value})}
                 >
-                  {categories.map(cat => <option key={cat._id}>{cat.name}</option>)}
+                  {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
                 </select>
               </div>
                <div className="form-group">

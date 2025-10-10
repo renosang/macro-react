@@ -100,7 +100,7 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
   return (
     <div className="manage-categories">
       <h2>Quản lý Danh mục</h2>
-      <button onClick={() => setIsAdding(!isAdding)} className="add-new-btn">
+      <button onClick={() => setIsAdding(!isAdding)} className="add-new-btn-category">
         {isAdding ? 'Hủy' : 'Thêm mới danh mục'}
       </button>
       

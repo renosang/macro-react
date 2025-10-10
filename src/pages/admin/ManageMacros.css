@@ -21,140 +21,169 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* --- Controls Section --- */
+/* --- BẮT ĐẦU SỬA LỖI BỐ CỤC --- */
 .controls {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 1.5rem; /* Khoảng cách giữa các khối control */
   margin-bottom: 2rem;
-  width: 100%;
-  box-sizing: border-box;
+  flex-wrap: wrap; /* Cho phép xuống dòng trên màn hình rất nhỏ */
 }
 
-.filter-controls { flex: 1; min-width: 200px; }
-.search-controls { flex: 2; text-align: center; padding: 0 1rem; }
-.add-controls { flex: 1; text-align: right; min-width: 200px; }
+.filter-controls {
+  display: flex;
+  gap: 1rem; /* Khoảng cách giữa 2 bộ lọc */
+}
 
-.filter-controls select,
-.search-controls input[type="text"] {
+/* Thiết lập độ rộng cho các bộ lọc */
+.filter-controls select {
+  width: 180px; 
+}
+
+.search-controls {
+  flex-grow: 1; /* Cho phép ô tìm kiếm tự động co giãn chiếm hết không gian còn lại */
+}
+
+.add-controls {
+  margin-left: auto; /* Đẩy nút "Thêm" về phía cuối bên phải */
+}
+/* --- KẾT THÚC SỬA LỖI BỐ CỤC --- */
+
+.controls select,
+.controls input {
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  font-size: 0.95rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 1rem;
+  background-color: #fff;
   width: 100%;
   box-sizing: border-box;
 }
 
-.filter-controls select:focus,
-.search-controls input[type="text"]:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-/* --- Buttons --- */
-.add-btn, .action-btn {
+.add-new-btn {
   padding: 0.75rem 1.5rem;
+  background: linear-gradient(to right, #007bff, #0056b3);
+  color: white;
   border: none;
   border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: capitalize;
+  font-weight: 500;
   white-space: nowrap;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.add-btn:hover, .action-btn:hover {
+.add-new-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
 }
 
-.add-btn {
-  background: linear-gradient(45deg, #3b82f6, #60a5fa);
-  color: white;
-  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.2);
-}
 
 /* --- Table Styling --- */
-.macros-table-wrapper { overflow-x: auto; }
-.macros-table { width: 100%; border-collapse: collapse; }
+.macros-table-wrapper {
+  overflow-x: auto;
+}
+
+.macros-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
 
 .macros-table th,
 .macros-table td {
-  padding: 1.2rem 1rem;
+  padding: 1rem 1.5rem;
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
   vertical-align: middle;
 }
 
 .macros-table th {
+  background-color: #f9fafb;
   font-size: 0.8rem;
+  color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #6b7280;
-  background-color: #f9fafb;
 }
 
-.macros-table td { color: #374151; font-weight: 500; }
-.macros-table tr:last-child td { border-bottom: none; }
-.macros-table tr:hover { background-color: #f7faff; }
+.macros-table td {
+  color: #374151;
+}
 
-/* --- Column Widths & Alignment --- */
-.th-title { width: 50%; }
-.th-category { width: 20%; }
-.th-status { width: 15%; }
-.th-actions { text-align: right; }
+.macros-table tr:last-child td {
+  border-bottom: none;
+}
 
-.td-actions { text-align: right; white-space: nowrap; }
-
-/* --- Status Badge --- */
 .status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
+  padding: 4px 12px;
+  border-radius: 12px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: capitalize;
+  white-space: nowrap;
 }
-.status-pending { background-color: #fef3c7; color: #b45309; }
-.status-approved { background-color: #d1fae5; color: #065f46; }
 
-/* --- Table action buttons --- */
-.action-btn { padding: 0.5rem 1rem; margin-left: 0.5rem; box-shadow: none; }
-.action-btn:hover { transform: scale(1.05); }
-.edit-btn { background-color: #f3f4f6; color: #374151; }
-.edit-btn:hover { background-color: #e5e7eb; }
-.delete-btn { background-color: #fee2e2; color: #ef4444; }
-.delete-btn:hover { background-color: #fecaca; color: #dc2626; }
+.status-badge.status-approved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
 
-/* --- Modal Form --- */
-.modal-overlay {
+.status-badge.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.action-cell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+
+.edit-btn { background-color: #3b82f6; color: white; }
+.delete-btn { background-color: #ef4444; color: white; }
+.save-btn { background-color: #10b981; color: white; }
+.cancel-btn { background-color: #6b7280; color: white; }
+
+.edit-btn:hover { background-color: #2563eb; }
+.delete-btn:hover { background-color: #dc2626; }
+.save-btn:hover { background-color: #059669; }
+.cancel-btn:hover { background-color: #4b5563; }
+
+
+/* --- Modal Styling --- */
+.modal-backdrop {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(17, 24, 39, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
   backdrop-filter: blur(4px);
-  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-content {
-  background-color: white;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  padding: 2rem 2.5rem;
+  border-radius: 16px;
   width: 90%;
-  max-width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+  max-width: 800px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   animation: slideIn 0.4s ease-out;
 }
 
@@ -194,7 +223,7 @@
 .form-group select:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
 .modal-actions {
@@ -202,15 +231,27 @@
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
 }
 
-.save-btn { background: linear-gradient(45deg, #10b981, #34d399); color: white; }
-.save-btn:hover { background-color: #059669; }
-.cancel-btn { background-color: #f3f4f6; color: #374151; }
-.cancel-btn:hover { background-color: #e5e7eb; }
+/* --- Tinh chỉnh độ rộng các cột CHỈ DÀNH CHO BẢNG MACRO --- */
+.manage-macros-container .macros-table th:nth-child(1),
+.manage-macros-container .macros-table td:nth-child(1) {
+  width: 35%; /* Cột "Tiêu đề" */
+  max-width: 400px;
+  overflow-wrap: break-word;
+}
 
-/* --- Animations --- */
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.manage-macros-container .macros-table th:nth-child(2),
+.manage-macros-container .macros-table td:nth-child(2) {
+  width: 25%; /* Cột "Danh mục" */
+}
+
+.manage-macros-container .macros-table th:nth-child(3),
+.manage-macros-container .macros-table td:nth-child(3) {
+  width: 20%; /* Cột "Trạng thái" */
+}
+
+.manage-macros-container .macros-table th:nth-child(4),
+.manage-macros-container .macros-table td:nth-child(4) {
+  width: 20%; /* Cột "Hành động" */
+}
