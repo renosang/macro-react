@@ -117,7 +117,7 @@ function ManageUsersPage() {
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
         />
-        <button className="add-new-btn" onClick={() => handleOpenModal()}>
+        <button className="add-new-btn-user" onClick={() => handleOpenModal()}>
           Thêm thành viên
         </button>
       </div>
