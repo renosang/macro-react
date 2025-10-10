@@ -1,84 +1,62 @@
-/* --- General Container Styling --- */
 .manage-macros-container {
-  padding: 2rem;
-  background-color: #f4f7f9;
-  min-height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .manage-macros-container h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-  font-weight: 600;
+  margin-top: 0;
 }
 
-/* --- Card Layout for Controls & Table --- */
-.controls, .macros-table-wrapper {
-  background-color: #ffffff;
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-/* --- BẮT ĐẦU SỬA LỖI BỐ CỤC --- */
+/* --- THANH ĐIỀU KHIỂN --- */
 .controls {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
   align-items: center;
-  gap: 1.5rem; /* Khoảng cách giữa các khối control */
-  margin-bottom: 2rem;
-  flex-wrap: wrap; /* Cho phép xuống dòng trên màn hình rất nhỏ */
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .filter-controls {
   display: flex;
-  gap: 1rem; /* Khoảng cách giữa 2 bộ lọc */
-}
-
-/* Thiết lập độ rộng cho các bộ lọc */
-.filter-controls select {
-  width: 180px; 
+  gap: 16px;
 }
 
 .search-controls {
-  flex-grow: 1; /* Cho phép ô tìm kiếm tự động co giãn chiếm hết không gian còn lại */
+  flex-grow: 1;
+  min-width: 250px;
 }
 
-.add-controls {
-  margin-left: auto; /* Đẩy nút "Thêm" về phía cuối bên phải */
-}
-/* --- KẾT THÚC SỬA LỖI BỐ CỤC --- */
-
-.controls select,
-.controls input {
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 1rem;
-  background-color: #fff;
-  width: 100%;
+.controls select, .controls input {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
   box-sizing: border-box;
 }
 
-.add-new-btn {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(to right, #007bff, #0056b3);
+.search-controls input {
+  width: 100%;
+}
+
+.add-new-btn-user {
+  padding: 10px 20px;
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: bold;
   white-space: nowrap;
-  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.add-new-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
+.add-new-btn-user:hover {
+  background-color: #0056b3;
 }
 
-
-/* --- Table Styling --- */
+/* --- PHẦN BẢNG DỮ LIỆU --- */
 .macros-table-wrapper {
   overflow-x: auto;
 }
@@ -86,152 +64,70 @@
 .macros-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
+  background-color: white;
 }
 
-.macros-table th,
-.macros-table td {
-  padding: 1rem 1.5rem;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+.macros-table th, .macros-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
   vertical-align: middle;
 }
 
 .macros-table th {
-  background-color: #f9fafb;
-  font-size: 0.8rem;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  background-color: #f8f9fa;
+  font-weight: 600;
 }
 
-.macros-table td {
-  color: #374151;
+/* --- BỔ SUNG CÁC CLASS CĂN CHỈNH MỚI --- */
+.cell-left {
+  text-align: left;
 }
 
-.macros-table tr:last-child td {
-  border-bottom: none;
+.cell-center {
+  text-align: center;
 }
+/* --- KẾT THÚC BỔ SUNG --- */
+
 
 .status-badge {
-  padding: 4px 12px;
+  padding: 5px 10px;
   border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-transform: capitalize;
-  white-space: nowrap;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block; /* Giúp badge hiển thị đúng trong ô căn giữa */
 }
 
-.status-badge.status-approved {
-  background-color: #d1fae5;
-  color: #065f46;
+.status-approved {
+  background-color: #28a745;
 }
 
-.status-badge.status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.action-cell {
-  display: flex;
-  gap: 0.5rem;
+.status-pending {
+  background-color: #ffc107;
+  color: #212529;
 }
 
 .action-btn {
   padding: 6px 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 0.85rem;
-  transition: background-color 0.2s;
-}
-
-.edit-btn { background-color: #3b82f6; color: white; }
-.delete-btn { background-color: #ef4444; color: white; }
-.save-btn { background-color: #10b981; color: white; }
-.cancel-btn { background-color: #6b7280; color: white; }
-
-.edit-btn:hover { background-color: #2563eb; }
-.delete-btn:hover { background-color: #dc2626; }
-.save-btn:hover { background-color: #059669; }
-.cancel-btn:hover { background-color: #4b5563; }
-
-
-/* --- Modal Styling --- */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(17, 24, 39, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-}
-
-@keyframes slideIn {
-  from { transform: translateY(-30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.modal-content {
-  background-color: #ffffff;
-  padding: 2rem 2.5rem;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 800px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  animation: slideIn 0.4s ease-out;
-}
-
-.modal-content h3 {
-  font-size: 1.5rem;
-  margin-top: 0;
-  margin-bottom: 2rem;
-  color: #111827;
-  text-align: center;
-}
-
-.form-group { margin-bottom: 1.5rem; }
-.form-group-row { display: flex; gap: 1.5rem; }
-.form-group-row .form-group { flex: 1; }
-
-.form-group label {
-  display: block;
+  margin: 0 4px;
   font-weight: 500;
-  margin-bottom: 0.5rem;
-  color: #374151;
-  font-size: 0.9rem;
 }
 
-.form-group input[type="text"],
-.form-group select {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  box-sizing: border-box;
-  background-color: #fff;
+.edit-btn {
+  background-color: #ffc107;
+  color: #212529;
+}
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
 }
 
-.form-group input[type="text"]:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-}
-
-.modal-actions {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-}
+/* --- PHẦN CSS CHO POPUP (MODAL) --- */
 
 /* --- Tinh chỉnh độ rộng các cột CHỈ DÀNH CHO BẢNG MACRO --- */
 .manage-macros-container .macros-table th:nth-child(1),
@@ -244,14 +140,17 @@
 .manage-macros-container .macros-table th:nth-child(2),
 .manage-macros-container .macros-table td:nth-child(2) {
   width: 25%; /* Cột "Danh mục" */
+  text-align: center;
 }
 
 .manage-macros-container .macros-table th:nth-child(3),
 .manage-macros-container .macros-table td:nth-child(3) {
   width: 20%; /* Cột "Trạng thái" */
+  text-align: center;
 }
 
 .manage-macros-container .macros-table th:nth-child(4),
 .manage-macros-container .macros-table td:nth-child(4) {
   width: 20%; /* Cột "Hành động" */
+  text-align: center;
 }
