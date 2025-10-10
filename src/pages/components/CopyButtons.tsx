@@ -6,31 +6,45 @@ import './CopyButtons.css';
 
 interface CopyButtonsProps {
   content: Descendant[];
+  macroId: string; // <-- BỔ SUNG: Thêm macroId vào props
 }
 
-const CopyButtons = ({ content }: CopyButtonsProps) => {
+const CopyButtons = ({ content, macroId }: CopyButtonsProps) => { // <-- BỔ SUNG: Nhận macroId
   const handleCopy = (mode: 'default' | 'anh' | 'chi') => {
     let textToCopy = serializeSlate(content);
 
     // SỬA LỖI: Xử lý riêng biệt cho trường hợp viết hoa và viết thường
-if (mode === 'anh') {
-  textToCopy = textToCopy
-    .replace(/Anh\/Chị/g, 'Anh')
-    .replace(/anh\/chị/g, 'anh')
-    .replace(/Anh\/chị/g, 'Anh') 
-    .replace(/ANh\/Chị/g, 'Anh')
-    .replace(/ANH\/CHỊ/g, 'Anh');
-} else if (mode === 'chi') {
-  textToCopy = textToCopy
-    .replace(/Anh\/Chị/g, 'Chị') 
-    .replace(/anh\/chị/g, 'chị')
-    .replace(/Anh\/chị/g, 'Chị')
-    .replace(/ANh\/Chị/g, 'Chị')
-    .replace(/ANH\/CHỊ/g, 'Chị');
-}
+    if (mode === 'anh') {
+      textToCopy = textToCopy
+        .replace(/Anh\/Chị/g, 'Anh')
+        .replace(/anh\/chị/g, 'anh')
+        .replace(/Anh\/chị/g, 'Anh')
+        .replace(/ANh\/Chị/g, 'Anh')
+        .replace(/ANH\/CHỊ/g, 'Anh');
+    } else if (mode === 'chi') {
+      textToCopy = textToCopy
+        .replace(/Anh\/Chị/g, 'Chị')
+        .replace(/anh\/chị/g, 'chị')
+        .replace(/Anh\/chị/g, 'Chị')
+        .replace(/ANh\/Chị/g, 'Chị')
+        .replace(/ANH\/CHỊ/g, 'Chị');
+    }
 
     navigator.clipboard.writeText(textToCopy).then(() => {
       toast.success('Đã sao chép vào bộ nhớ tạm!');
+
+      // --- BỔ SUNG LOGIC GỌI API TẠI ĐÂY ---
+      if (macroId) {
+        try {
+          fetch(`/api/macros/${macroId}/increment-usage`, {
+            method: 'PUT',
+          });
+        } catch (error) {
+          console.error('Lỗi khi cập nhật số lượt sử dụng:', error);
+        }
+      }
+      // ---------------------------------
+
     }).catch(err => {
       toast.error('Sao chép thất bại!');
       console.error('Could not copy text: ', err);

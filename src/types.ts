@@ -11,6 +11,7 @@ export interface Macro {
   category: string;
   content: Descendant[];
   status: 'pending' | 'approved';
+  useCount: number; // <-- Thuộc tính đã được thêm vào
   submittedBy?: string; // <-- Thuộc tính đã được thêm vào
 }
 

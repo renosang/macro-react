@@ -162,6 +162,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
               <th>Tiêu đề</th>
               <th>Danh mục</th>
               <th>Trạng thái</th>
+              <th>Lượt sử dụng</th>
               <th>Hành động</th>
             </tr>
           </thead>
@@ -176,6 +177,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
                     {macro.status === 'approved' ? 'Đã xét duyệt' : 'Chờ xét duyệt'}
                   </span>
                 </td>
+                <td>{macro.useCount || 0}</td>
                 <td className="action-cell">
                   <button className="action-btn edit-btn" onClick={() => handleOpenModal(macro)}>Sửa</button>
                   <button className="action-btn delete-btn" onClick={() => handleDelete(macro._id)}>Xóa</button>

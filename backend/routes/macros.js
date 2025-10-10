@@ -70,4 +70,21 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// TĂNG SỐ LƯỢT SỬ DỤNG MACRO
+router.put('/:id/increment-usage', async (req, res) => {
+  try {
+    const updatedMacro = await Macro.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { useCount: 1 } }, // Tăng useCount lên 1
+      { new: true }
+    );
+    if (!updatedMacro) {
+      return res.status(404).send('Không tìm thấy macro.');
+    }
+    res.json(updatedMacro);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = router;

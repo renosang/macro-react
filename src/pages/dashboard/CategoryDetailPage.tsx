@@ -57,7 +57,7 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
                   </h3>
                   <div className="macro-content-body">
                     <ContentViewer content={macro.content} highlight={searchQuery} />
-                    <CopyButtons content={macro.content} />
+                    <CopyButtons content={macro.content} macroId={macro._id} />
                   </div>
                 </div>
               );
