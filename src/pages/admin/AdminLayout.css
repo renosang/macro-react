@@ -2,20 +2,31 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background-color: #f4f7f6; 
 }
 
 .admin-container {
   display: flex;
-  flex-grow: 1; /* Giúp container chiếm hết chiều cao còn lại */
-  overflow: hidden; /* Tránh bị scroll ngoài ý muốn */
+  flex-grow: 1;
+  overflow: hidden;
 }
 
 .admin-sidebar {
-  width: 250px;
-  background-color: #f8f9fa;
+  width: 80px; 
+  background-color: #f8f9fa; /* Màu xám rất nhạt */
   border-right: 1px solid #dee2e6;
-  padding: 20px;
+  padding: 20px 0;
   flex-shrink: 0;
+  overflow: hidden;
+  transition: width 0.3s ease-in-out; 
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+/* Khi di chuột vào sidebar */
+.admin-sidebar:hover {
+  /* Chiều rộng khi mở rộng */
+  width: 250px; 
 }
 
 .admin-sidebar nav {
@@ -24,26 +35,53 @@
 }
 
 .admin-sidebar nav a {
-  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  padding: 0 25px;
   text-decoration: none;
-  color: #333;
-  border-radius: 5px;
-  margin-bottom: 5px;
+  color: #495057; /* Màu chữ đậm hơn một chút */
+  margin-bottom: 8px;
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .admin-sidebar nav a:hover {
-  background-color: #e9ecef;
+  background-color: #e9ecef; /* Màu hover xám đậm hơn */
+  color: #212529;
 }
 
-/* Style cho NavLink khi đang active */
 .admin-sidebar nav a.active {
   background-color: #007bff;
   color: white;
+  border-left: 4px solid #4dabf7;
+  padding-left: 21px;
 }
+
+/* CSS cho Icon */
+.nav-icon {
+  font-size: 1.3rem; /* Tăng kích thước icon một chút */
+  min-width: 30px;
+  flex-shrink: 0;
+}
+
+/* CSS cho Text */
+.nav-text {
+  margin-left: 20px;
+  font-weight: 500;
+  opacity: 0; 
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Khi sidebar được hover, hiện text ra */
+.admin-sidebar:hover .nav-text {
+  opacity: 1;
+  transition-delay: 0.1s;
+}
+/* --- KẾT THÚC CẬP NHẬT SIDEBAR --- */
 
 .admin-content {
   flex-grow: 1;
-  padding: 20px;
-  overflow-y: auto; /* Cho phép scroll nếu nội dung dài */
-  background-color: #fff;
+  padding: 25px;
+  overflow-y: auto;
 }
