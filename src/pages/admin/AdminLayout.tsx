@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '../../stores/useAuthStore'; // Import store của bạn
 import './AdminLayout.css';
 
@@ -37,9 +37,9 @@ function AdminLayout() {
         <aside className="admin-sidebar">
           {/* Phần trên của sidebar */}
           <div className="sidebar-top">
-            <div className="sidebar-logo">
+            <Link to="/dashboard" className="sidebar-logo">
               <img src="/logo.png" alt="Logo" />
-            </div>
+            </Link>
             <nav>
               <NavLink to="/admin/categories" title="Quản lý Danh mục">
                 <IconCategories className="nav-icon" />
