@@ -2,30 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale, // Thêm TimeScale cho trục thời gian
-  ChartOptions
+  CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, TimeScale, ChartOptions
 } from 'chart.js';
-import 'chartjs-adapter-date-fns'; // Import adapter bạn vừa cài đặt
+import 'chartjs-adapter-date-fns';
 import './AnalyticsDashboard.css';
 
+// --- BỔ SUNG IMPORTS ---
+import { FaMagic } from 'react-icons/fa';
+import ReactMarkdown from 'react-markdown';
+
+// --- GIẢI PHÁP: Ép kiểu icon ---
+const IconMagic = FaMagic as React.ElementType;
+
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale // Đăng ký TimeScale
+  CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, TimeScale
 );
 
 interface UserStats {
@@ -40,6 +30,8 @@ const AnalyticsDashboard = () => {
   const [usageOverTime, setUsageOverTime] = useState<any[]>([]);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [timePeriod, setTimePeriod] = useState('month');
+  const [analysis, setAnalysis] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     fetch(`/api/analytics/top-macros?period=${timePeriod}`).then(res => res.json()).then(setTopMacros);
@@ -49,7 +41,37 @@ const AnalyticsDashboard = () => {
     fetch('/api/analytics/user-stats').then(res => res.json()).then(setUserStats);
   }, [timePeriod]);
 
-  // Cấu hình cho biểu đồ đường (Line Chart)
+  const handleAiAnalysis = async () => {
+    setIsAnalyzing(true);
+    setAnalysis('');
+    try {
+      const res = await fetch('/api/ai/analyze-dashboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topMacros,
+          leastUsedMacros,
+          categoryUsage,
+          usageOverTime,
+          userStats
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Yêu cầu phân tích thất bại');
+      }
+
+      const data = await res.json();
+      setAnalysis(data.analysis);
+
+    } catch (error) {
+      console.error(error);
+      setAnalysis('Đã xảy ra lỗi khi cố gắng phân tích dữ liệu. Vui lòng thử lại.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const usageOverTimeChartData = {
     labels: usageOverTime.map(u => u.date),
     datasets: [{
@@ -68,32 +90,17 @@ const AnalyticsDashboard = () => {
     scales: {
       x: {
         type: 'time',
-        time: {
-          unit: 'day',
-          tooltipFormat: 'dd/MM/yyyy',
-          displayFormats: {
-            day: 'dd/MM'
-          }
-        },
-        title: {
-          display: true,
-          text: 'Ngày (30 ngày gần nhất)'
-        }
+        time: { unit: 'day', tooltipFormat: 'dd/MM/yyyy', displayFormats: { day: 'dd/MM' } },
+        title: { display: true, text: 'Ngày (30 ngày gần nhất)' }
       },
       y: {
         beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Số lượt sử dụng'
-        },
-        ticks: {
-          precision: 0 
-        }
+        title: { display: true, text: 'Số lượt sử dụng' },
+        ticks: { precision: 0 }
       }
     }
   };
 
-  // Cấu hình cho biểu đồ cột (Bar Chart)
   const categoryChartData = {
     labels: categoryUsage.map(c => c.name),
     datasets: [{
@@ -108,19 +115,19 @@ const AnalyticsDashboard = () => {
   const categoryChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          precision: 0
-        }
-      }
-    }
+    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
   };
 
   return (
     <div className="analytics-dashboard">
-      <h1>Bảng điều khiển phân tích</h1>
+      <div className="dashboard-header">
+        <h1>Bảng điều khiển phân tích</h1>
+        <button onClick={handleAiAnalysis} disabled={isAnalyzing} className="ai-analyze-btn">
+          {/* --- SỬA LỖI: Sử dụng icon đã được ép kiểu --- */}
+          <IconMagic style={{ marginRight: '8px' }} />
+          {isAnalyzing ? 'Đang phân tích...' : 'Phân tích với Gemini'}
+        </button>
+      </div>
       
       <div className="analytics-grid">
         <div className="stat-card card">
@@ -175,6 +182,21 @@ const AnalyticsDashboard = () => {
             <Bar data={categoryChartData} options={categoryChartOptions} />
           </div>
         </div>
+        
+        {(isAnalyzing || analysis) && (
+          <div className="card full-width insights-container">
+            <h2>
+              PHÂN TÍCH & ĐỀ XUẤT TỪ AI
+            </h2>
+            {isAnalyzing ? (
+              <div className="loading-spinner"></div>
+            ) : (
+              <div className="insights-content">
+                <ReactMarkdown>{analysis}</ReactMarkdown>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
