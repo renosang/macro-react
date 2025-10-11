@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Macro = require('../models/Macro');
 const MacroUsage = require('../models/MacroUsage');
+const User = require('../models/User');
 
 // Helper function to get date range
 const getDateRange = (period) => {
@@ -79,28 +80,70 @@ router.get('/category-usage', async (req, res) => {
   }
 });
 
-// 4. BIỂU ĐỒ SỐ LƯỢT SỬ DỤNG THEO THỜI GIAN (30 ngày gần nhất)
+// BIỂU ĐỒ SỐ LƯỢT SỬ DỤNG THEO THỜI GIAN (30 ngày gần nhất)
 router.get('/usage-over-time', async (req, res) => {
-    try {
-        const { start, end } = getDateRange('month');
+  try {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // Kết thúc vào cuối ngày hôm nay
 
-        const usage = await MacroUsage.aggregate([
-            { $match: { timestamp: { $gte: start, $lte: end } } },
-            {
-                $group: {
-                    _id: {
-                        $dateToString: { format: '%Y-%m-%d', date: '$timestamp' }
-                    },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { _id: 1 } },
-            { $project: { date: '$_id', count: 1, _id: 0 } }
-        ]);
-        res.json(usage);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 29); // Bắt đầu từ 29 ngày trước
+    startDate.setHours(0, 0, 0, 0);
+
+    const usageData = await MacroUsage.aggregate([
+      { $match: { timestamp: { $gte: startDate, $lte: today } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Tạo một map để dễ dàng tra cứu dữ liệu đã có
+    const usageMap = new Map(usageData.map(item => [item._id, item.count]));
+
+    // Tạo mảng kết quả với đủ 30 ngày
+    const result = [];
+    for (let i = 0; i < 30; i++) {
+      const day = new Date(startDate);
+      day.setDate(startDate.getDate() + i);
+      
+      const dateString = day.toISOString().split('T')[0];
+      
+      result.push({
+        date: dateString,
+        count: usageMap.get(dateString) || 0 // Lấy count hoặc trả về 0 nếu không có
+      });
     }
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// --- BỔ SUNG ROUTE MỚI DƯỚI ĐÂY ---
+// THỐNG KÊ NGƯỜI DÙNG MỚI TRONG THÁNG
+router.get('/user-stats', async (req, res) => {
+  try {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const endOfMonth = new Date(startOfMonth);
+    endOfMonth.setMonth(startOfMonth.getMonth() + 1);
+
+    const newUsersCount = await User.countDocuments({
+      createdAt: { $gte: startOfMonth, $lt: endOfMonth }
+    });
+
+    res.json({ newUsers: newUsersCount, deletedUsers: 0 });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 

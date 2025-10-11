@@ -1,32 +1,50 @@
 .analytics-dashboard {
-  padding: 20px;
+  padding: 25px;
 }
 
 .analytics-dashboard h1 {
   margin-top: 0;
   color: #333;
+  margin-bottom: 25px;
 }
 
+/* --- BỐ CỤC LƯỚI 3 CỘT --- */
 .analytics-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
 }
 
 .card {
   background: #fff;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex; /* Thêm flexbox để dễ căn chỉnh */
+  flex-direction: column;
 }
 
+/* --- SỬA LỖI BIỂU ĐỒ VỪA VẶN --- */
 .chart-container {
-  height: 400px;
+  height: 450px; /* Chiều cao cố định cho các card chứa biểu đồ */
   position: relative;
 }
 
-.chart-container.wide, .list-container.wide {
-  grid-column: span 2;
+/* Thẻ div bọc canvas sẽ chiếm hết không gian còn lại */
+.chart-container > div {
+    position: relative;
+    height: 100% !important;
+    width: 100% !important;
+}
+
+
+/* Quy tắc cho các card chiếm chiều rộng */
+.card.full-width {
+  grid-column: 1 / -1; /* Luôn chiếm toàn bộ chiều rộng */
+}
+
+.list-container {
+  min-height: 350px; /* Chiều cao tối thiểu để các card danh sách bằng nhau */
 }
 
 .list-container h3 {
@@ -42,11 +60,14 @@
   padding: 5px 8px;
   border-radius: 4px;
   border: 1px solid #ccc;
+  font-size: 0.85rem;
 }
 
 .list-container ol {
   padding-left: 20px;
   margin: 0;
+  flex-grow: 1; /* Cho phép danh sách co giãn */
+  overflow-y: auto;
 }
 
 .list-container li {
@@ -55,6 +76,7 @@
   align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
 }
 
 .list-container li:last-child {
@@ -64,8 +86,69 @@
 .count-badge {
   background-color: #007bff;
   color: white;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.8rem;
   font-weight: bold;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.count-badge.secondary {
+  background-color: #6c757d;
+}
+
+/* --- CSS CHO CARD THỐNG KÊ MỚI --- */
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  min-height: 350px;
+}
+
+.stat-card h3 {
+  width: 100%;
+  margin-top: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.stat-item {
+  margin: auto 0;
+}
+
+.stat-number {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #28a745;
+  line-height: 1;
+}
+
+.stat-label {
+  display: block;
+  font-size: 1rem;
+  color: #6c757d;
+  margin-top: 5px;
+}
+
+.stat-card small {
+  color: #999;
+  font-style: italic;
+  font-size: 0.75rem;
+  margin-top: 10px;
+}
+
+/* Responsive cho màn hình nhỏ hơn */
+@media (max-width: 1200px) {
+  .analytics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
 }
