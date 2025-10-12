@@ -198,7 +198,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
 
       {isModalOpen && currentMacro && (
         <div className="modal-backdrop">
-          <div className="modal-content">
+          <div className="macro-modal-content">
             <h3>{currentMacro._id ? 'Chỉnh sửa Macro' : 'Thêm Macro mới'}</h3>
             
             {/* --- BỔ SUNG thẻ div .modal-body bao bọc các form-group --- */}
@@ -241,7 +241,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
               </div>
             </div>
             
-            <div className="modal-actions">
+            <div className="macro-modal-actions">
               <button className="action-btn cancel-btn" onClick={handleCloseModal}>Hủy</button>
               <button className="action-btn save-btn" onClick={handleSave}>Lưu</button>
             </div>

@@ -4,10 +4,13 @@
 }
 
 .editable-area {
-  min-height: 350px !important; /* Tăng chiều cao một chút */
-  padding: 10px 15px;
-  outline: none;
-  line-height: 1.6;
+  min-height: 200px !important; /* Chiều cao tối thiểu */
+  max-height: 360px; /* Chiều cao tối đa trước khi cuộn */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  overflow-y: auto; /* Thêm thanh cuộn dọc cho riêng vùng soạn thảo */
+  resize: vertical; /* Cho phép người dùng tự kéo dãn chiều cao */
 }
 
 /* Style cho các list item */
