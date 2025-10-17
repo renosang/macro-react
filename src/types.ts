@@ -39,6 +39,6 @@ export interface User {
   email: string;
   role: 'user' | 'admin';
   password?: string;
-  lastLogin?: string | null;
+  lastActivity?: string;
 }
 

@@ -2,9 +2,10 @@
 const express = require('express');
 const User = require('../models/User');
 const router = express.Router();
+const { protect, admin } = require('../middleware/authMiddleware');
 
 // Lấy tất cả người dùng
-router.get('/', async (req, res) => {
+router.get('/', protect, admin, async (req, res) => { // Chỉ admin mới có quyền xem danh sách users
   try {
     const users = await User.find().select('-password');
     res.json(users);
@@ -31,8 +32,7 @@ router.post('/', async (req, res) => {
 });
 
 // Cập nhật thông tin người dùng
-router.put('/:id', async (req, res) => {
-  // ---- CẬP NHẬT ----
+router.put('/:id', async (req, res) => {  
   try {
     // Lấy các trường cần cập nhật từ body
     const { role, fullName, email } = req.body;
@@ -41,7 +41,6 @@ router.put('/:id', async (req, res) => {
     const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true }).select('-password');
     if (!user) return res.status(404).send('Không tìm thấy người dùng.');
     res.json(user);
-  // ---- KẾT THÚC CẬP NHẬT ----
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

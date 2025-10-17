@@ -13,9 +13,7 @@ const userSchema = new mongoose.Schema({
     match: [/.+\@.+\..+/, 'Vui lòng nhập một địa chỉ email hợp lệ']
   },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
-  // ---- BỔ SUNG ----
-  lastLogin: { type: Date, default: null }
-  // ---- KẾT THÚC BỔ SUNG ----
+  lastActivity: { type: Date, default: null }
 }, { timestamps: true }); // Thêm timestamps để có createdAt và updatedAt
 
 // Băm mật khẩu trước khi lưu

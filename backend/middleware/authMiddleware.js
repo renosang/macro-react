@@ -25,6 +25,7 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ message: 'Không tìm thấy người dùng, token không hợp lệ' });
       }
 
+      User.updateOne({ _id: req.user._id }, { lastActivity: new Date() }).exec();
       next(); // Chuyển sang middleware hoặc route handler tiếp theo
     } catch (error) {
       console.error(error);
