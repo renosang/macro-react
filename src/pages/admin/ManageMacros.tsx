@@ -5,6 +5,7 @@ import RichTextEditor from '../components/RichTextEditor';
 import HighlightText from '../components/HighlightText';
 import { Category, Macro } from '../../types';
 import { Descendant } from 'slate';
+import useAuthStore from '../../stores/useAuthStore';
 
 interface ManageMacrosProps {
   categories: Category[];
@@ -17,13 +18,14 @@ const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }
 type StatusFilter = 'all' | 'pending' | 'approved';
 type SortOrder = 'asc' | 'desc' | 'none';
 
-function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
+function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMacro, setCurrentMacro] = useState<Partial<Macro> | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
+  const { token } = useAuthStore();
 
   const filteredAndSortedMacros = useMemo(() => {
     let filtered = [...macros];
@@ -85,13 +87,22 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       return;
     }
 
+    if (!token) {
+      toast.error('Bạn cần đăng nhập để thực hiện hành động này!');
+      return;
+    }
+
     const url = currentMacro._id ? `/api/macros/${currentMacro._id}` : '/api/macros';
     const method = currentMacro._id ? 'PUT' : 'POST';
 
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // --- SỬA LỖI CHÍNH TẢ TẠI ĐÂY ---
+          'Authorization': `Bearer ${token}` // Sửa 'Authorisation' thành 'Authorization'
+        },
         body: JSON.stringify(currentMacro),
       });
 
@@ -103,7 +114,7 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
       const savedMacro = await res.json();
       
       if (method === 'POST') {
-        setMacros(prev => [...prev, savedMacro]);
+        setMacros(prev => [savedMacro, ...prev]);
         toast.success('Tạo macro thành công!');
       } else {
         setMacros(prev => prev.map(m => m._id === savedMacro._id ? savedMacro : m));
@@ -118,8 +129,18 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa macro này?')) {
+      if (!token) {
+        toast.error('Bạn cần đăng nhập để thực hiện hành động này!');
+        return;
+      }
       try {
-        const res = await fetch(`/api/macros/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/macros/${id}`, { 
+          method: 'DELETE',
+          headers: {
+            // --- SỬA LỖI CHÍNH TẢ TẠI ĐÂY ---
+            'Authorization': `Bearer ${token}` // Sửa 'Authorisation' thành 'Authorization'
+          }
+        });
         if (!res.ok) throw new Error('Xóa thất bại');
         setMacros(prev => prev.filter(m => m._id !== id));
         toast.success('Xóa macro thành công!');
@@ -168,6 +189,9 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
             <tr>
               <th>Tiêu đề</th>
               <th>Danh mục</th>
+              <th>Người tạo</th>
+              <th>Người sửa đổi</th>
+              <th>Ngày sửa đổi</th>
               <th>Trạng thái</th>
               <th onClick={handleSortByUseCount} style={{ cursor: 'pointer', userSelect: 'none' }}>
                 Lượt sử dụng {sortOrder === 'desc' ? '▼' : sortOrder === 'asc' ? '▲' : '⇅'}
@@ -180,12 +204,23 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
               <tr key={macro._id}>
                 <td className="cell-left"><HighlightText text={macro.title} highlight={searchQuery} /></td>
                 <td className="cell-center">{macro.category}</td>
-                <td>
+                <td className="cell-center">{macro.createdBy?.fullName ?? 'Không xác định'}</td>
+                <td className="cell-center">
+                  {macro.lastModifiedBy?.fullName ?? macro.createdBy?.fullName ?? 'Không xác định'}
+                </td>
+                <td className="cell-center">
+                  {new Date(macro.updatedAt).toLocaleString('vi-VN', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                  })}
+                </td>
+
+                <td className="cell-center">
                   <span className={`status-badge status-${macro.status}`}>
-                    {macro.status === 'approved' ? 'Đã xét duyệt' : 'Chờ xét duyệt'}
+                    {macro.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
                   </span>
                 </td>
-                <td>{macro.useCount || 0}</td>
+                <td className="cell-center">{macro.useCount || 0}</td>
                 <td className="action-cell">
                   <button className="action-btn edit-btn" onClick={() => handleOpenModal(macro)}>Sửa</button>
                   <button className="action-btn delete-btn" onClick={() => handleDelete(macro._id!)}>Xóa</button>
@@ -201,7 +236,6 @@ function ManageMacros({ categories, macros, setMacros }: ManageMacrosProps) {
           <div className="macro-modal-content">
             <h3>{currentMacro._id ? 'Chỉnh sửa Macro' : 'Thêm Macro mới'}</h3>
             
-            {/* --- BỔ SUNG thẻ div .modal-body bao bọc các form-group --- */}
             <div className="modal-body">
               <div className="form-group">
                 <label>Tiêu đề</label>

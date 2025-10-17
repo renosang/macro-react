@@ -65,6 +65,7 @@
   width: 100%;
   border-collapse: collapse;
   background-color: white;
+  table-layout: fixed; 
 }
 
 .macros-table th, .macros-table td {
@@ -126,27 +127,26 @@
   background-color: #dc3545;
   color: white;
 }
+.macros-table th:nth-of-type(1) { width: 25%; } /* Tiêu đề */
+.macros-table th:nth-of-type(2) { width: 15%; } /* Danh mục */
+.macros-table th:nth-of-type(3) { width: 12%; } /* Người tạo */
+.macros-table th:nth-of-type(4) { width: 12%; } /* Người sửa đổi */
+.macros-table th:nth-of-type(5) { width: 14%; } /* Ngày sửa đổi */
+.macros-table th:nth-of-type(6) { width: 10%; } /* Trạng thái */
+.macros-table th:nth-of-type(7) { width: 12%; } /* Lượt sử dụng */
+.macros-table th:nth-of-type(8) { width: 12%; } /* Hành động */
 
-/* --- PHẦN CSS CHO POPUP (MODAL) --- */
-
-/* --- Tinh chỉnh độ rộng các cột CHỈ DÀNH CHO BẢNG MACRO --- */
-.manage-macros-container .macros-table th:nth-child(1),
-.manage-macros-container .macros-table th:nth-child(2),
-.manage-macros-container .macros-table td:nth-child(2) {
-  width: 25%; /* Cột "Danh mục" */
-  text-align: center;
+/* Thêm hiệu ứng cho tiêu đề dài */
+.macros-table td:first-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
 }
-
-.manage-macros-container .macros-table th:nth-child(3),
-.manage-macros-container .macros-table td:nth-child(3) {
-  width: 20%; /* Cột "Trạng thái" */
-  text-align: center;
-}
-
-.manage-macros-container .macros-table th:nth-child(4),
-.manage-macros-container .macros-table td:nth-child(4) {
-  width: 20%; /* Cột "Hành động" */
-  text-align: center;
+/* Hiện đầy đủ khi hover */
+.macros-table td:first-child:hover {
+  white-space: normal;
+  overflow: visible;
 }
 
 .macro-modal-content {
