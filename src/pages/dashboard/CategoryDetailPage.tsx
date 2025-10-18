@@ -79,6 +79,24 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
     });
   };
 
+  // --- BỔ SUNG: HÀM TỰ ĐỘNG SAO CHÉP KHI BÔI ĐEN ---
+  const handleCopyOnSelect = () => {
+    const selection = window.getSelection();
+    // Chỉ sao chép nếu có nội dung được chọn (lớn hơn 1 ký tự)
+    if (selection && selection.toString().trim().length > 1) {
+        const selectedText = selection.toString();
+        navigator.clipboard.writeText(selectedText)
+            .then(() => {
+                toast.success('Đã sao chép vào bộ nhớ tạm!');
+            })
+            .catch(err => {
+                // Có thể bỏ qua toast lỗi để không làm phiền người dùng
+                console.error('Lỗi sao chép tự động:', err);
+            });
+    }
+  };
+  // --- KẾT THÚC BỔ SUNG ---
+
   return (
     <div className="category-detail-container">
       <main className="page-container">
@@ -107,18 +125,20 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
                   <h3>
                     <HighlightText text={macro.title} highlight={searchQuery} />
                   </h3>
-                  <div className="macro-content-body">
+                  
+                  {/* --- THÊM SỰ KIỆN onMouseUp VÀO ĐÂY --- */}
+                  <div className="macro-content-body" onMouseUp={handleCopyOnSelect}>
                     <ContentViewer content={macro.content} highlight={searchQuery} />
                   </div>
                   
                   {isTranslated && (
-                    <div className="translated-content">
+                    // --- VÀ CẢ VÀO KHU VỰC BẢN DỊCH ---
+                    <div className="translated-content" onMouseUp={handleCopyOnSelect}>
                       <h4>Bản dịch (Tiếng Anh)</h4>
                       <ContentViewer content={translations[macro._id!].content} />
                     </div>
                   )}
 
-                  {/* Truyền tất cả props cần thiết cho CopyButtons */}
                   <CopyButtons
                     content={macro.content}
                     macro={macro}
