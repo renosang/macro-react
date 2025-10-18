@@ -4,6 +4,7 @@ import { Descendant } from 'slate';
 import { serializeSlate } from '../../utils/slateUtils';
 import './CopyButtons.css';
 import { Macro } from '../../types'; // Import kiểu Macro
+import useAuthStore from '../../stores/useAuthStore'; // Import useAuthStore
 
 // Mở rộng Props để nhận thêm các thuộc tính và hàm cho chức năng dịch
 interface CopyButtonsProps {
@@ -23,6 +24,7 @@ const CopyButtons = ({
   handleTranslate,
   hideTranslation,
 }: CopyButtonsProps) => {
+  const { token } = useAuthStore(); // Lấy token từ store
 
   const handleCopy = (mode: 'default' | 'anh' | 'chi') => {
     let textToCopy = serializeSlate(content);
@@ -34,11 +36,15 @@ const CopyButtons = ({
       textToCopy = textToCopy.replace(/Anh\/Chị/gi, 'Chị').replace(/anh\/chị/gi, 'chị');
     }
 
-    navigator.clipboard.writeText(textToCopy).then(() => {
+navigator.clipboard.writeText(textToCopy).then(() => {
       toast.success('Đã sao chép vào bộ nhớ tạm!');
-      if (macro._id) {
-        // Gọi API tăng lượt sử dụng
-        fetch(`/api/macros/${macro._id}/increment-usage`, { method: 'PUT' });
+      if (macro._id && token) {
+        fetch(`/api/macros/${macro._id}/increment-usage`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
       }
     }).catch(err => {
       toast.error('Sao chép thất bại!');

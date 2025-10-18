@@ -16,18 +16,18 @@ import AnalyticsDashboard from './pages/admin/AnalyticsDashboard';
 import './App.css';
 import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
-import useAuthStore from './stores/useAuthStore'; // --- BỔ SUNG ---
+import useAuthStore from './stores/useAuthStore';
 
 function App() {
   const [isAdmin] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [macros, setMacros] = useState<Macro[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const { token, logout } = useAuthStore(); // --- BỔ SUNG: Lấy token và hàm logout từ store ---
+  const { token, logout } = useAuthStore(); // Lấy token và hàm logout
 
   useEffect(() => {
     const fetchData = async () => {
-      // Nếu không có token (chưa đăng nhập), xóa dữ liệu cũ và không làm gì cả
+      // Nếu không có token (chưa đăng nhập), xóa dữ liệu cũ và dừng lại
       if (!token) {
         setCategories([]);
         setMacros([]);
@@ -49,12 +49,12 @@ function App() {
         ]);
 
         // Nếu có lỗi xác thực (token hết hạn), thông báo và logout
-        if (macrosRes.status === 401 || categoriesRes.status === 401 || announcementsRes.status === 401) {
+        if (macrosRes.status === 401 || categoriesRes.status === 401) {
           toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
           logout(); // Tự động logout người dùng
           return;
         }
-
+        
         if (!macrosRes.ok || !categoriesRes.ok || !announcementsRes.ok) {
             throw new Error('Không thể tải dữ liệu từ máy chủ.');
         }
@@ -73,7 +73,7 @@ function App() {
     };
 
     fetchData();
-  }, [token, logout]); // Thêm token và logout vào dependency array
+  }, [token, logout]); // Thêm token, logout vào dependency array
 
   return (
     <Router>
