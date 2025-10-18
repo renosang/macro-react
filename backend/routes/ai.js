@@ -148,7 +148,7 @@ router.post('/analyze-dashboard', async (req, res) => {
 });
 
 // --- CẬP NHẬT ROUTE DỊCH THUẬT ---
-router.post('/translate', async (req, res) => {
+router.post('/translate', protect, async (req, res) => {
   const { content, targetLang = 'en' } = req.body;
 
   if (!content || !Array.isArray(content)) {
@@ -180,17 +180,21 @@ Translate the following batch of Vietnamese text segments, separated by "${separ
 
     const batchTranslation = await runChat(translationPrompt);
 
-    // Sửa lỗi: Xóa bỏ .trim() để giữ lại khoảng trắng quan trọng
-    const translatedTexts = batchTranslation.split(separator);
+    // Sửa lỗi: Chỉ xóa dấu ", không xóa khoảng trắng
+    const translatedTexts = batchTranslation
+      .split(separator)
+      .map(text => text.replace(/^"|"$/g, ''));
 
-    // Thêm cơ chế dự phòng: nếu AI không trả về đúng số lượng, dịch lại từng phần
     if (translatedTexts.length !== textsToTranslate.length) {
       console.warn('Batch translation mismatch, falling back to individual translation.');
       const fallbackTexts = await Promise.all(
         textsToTranslate.map(async (text) => {
-          if (text.trim() === '') return text; // Không dịch các chuỗi rỗng/khoảng trắng
+          if (text.trim() === '') return text;
           const singlePrompt = `Translate this Vietnamese text to English for an e-commerce context. Return ONLY the translation, keeping original whitespace.\nVietnamese: "${text}"\nEnglish:`;
-          return await runChat(singlePrompt);
+          
+          let singleTranslation = await runChat(singlePrompt);
+          // Sửa lỗi: Chỉ xóa dấu ", không xóa khoảng trắng
+          return singleTranslation.replace(/^"|"$/g, '');
         })
       );
        const newContent = reconstructSlateWithTranslations(content, fallbackTexts);
@@ -198,7 +202,6 @@ Translate the following batch of Vietnamese text segments, separated by "${separ
     }
 
     const newContent = reconstructSlateWithTranslations(content, translatedTexts);
-
     res.json({ translation: newContent });
 
   } catch (error) {
