@@ -183,3 +183,82 @@
     margin-bottom: 30px; /* Giảm khoảng cách dưới cho gọn hơn */
   }
 }
+
+.translation-container {
+  margin-top: -10px;
+  padding-top: 15px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.translated-content {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.translated-content h4 {
+  margin-top: 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #6c757d;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.translated-content h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.translation-controls {
+  text-align: right;
+}
+
+.translate-btn {
+  background-color: transparent;
+  color: #007bff;
+  border: 1px solid #007bff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+}
+
+.translate-btn:hover {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.translate-btn:disabled {
+  background-color: #e9ecef;
+  color: #adb5bd;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+}
+
+.macro-actions-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Nút ẩn bản dịch */
+.translation-controls .translate-btn {
+  background-color: #6c757d;
+  color: white;
+  border-color: #6c757d;
+}
+.translation-controls .translate-btn:hover {
+  background-color: #5a6268;
+  border-color: #5a6268;
+}

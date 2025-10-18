@@ -3,59 +3,70 @@ import toast from 'react-hot-toast';
 import { Descendant } from 'slate';
 import { serializeSlate } from '../../utils/slateUtils';
 import './CopyButtons.css';
+import { Macro } from '../../types'; // Import kiểu Macro
 
+// Mở rộng Props để nhận thêm các thuộc tính và hàm cho chức năng dịch
 interface CopyButtonsProps {
   content: Descendant[];
-  macroId: string; // <-- BỔ SUNG: Thêm macroId vào props
+  macro: Macro; // Cần cả đối tượng macro để truyền cho hàm dịch
+  isTranslated: boolean;
+  isLoading: boolean;
+  handleTranslate: (macro: Macro) => void;
+  hideTranslation: (macroId: string) => void;
 }
 
-const CopyButtons = ({ content, macroId }: CopyButtonsProps) => { // <-- BỔ SUNG: Nhận macroId
+const CopyButtons = ({
+  content,
+  macro,
+  isTranslated,
+  isLoading,
+  handleTranslate,
+  hideTranslation,
+}: CopyButtonsProps) => {
+
   const handleCopy = (mode: 'default' | 'anh' | 'chi') => {
     let textToCopy = serializeSlate(content);
 
-    // SỬA LỖI: Xử lý riêng biệt cho trường hợp viết hoa và viết thường
+    // Xử lý thay thế "Anh/Chị"
     if (mode === 'anh') {
-      textToCopy = textToCopy
-        .replace(/Anh\/Chị/g, 'Anh')
-        .replace(/anh\/chị/g, 'anh')
-        .replace(/Anh\/chị/g, 'Anh')
-        .replace(/ANh\/Chị/g, 'Anh')
-        .replace(/ANH\/CHỊ/g, 'Anh');
+      textToCopy = textToCopy.replace(/Anh\/Chị/gi, 'Anh').replace(/anh\/chị/gi, 'anh');
     } else if (mode === 'chi') {
-      textToCopy = textToCopy
-        .replace(/Anh\/Chị/g, 'Chị')
-        .replace(/anh\/chị/g, 'chị')
-        .replace(/Anh\/chị/g, 'Chị')
-        .replace(/ANh\/Chị/g, 'Chị')
-        .replace(/ANH\/CHỊ/g, 'Chị');
+      textToCopy = textToCopy.replace(/Anh\/Chị/gi, 'Chị').replace(/anh\/chị/gi, 'chị');
     }
 
     navigator.clipboard.writeText(textToCopy).then(() => {
       toast.success('Đã sao chép vào bộ nhớ tạm!');
-
-      // --- BỔ SUNG LOGIC GỌI API TẠI ĐÂY ---
-      if (macroId) {
-        try {
-          fetch(`/api/macros/${macroId}/increment-usage`, {
-            method: 'PUT',
-          });
-        } catch (error) {
-          console.error('Lỗi khi cập nhật số lượt sử dụng:', error);
-        }
+      if (macro._id) {
+        // Gọi API tăng lượt sử dụng
+        fetch(`/api/macros/${macro._id}/increment-usage`, { method: 'PUT' });
       }
-      // ---------------------------------
-
     }).catch(err => {
       toast.error('Sao chép thất bại!');
-      console.error('Could not copy text: ', err);
+      console.error('Không thể sao chép: ', err);
     });
   };
 
   return (
     <div className="copy-buttons-container">
-      <button onClick={() => handleCopy('default')}>Sao chép (Anh/Chị)</button>
-      <button onClick={() => handleCopy('anh')}>Sao chép (Anh)</button>
-      <button onClick={() => handleCopy('chi')}>Sao chép (Chị)</button>
+      {/* Nhóm các nút sao chép sang bên trái */}
+      <div className="copy-group">
+        <button onClick={() => handleCopy('default')}>Sao chép</button>
+        <button onClick={() => handleCopy('anh')}>Sao chép (Anh)</button>
+        <button onClick={() => handleCopy('chi')}>Sao chép (Chị)</button>
+      </div>
+
+      {/* Nút dịch được đặt ở đây, CSS sẽ đẩy nó sang phải */}
+      <div className="translation-controls">
+        {isTranslated ? (
+          <button onClick={() => hideTranslation(macro._id!)} className="translate-btn">
+            Ẩn bản dịch
+          </button>
+        ) : (
+          <button onClick={() => handleTranslate(macro)} disabled={isLoading} className="translate-btn">
+            {isLoading ? 'Đang dịch...' : 'Dịch sang Tiếng Anh'}
+          </button>
+        )}
+      </div>
     </div>
   );
 };
