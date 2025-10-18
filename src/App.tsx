@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import LoginPage from './pages/login/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -16,36 +16,64 @@ import AnalyticsDashboard from './pages/admin/AnalyticsDashboard';
 import './App.css';
 import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
- 
+import useAuthStore from './stores/useAuthStore'; // --- BỔ SUNG ---
 
 function App() {
   const [isAdmin] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [macros, setMacros] = useState<Macro[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const { token, logout } = useAuthStore(); // --- BỔ SUNG: Lấy token và hàm logout từ store ---
 
   useEffect(() => {
-    // A stable component that fetches data is better than fetching in App.tsx
-    // But for now, this will do.
     const fetchData = async () => {
+      // Nếu không có token (chưa đăng nhập), xóa dữ liệu cũ và không làm gì cả
+      if (!token) {
+        setCategories([]);
+        setMacros([]);
+        setAnnouncements([]);
+        return;
+      }
+
       try {
-        const [catRes, macroRes, annRes] = await Promise.all([
-          fetch('/api/categories'),
-          fetch('/api/macros'), // This fetches only approved macros
-          fetch('/api/announcements')
+        // Tạo header có chứa token để xác thực
+        const headers = {
+          'Authorization': `Bearer ${token}`
+        };
+
+        // Gọi đồng thời các API với header xác thực
+        const [macrosRes, categoriesRes, announcementsRes] = await Promise.all([
+          fetch('/api/macros', { headers }),
+          fetch('/api/categories', { headers }),
+          fetch('/api/announcements', { headers })
         ]);
-        const catData = await catRes.json();
-        const macroData = await macroRes.json();
-        const annData = await annRes.json();
-        setCategories(catData);
-        setMacros(macroData);
-        setAnnouncements(annData);
-      } catch (error) {
-        console.error("Failed to fetch initial data", error);
+
+        // Nếu có lỗi xác thực (token hết hạn), thông báo và logout
+        if (macrosRes.status === 401 || categoriesRes.status === 401 || announcementsRes.status === 401) {
+          toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+          logout(); // Tự động logout người dùng
+          return;
+        }
+
+        if (!macrosRes.ok || !categoriesRes.ok || !announcementsRes.ok) {
+            throw new Error('Không thể tải dữ liệu từ máy chủ.');
+        }
+
+        const macrosData = await macrosRes.json();
+        const categoriesData = await categoriesRes.json();
+        const announcementsData = await announcementsRes.json();
+        
+        setMacros(macrosData);
+        setCategories(categoriesData);
+        setAnnouncements(announcementsData);
+
+      } catch (error: any) {
+        toast.error(error.message);
       }
     };
+
     fetchData();
-  }, []);
+  }, [token, logout]); // Thêm token và logout vào dependency array
 
   return (
     <Router>
@@ -78,4 +106,3 @@ function App() {
 }
 
 export default App;
-

@@ -15,7 +15,7 @@ router.get('/', protect, admin, async (req, res) => { // Chỉ admin mới có q
 });
 
 // Tạo người dùng mới
-router.post('/', async (req, res) => {
+router.post('/', protect, admin, async (req, res) => {
   // ---- CẬP NHẬT ----
   const { username, password, role, fullName, email } = req.body;
   try {
@@ -32,7 +32,7 @@ router.post('/', async (req, res) => {
 });
 
 // Cập nhật thông tin người dùng
-router.put('/:id', async (req, res) => {  
+router.put('/:id', protect, admin, async (req, res) => { 
   try {
     // Lấy các trường cần cập nhật từ body
     const { role, fullName, email } = req.body;
@@ -47,7 +47,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Đặt lại mật khẩu (Không thay đổi)
-router.post('/:id/reset-password', async (req, res) => {
+router.post('/:id/reset-password', protect, admin, async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).send('Không tìm thấy người dùng.');
@@ -61,7 +61,7 @@ router.post('/:id/reset-password', async (req, res) => {
 
 
 // Xóa người dùng (Không thay đổi)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, admin, async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).send('Không tìm thấy người dùng.');

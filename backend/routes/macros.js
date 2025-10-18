@@ -8,7 +8,7 @@ const { protect } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 // LẤY TẤT CẢ MACRO
-router.get('/', async (req, res) => {
+router.get('/', protect, async (req, res) => {
   try {
     // Thêm .populate() để lấy thông tin chi tiết của người tạo và người sửa
     const macros = await Macro.find({})
@@ -69,7 +69,7 @@ router.put('/:id', protect, async (req, res) => {
 });
 
 // XÓA MACRO
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, async (req, res) => {
     try {
         const deletedMacro = await Macro.findByIdAndDelete(req.params.id);
         if (!deletedMacro) {
@@ -81,7 +81,7 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-router.put('/:id/increment-usage', async (req, res) => {
+router.put('/:id/increment-usage', protect, async (req, res) => {
   try {
     const macro = await Macro.findByIdAndUpdate(
       req.params.id,
