@@ -5,6 +5,7 @@ import RichTextEditor from '../components/RichTextEditor';
 import { Category } from '../../types';
 import { Descendant } from 'slate';
 import './ContributePage.css';
+import useAuthStore from '../../stores/useAuthStore'; // --- BỔ SUNG ---
 
 const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }] }];
 
@@ -14,56 +15,75 @@ function ContributePage() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [content, setContent] = useState<Descendant[]>(emptyContent);
   const navigate = useNavigate();
+  const { token } = useAuthStore(); // --- BỔ SUNG: Lấy token từ store ---
 
   useEffect(() => {
-    // Lấy danh sách danh mục khi component được tải
     const fetchCategories = async () => {
+      // Nếu không có token (chưa đăng nhập), không làm gì cả
+      if (!token) {
+        return;
+      }
+
       try {
-        const res = await fetch('/api/categories');
+        // --- SỬA LỖI: Thêm token vào header của request ---
+        const res = await fetch('/api/categories', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Không thể tải danh mục.');
+        }
+
         const data = await res.json();
         setCategories(data);
         if (data.length > 0) {
-          setSelectedCategory(data[0].name); // Đặt danh mục mặc định là TÊN
+          setSelectedCategory(data[0].name);
         }
-      } catch (error) {
-        toast.error('Không thể tải danh mục.');
+      } catch (error: any) {
+        toast.error(`Lỗi: ${error.message}`);
       }
     };
     fetchCategories();
-  }, []);
+  }, [token]); // Thêm token vào dependency array
 
   const handleContribute = async () => {
     if (!title.trim() || !selectedCategory) {
-      toast.error('Vui lòng nhập đầy đủ tiêu đề và chọn danh mục.');
+      toast.error('Vui lòng nhập đầy đủ tiêu đề và danh mục.');
       return;
     }
 
-    const newMacro = {
-      title,
-      category: selectedCategory, // Gửi đi TÊN danh mục
-      content,
-      status: 'pending',
-    };
+    if (!token) {
+      toast.error('Bạn cần đăng nhập để thực hiện hành động này.');
+      return;
+    }
 
     try {
-      const response = await fetch('/api/macros', {
+      const res = await fetch('/api/macros', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newMacro),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title,
+          category: selectedCategory,
+          content,
+          status: 'pending', // Macro do người dùng đóng góp sẽ ở trạng thái chờ duyệt
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error('Gửi đóng góp thất bại. Vui lòng thử lại.');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Gửi đóng góp thất bại.');
       }
 
-      toast.success('Cảm ơn bạn đã đóng góp! Macro của bạn đang chờ xét duyệt.');
+      toast.success('Cảm ơn bạn đã đóng góp! Macro của bạn đã được gửi để xét duyệt.');
       navigate('/dashboard');
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error('Đã có lỗi xảy ra.');
-      }
+    } catch (error: any) {
+      toast.error(`Lỗi: ${error.message}`);
     }
   };
 
@@ -90,7 +110,6 @@ function ContributePage() {
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
-            {/* Đảm bảo value của option là cat.name */}
             {categories.map(cat => (
               <option key={cat._id} value={cat.name}>{cat.name}</option>
             ))}
@@ -102,7 +121,7 @@ function ContributePage() {
         </div>
         <div className="form-actions">
           <button className="cancel-btn" onClick={() => navigate('/dashboard')}>Hủy</button>
-          <button className="submit-btn" onClick={handleContribute}>Gửi đi</button>
+          <button className="submit-btn" onClick={handleContribute}>Gửi đóng góp</button>
         </div>
       </div>
     </div>
