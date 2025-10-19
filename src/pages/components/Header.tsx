@@ -1,26 +1,53 @@
+// src/pages/components/Header.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, NavLink } from 'react-router-dom';
 import useAuthStore from '../../stores/useAuthStore';
 import './Header.css';
 
+// Import các icon cần thiết từ Heroicons
+import {
+  HiOutlineRectangleGroup,
+  HiOutlineCheckBadge,
+  HiOutlineQueueList,
+  HiOutlineQuestionMarkCircle,
+  HiOutlineChartPie,
+  HiOutlineCube,
+  HiOutlineMegaphone,
+  HiOutlineCog,
+  HiOutlineBars3,
+  HiOutlineArrowRightOnRectangle,
+  HiOutlinePencilSquare
+} from 'react-icons/hi2';
+
+// Ép kiểu các icon để TypeScript hiểu đúng
+const IconPortal = HiOutlineRectangleGroup as React.ElementType;
+const IconCQM = HiOutlineCheckBadge as React.ElementType;
+const IconBacklog = HiOutlineQueueList as React.ElementType;
+const IconFAQ = HiOutlineQuestionMarkCircle as React.ElementType;
+const IconAdmin = HiOutlineCog as React.ElementType;
+const IconMenu = HiOutlineBars3 as React.ElementType;
+const IconLogout = HiOutlineArrowRightOnRectangle as React.ElementType;
+const IconContribute = HiOutlinePencilSquare as React.ElementType;
+
+
 function Header() {
-  const { logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  // State để quản lý menu người dùng trên mobile
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
+    setIsMenuOpen(false); // Đóng menu khi đăng xuất
     logout();
     navigate('/login');
   };
 
-  // Logic để đóng menu khi click ra ngoài
+  // Xử lý đóng menu khi click ra ngoài
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsUserMenuOpen(false);
+        setIsMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -28,7 +55,6 @@ function Header() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [menuRef]);
-
 
   return (
     <header className="header">
@@ -42,30 +68,50 @@ function Header() {
           Xin chào, Chúc bạn làm việc hiệu quả ❤️!
         </span>
         
-        {/* Các nút hiển thị trên desktop */}
-        <div className="desktop-actions">
-            <Link to="/dashboard/contribute" id="tour-contribute-link" className="contribute-btn">Đóng góp</Link>
-          <button onClick={handleLogout} className="logout-btn">
-            Đăng xuất
-          </button>
-        </div>
-
-        {/* Menu người dùng cho mobile */}
-        <div className="mobile-actions" ref={menuRef}>
-          <button className="hamburger-btn user-menu-toggle" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
-            {/* Icon menu người dùng (3 chấm) */}
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
+        {/* Nút menu chính thay thế cho các nút cũ */}
+        <div className="header-menu-container" ref={menuRef}>
+          <button className="header-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <IconMenu />
           </button>
 
-          {isUserMenuOpen && (
-            <div className="user-menu-dropdown">
-                <Link  to="/dashboard/contribute" onClick={() => setIsUserMenuOpen(false)}>Đóng góp Macro</Link>
-              <button onClick={handleLogout}>Đăng xuất</button>
-            </div>
+          {isMenuOpen && (
+            <nav className="header-menu-dropdown">
+
+              {/* Nhóm điều hướng chính */}
+              <NavLink to="https://kb-portal.vercel.app/" target="_blank" end onClick={() => setIsMenuOpen(false)}>
+                <IconPortal /><span>KB Portal</span>
+              </NavLink>
+              <NavLink to="https://onpointvn-my.sharepoint.com/:x:/r/personal/diep_truong_onpoint_vn/_layouts/15/doc2.aspx?sourcedoc=%7B811E44AC-EEB0-416E-A6CB-C3CAA957964D%7D&file=DATA%20CQM%20TTU%20-%20Ver3.2025.xlsx&fromShare=true&action=default&mobileredirect=true" target="_blank" onClick={() => setIsMenuOpen(false)}>
+                 <IconCQM /><span>Sai sót chất lượng</span>
+              </NavLink>
+              <NavLink to="https://docs.google.com/spreadsheets/u/0/d/19luSxwI2kUt0e5gJy1QZt7EOqJxzORcTIc__gEsDHcA/htmlview#gid=0" target="_blank" onClick={() => setIsMenuOpen(false)}>
+                 <IconFAQ /><span>FAQ tổng hợp</span>
+              </NavLink>
+              <NavLink to="https://beegadget.sg.larksuite.com/base/OF69bG6onayNSNsCc8kl2QKxgle?from=from_copylink" target="_blank" onClick={() => setIsMenuOpen(false)}>
+                 <IconBacklog /><span>Kiểm tra Backlog</span>
+              </NavLink>
+
+              <NavLink to="/dashboard/contribute" id="tour-contribute-link" onClick={() => setIsMenuOpen(false)}>
+                <IconContribute /><span>Đóng góp Macro</span>
+              </NavLink>
+              
+              <div className="dropdown-separator"></div>
+
+              {/* Nhóm chức năng bổ sung */}
+              {user?.role === 'admin' && (
+                <NavLink to="/admin" onClick={() => setIsMenuOpen(false)}>
+                  <IconAdmin /><span>Trang quản trị</span>
+                </NavLink>
+              )}
+
+              
+              <div className="dropdown-separator"></div>
+
+              {/* Nút đăng xuất */}
+              <button className="logout-menu-btn" onClick={handleLogout}>
+                <IconLogout /><span>Đăng xuất</span>
+              </button>
+            </nav>
           )}
         </div>
       </div>

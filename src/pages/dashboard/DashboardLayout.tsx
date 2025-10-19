@@ -1,3 +1,4 @@
+// src/pages/dashboard/DashboardLayout.tsx
 import React, { useEffect, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/Header';
@@ -6,20 +7,16 @@ import AiChatWidget from '../components/AiChatWidget';
 import EditorPopup from '../components/EditorPopup';
 import FloatingEditorButton from '../components/FloatingEditorButton';
 import BroadcastBanner from '../components/BroadcastBanner';
+// import Sidebar from '../components/Sidebar'; // Xóa dòng này
+import './DashboardLayout.css';
 
 function DashboardLayout() {
   const { fetchInitialData, _hasHydrated } = useDataStore();
-  
-  // Sử dụng useRef để tạo một cờ, đảm bảo việc fetch chỉ xảy ra một lần
   const hasFetched = useRef(false);
 
   useEffect(() => {
-    // Chỉ thực hiện logic khi:
-    // 1. Quá trình hydration đã hoàn tất.
-    // 2. Việc fetch chưa được thực hiện lần nào (hasFetched.current là false).
     if (_hasHydrated && !hasFetched.current) {
       fetchInitialData();
-      // Đánh dấu là đã fetch để các lần render lại sau này không gọi nữa.
       hasFetched.current = true;
     }
   }, [_hasHydrated, fetchInitialData]);
@@ -27,17 +24,16 @@ function DashboardLayout() {
   return (
     <div className="dashboard-layout">
       <Header />
-      <BroadcastBanner />
+      {/* Bỏ đi div.dashboard-body và Sidebar */}
       <main className="dashboard-content">
+        <BroadcastBanner />
         <Outlet />
       </main>
-      {/* Các component nổi sẽ luôn hiển thị ở góc màn hình */}
       <FloatingEditorButton />
-      <AiChatWidget /> {/* <-- Thêm AiChatWidget để nó được render */}
+      <AiChatWidget />
       <EditorPopup />
     </div>
   );
 }
 
 export default DashboardLayout;
-
