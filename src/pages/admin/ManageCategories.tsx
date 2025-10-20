@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import './ManageCategories.css';
 import { Category } from '../../types';
+import useAuthStore from '../../stores/useAuthStore';
 
+// SỬA LỖI: Thêm lại interface đã bị thiếu
 interface ManageCategoriesProps {
   categories: Category[];
   setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
@@ -13,8 +15,8 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingName, setEditingName] = useState('');
+  const { token } = useAuthStore();
 
-  // HÀM TẠO MỚI (ĐÃ CẬP NHẬT XỬ LÝ LỖI)
   const handleAddNew = async () => {
     if (newCategoryName.trim() === '') {
       toast.error('Tên danh mục không được để trống!');
@@ -23,18 +25,20 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
     try {
       const res = await fetch('/api/categories', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ name: newCategoryName }),
       });
 
-      // Xử lý lỗi tốt hơn
       if (!res.ok) {
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
           const errorData = await res.json();
           throw new Error(errorData.message || 'Lỗi từ server');
         } else {
-          throw new Error(`Lỗi server: ${res.status} ${res.statusText}. Phản hồi không phải là JSON.`);
+          throw new Error(`Lỗi server: ${res.status} ${res.statusText}.`);
         }
       }
       
@@ -48,12 +52,17 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
     }
   };
 
-  // HÀM XÓA
   const handleDelete = async (id: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này không?')) {
       try {
-        await fetch(`/api/categories/${id}`, { method: 'DELETE' });
-        setCategories(prev => prev.filter(category => category._id !== id));
+        await fetch(`/api/categories/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        // SỬA LỖI: Thêm kiểu dữ liệu cho tham số
+        setCategories((prev: Category[]) => prev.filter((category: Category) => category._id !== id));
         toast.success('Đã xóa danh mục thành công!');
       } catch (error: any) {
         toast.error(`Lỗi: ${error.message}`);
@@ -66,7 +75,6 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
     setEditingName(category.name);
   };
 
-  // HÀM LƯU SAU KHI SỬA
   const handleSaveEdit = async () => {
     if (!editingCategory || editingName.trim() === '') {
       toast.error('Tên danh mục không được để trống!');
@@ -75,14 +83,18 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
     try {
       const res = await fetch(`/api/categories/${editingCategory._id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ name: editingName }),
       });
       if (!res.ok) throw new Error('Cập nhật thất bại');
       
       const updatedCategory = await res.json();
-      setCategories(prev => 
-        prev.map(cat => 
+      // SỬA LỖI: Thêm kiểu dữ liệu cho tham số
+      setCategories((prev: Category[]) => 
+        prev.map((cat: Category) => 
           cat._id === editingCategory._id ? updatedCategory : cat
         )
       );
@@ -124,7 +136,8 @@ function ManageCategories({ categories, setCategories }: ManageCategoriesProps) 
           </tr>
         </thead>
         <tbody>
-          {categories.map((category) => (
+          {/* SỬA LỖI: Thêm kiểu dữ liệu cho tham số */}
+          {categories.map((category: Category) => (
             <tr key={category._id}>
               <td>
                 {editingCategory?._id === category._id ? (
