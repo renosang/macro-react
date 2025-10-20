@@ -7,7 +7,6 @@ import AiChatWidget from '../components/AiChatWidget';
 import EditorPopup from '../components/EditorPopup';
 import FloatingEditorButton from '../components/FloatingEditorButton';
 import BroadcastBanner from '../components/BroadcastBanner';
-// import Sidebar from '../components/Sidebar'; // Xóa dòng này
 import './DashboardLayout.css';
 
 function DashboardLayout() {
