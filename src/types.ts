@@ -48,3 +48,12 @@ export interface Link {
   title: string;
   url: string;
 }
+
+export interface Task {
+  _id: string;
+  title: string;
+  status: 'pending' | 'completed';
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}

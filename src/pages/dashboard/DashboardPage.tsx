@@ -4,7 +4,7 @@ import './DashboardPage.css';
 import { Category, Macro, Announcement } from '../../types';
 import BroadcastBanner from '../components/BroadcastBanner';
 import HighlightText from '../components/HighlightText';
-import InteractiveGuide from '../components/InteractiveGuide'; // Import component mới
+import InteractiveGuide from '../components/InteractiveGuide';
 
 interface DashboardPageProps {
   categories: Category[];
@@ -16,12 +16,11 @@ const ONBOARDING_KEY = 'macroSystemHasVisited';
 
 function DashboardPage({ categories, macros, announcements }: DashboardPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [runTour, setRunTour] = useState(false); // State để chạy tour
+  const [runTour, setRunTour] = useState(false);
 
   useEffect(() => {
     const hasVisited = localStorage.getItem(ONBOARDING_KEY);
     if (!hasVisited) {
-      // Đợi một chút để đảm bảo tất cả các thành phần đã render
       setTimeout(() => {
         setRunTour(true);
       }, 500);
@@ -55,11 +54,10 @@ function DashboardPage({ categories, macros, announcements }: DashboardPageProps
 
       <main className="page-container">
         <BroadcastBanner announcement={latestAnnouncement} />
-
+        
         <h1 className="main-title">Hệ thống tra cứu macro tư vấn</h1>
         <p className="main-description">Nhanh chóng tìm kiếm các macro và tài liệu cần thiết cho công việc của bạn.</p>
         
-        {/* Thêm ID cho thanh tìm kiếm */}
         <div id="tour-search-bar" className="search-bar-container">
           <input 
             type="text" 
@@ -72,7 +70,6 @@ function DashboardPage({ categories, macros, announcements }: DashboardPageProps
 
         <h2 className="category-title">Danh mục ({filteredCategories.length})</h2>
         
-        {/* Thêm ID cho lưới danh mục */}
         <div id="tour-category-grid" className="category-grid">
           {filteredCategories.map((category, index) => {
             const macroCount = getMacroCount(category.name);

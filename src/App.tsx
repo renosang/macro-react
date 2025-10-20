@@ -15,6 +15,7 @@ import ContributePage from './pages/dashboard/ContributePage';
 import AnalyticsDashboard from './pages/admin/AnalyticsDashboard';
 import LinksPage from './pages/dashboard/LinksPage';
 import ManageLinksPage from './pages/admin/ManageLinksPage';
+import TasksPage from './pages/dashboard/TasksPage';
 import './App.css';
 import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
@@ -89,6 +90,7 @@ function App() {
             <Route path="category/:categoryName" element={<CategoryDetailPage allMacros={macros} />} />
             <Route path="contribute" element={<ContributePage />} />
             <Route path="links" element={<LinksPage />} />
+            <Route path="tasks" element={<TasksPage />} />
           </Route>
          <Route element={<AdminRoute />}>
           <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
