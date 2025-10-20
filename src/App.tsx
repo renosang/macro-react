@@ -13,6 +13,8 @@ import ManageUsersPage from './pages/admin/ManageUsersPage';
 import ProtectedRoute from './pages/components/ProtectedRoute';
 import ContributePage from './pages/dashboard/ContributePage';
 import AnalyticsDashboard from './pages/admin/AnalyticsDashboard';
+import LinksPage from './pages/dashboard/LinksPage';
+import ManageLinksPage from './pages/admin/ManageLinksPage';
 import './App.css';
 import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
@@ -86,6 +88,7 @@ function App() {
             <Route index element={<DashboardPage categories={categories} macros={macros} announcements={announcements} />} />
             <Route path="category/:categoryName" element={<CategoryDetailPage allMacros={macros} />} />
             <Route path="contribute" element={<ContributePage />} />
+            <Route path="links" element={<LinksPage />} />
           </Route>
          <Route element={<AdminRoute />}>
           <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
@@ -94,6 +97,7 @@ function App() {
             <Route path="announcements" element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />} />
              <Route path="analytics" element={<AnalyticsDashboard />} />
             <Route path="users" element={<ManageUsersPage />} />
+            <Route path="links" element={<ManageLinksPage />} />
             <Route index element={<Navigate to="categories" />} />
           </Route>
           </Route>

@@ -13,7 +13,8 @@ import {
   HiOutlineCog,
   HiOutlineBars3,
   HiOutlineArrowRightOnRectangle,
-  HiOutlinePencilSquare
+  HiOutlinePencilSquare,
+  HiOutlineLink
 } from 'react-icons/hi2';
 
 // Ép kiểu các icon để TypeScript hiểu đúng
@@ -25,6 +26,7 @@ const IconAdmin = HiOutlineCog as React.ElementType;
 const IconMenu = HiOutlineBars3 as React.ElementType;
 const IconLogout = HiOutlineArrowRightOnRectangle as React.ElementType;
 const IconContribute = HiOutlinePencilSquare as React.ElementType;
+const IconLinks = HiOutlineLink as React.ElementType;
 
 
 function Header() {
@@ -87,7 +89,9 @@ function Header() {
               <NavLink to="https://beegadget.sg.larksuite.com/base/OF69bG6onayNSNsCc8kl2QKxgle?from=from_copylink" target="_blank" onClick={() => setIsMenuOpen(false)}>
                  <IconBacklog /><span>Kiểm tra Backlog</span>
               </NavLink>
-
+              <NavLink to="/dashboard/links" onClick={() => setIsMenuOpen(false)}>
+                <IconLinks /><span>Quản lí liên kết</span>
+              </NavLink>
               <NavLink to="/dashboard/contribute" id="tour-contribute-link" onClick={() => setIsMenuOpen(false)}>
                 <IconContribute /><span>Đóng góp Macro</span>
               </NavLink>

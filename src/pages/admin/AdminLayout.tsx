@@ -10,7 +10,8 @@ import {
   HiOutlineUsers,
   HiOutlineMegaphone,
   HiOutlineChartBarSquare,
-  HiOutlineArrowLeftOnRectangle
+  HiOutlineArrowLeftOnRectangle,
+  HiOutlineLink
 } from 'react-icons/hi2';
 
 // Ép kiểu để đảm bảo tương thích TypeScript
@@ -20,6 +21,7 @@ const IconUsers = HiOutlineUsers as React.ElementType;
 const IconAnnouncements = HiOutlineMegaphone as React.ElementType;
 const IconAnalytics = HiOutlineChartBarSquare as React.ElementType;
 const IconLogout = HiOutlineArrowLeftOnRectangle as React.ElementType;
+const IconLinks = HiOutlineLink as React.ElementType;
 
 function AdminLayout() {
   // --- SỬA LỖI: Lấy đúng hàm `logout` từ store ---
@@ -56,6 +58,10 @@ function AdminLayout() {
               <NavLink to="/admin/announcements" title="Quản lý Thông báo">
                 <IconAnnouncements className="nav-icon" />
                 <span className="nav-text">Quản lý Thông báo</span>
+              </NavLink>
+              <NavLink to="/admin/links" title="Quản lý liên kết">
+                <IconLinks className="nav-icon" />
+                <span className="nav-text">Quản lý liên kết</span>
               </NavLink>
               <NavLink to="/admin/analytics" title="Phân tích">
                 <IconAnalytics className="nav-icon" />

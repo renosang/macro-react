@@ -42,3 +42,9 @@ export interface User {
   lastActivity?: string;
 }
 
+export interface Link {
+  _id: string;
+  team: string;
+  title: string;
+  url: string;
+}
