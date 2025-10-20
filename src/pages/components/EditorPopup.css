@@ -1,0 +1,104 @@
+/* src/pages/components/EditorPopup.css */
+.editor-popup-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  background: none; /* Bỏ nền đen để thấy hiệu ứng kính mờ */
+  pointer-events: none; /* Cho phép click xuyên qua overlay */
+}
+
+.editor-popup-container {
+  /* Hiệu ứng kính mờ đặc trưng của macOS */
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease-in-out;
+  pointer-events: auto; /* Kích hoạt lại click cho popup */
+}
+
+.editor-popup-header {
+  display: flex;
+  justify-content: center; /* Căn giữa tiêu đề */
+  align-items: center;
+  position: relative; /* Để định vị các nút traffic light */
+  padding: 0 20px;
+  height: 50px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: transparent; /* Nền trong suốt */
+  cursor: move;
+  flex-shrink: 0;
+}
+
+.editor-popup-header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Cụm nút traffic light */
+.traffic-lights {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #5a5a5a;
+  font-size: 9px;
+  font-weight: bold;
+  opacity: 0.8;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.dot span {
+  visibility: hidden; /* Ẩn icon mặc định */
+}
+.traffic-lights:hover .dot span {
+  visibility: visible; /* Hiện icon khi hover vào cả cụm */
+}
+
+.dot-red { background-color: #ff5f57; }
+.dot-yellow { background-color: #febc2e; }
+.dot-green { background-color: #28c840; }
+
+.dot:hover {
+  opacity: 1;
+}
+
+.editor-popup-content {
+  flex-grow: 1;
+  padding: 0;
+  overflow-y: auto;
+  background-color: transparent;
+}
+
+.editor-popup-content .editor-container {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.editor-popup-content .editor-inner-content {
+  background-color: transparent !important;
+}

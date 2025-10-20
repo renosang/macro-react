@@ -1,0 +1,197 @@
+.manage-macros-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.manage-macros-container h2 {
+  margin-top: 0;
+}
+
+/* --- THANH ĐIỀU KHIỂN --- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 16px;
+}
+
+.search-controls {
+  flex-grow: 1;
+  min-width: 250px;
+}
+
+.controls select, .controls input {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.search-controls input {
+  width: 100%;
+}
+
+.add-new-btn-user {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.add-new-btn-user:hover {
+  background-color: #0056b3;
+}
+
+/* --- PHẦN BẢNG DỮ LIỆU --- */
+.macros-table-wrapper {
+  overflow-x: auto;
+}
+
+.macros-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  table-layout: fixed; 
+}
+
+.macros-table th, .macros-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  vertical-align: middle;
+}
+
+.macros-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* --- BỔ SUNG CÁC CLASS CĂN CHỈNH MỚI --- */
+.cell-left {
+  text-align: left;
+}
+
+.cell-center {
+  text-align: center;
+}
+/* --- KẾT THÚC BỔ SUNG --- */
+
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block; /* Giúp badge hiển thị đúng trong ô căn giữa */
+}
+
+.status-approved {
+  background-color: #28a745;
+}
+
+.status-pending {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0 4px;
+  font-weight: 500;
+}
+
+.edit-btn {
+  background-color: #ffc107;
+  color: #212529;
+}
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+.macros-table th:nth-of-type(1) { width: 25%; } /* Tiêu đề */
+.macros-table th:nth-of-type(2) { width: 15%; } /* Danh mục */
+.macros-table th:nth-of-type(3) { width: 12%; } /* Người tạo */
+.macros-table th:nth-of-type(4) { width: 12%; } /* Người sửa đổi */
+.macros-table th:nth-of-type(5) { width: 14%; } /* Ngày sửa đổi */
+.macros-table th:nth-of-type(6) { width: 10%; } /* Trạng thái */
+.macros-table th:nth-of-type(7) { width: 12%; } /* Lượt sử dụng */
+.macros-table th:nth-of-type(8) { width: 12%; } /* Hành động */
+
+/* Thêm hiệu ứng cho tiêu đề dài */
+.macros-table td:first-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+/* Hiện đầy đủ khi hover */
+.macros-table td:first-child:hover {
+  white-space: normal;
+  overflow: visible;
+}
+
+.macro-modal-content {
+  background-color: white;
+  padding: 0 20px 0px 20px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.4s ease-out;
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  overflow: hidden; 
+}
+
+
+.modal-body {
+
+  flex-grow: 1; /* Tự động lấp đầy không gian còn lại */
+  overflow: hidden; /* Ẩn tràn bên ngoài */
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body-content {
+  padding: 1.5rem 2.5rem;
+  overflow-y: auto; /* Tự động tạo thanh cuộn dọc khi nội dung dài */
+  flex-grow: 1; /* Tự động lấp đầy không gian còn lại */
+}
+
+/* Phần soạn thảo văn bản (QUAN TRỌNG) */
+
+.macro-modal-actions {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0; /* Không co lại */
+}
+
+
+.form-group-row {
+  display: flex;
+  gap: 20px; /* Khoảng cách giữa các trường */
+  width: 100%;
+    flex-shrink: 0; /* Không co lại */
+}

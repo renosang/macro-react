@@ -1,0 +1,110 @@
+.contribute-container {
+  width: 70%; /* Giới hạn chiều rộng của form */
+  margin: 2rem auto; /* Tự động căn giữa theo chiều ngang và thêm khoảng cách trên dưới */
+  padding: 2.5rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.contribute-container h2 {
+  text-align: left;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.contribute-container p {
+  text-align: left;
+  color: #6b7280;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.contribute-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.contribute-form .form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.contribute-form .form-group input[type="text"],
+.contribute-form .form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.contribute-form .form-group input[type="text"]:focus,
+.contribute-form .form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* --- Yêu cầu: Cố định chiều cao trình soạn thảo --- */
+/* (Giả sử RichTextEditor của bạn có cấu trúc class này) */
+.editor-wrapper .editable-area {
+  height: 300px !important; /* Chiều cao cố định */
+  overflow-y: auto; /* Thêm thanh cuộn khi nội dung dài hơn */
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end; /* Căn các nút về phía bên phải */
+  gap: 1rem; /* Khoảng cách giữa các nút */
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* --- Yêu cầu: CSS lại các nút --- */
+.submit-btn,
+.cancel-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover,
+.cancel-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.submit-btn {
+  background-color: #007aff; /* Màu xanh dương chính */
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #0056b3;
+}
+
+.cancel-btn {
+  background-color: #f3f4f6; /* Màu xám nhạt */
+  color: #374151;
+}
+
+.cancel-btn:hover {
+  background-color: #e5e7eb;
+}

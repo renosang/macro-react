@@ -1,0 +1,20 @@
+/* src/pages/dashboard/DashboardLayout.css */
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; /* Ngăn toàn bộ trang bị cuộn */
+}
+
+.dashboard-body {
+  display: flex;
+  flex: 1;
+  /* Thêm overflow: hidden để đảm bảo không có gì tràn ra ngoài */
+  overflow: hidden;
+}
+
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto; /* Chỉ cho phép vùng nội dung chính được cuộn */
+  padding: 20px;
+}
