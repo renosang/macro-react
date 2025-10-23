@@ -4,12 +4,30 @@ import toast from 'react-hot-toast';
 import './LoginPage.css';
 import useAuthStore from '../../stores/useAuthStore';
 
+const REMEMBER_USERNAME_KEY = 'rememberedUsername';
+const REMEMBER_PASSWORD_KEY = 'rememberedPassword'; // Key mới cho mật khẩu
+
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const { login, token } = useAuthStore();
+
+  // Load username và password đã lưu khi component mount
+  useEffect(() => {
+    const rememberedUsername = localStorage.getItem(REMEMBER_USERNAME_KEY);
+    const rememberedPassword = localStorage.getItem(REMEMBER_PASSWORD_KEY); // Lấy mật khẩu đã lưu
+    if (rememberedUsername) {
+      setUsername(rememberedUsername);
+      setRememberMe(true);
+      // Chỉ điền mật khẩu nếu username cũng được lưu
+      if (rememberedPassword) {
+        setPassword(rememberedPassword);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -36,6 +54,17 @@ function LoginPage() {
       if (response.ok) {
         const user = { id: data.id, username: data.username, role: data.role };
         login(user, data.token);
+
+        // Xử lý lưu hoặc xóa username và password dựa trên checkbox
+        if (rememberMe) {
+          localStorage.setItem(REMEMBER_USERNAME_KEY, username);
+          // !!! CẢNH BÁO: LƯU MẬT KHẨU VÀO LOCALSTORAGE LÀ KHÔNG AN TOÀN !!!
+          localStorage.setItem(REMEMBER_PASSWORD_KEY, password);
+        } else {
+          localStorage.removeItem(REMEMBER_USERNAME_KEY);
+          localStorage.removeItem(REMEMBER_PASSWORD_KEY);
+        }
+
         toast.success('Đăng nhập thành công!');
         navigate('/dashboard');
       } else {
@@ -57,7 +86,6 @@ function LoginPage() {
   return (
     <div className="login-container">
       <div className="login-box">
-        {/* Đã xóa logo */}
         <h2>Welcome Back</h2>
         <p className="login-subtitle">Đăng nhập để tiếp tục</p>
         <form onSubmit={handleLogin}>
@@ -91,11 +119,17 @@ function LoginPage() {
 
           <div className="extra-options">
             <div className="remember-me">
-              <input type="checkbox" id="remember" />
-              <label htmlFor="remember">Ghi nhớ mật khẩu</label>
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              {/* Sửa lại label */}
+              <label htmlFor="remember">Ghi nhớ đăng nhập</label>
             </div>
           </div>
-          
+
           <button type="submit" className="login-btn">Đăng nhập</button>
         </form>
       </div>
