@@ -9,6 +9,9 @@ import { serializeSlate } from '../../utils/slateUtils';
 import { Descendant } from 'slate';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../stores/useAuthStore';
+import { HiOutlineClock } from 'react-icons/hi2'; // Import icon đồng hồ
+
+const IconClock = HiOutlineClock as React.ElementType;
 
 function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
   const { categoryName } = useParams<{ categoryName: string }>();
@@ -19,7 +22,7 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
   const [loadingTranslationId, setLoadingTranslationId] = useState<string | null>(null);
   const { token } = useAuthStore();
 
-  const macrosInCategory = useMemo(() => 
+  const macrosInCategory = useMemo(() =>
     allMacros.filter(macro => macro.category === decodedCategoryName),
     [allMacros, decodedCategoryName]
   );
@@ -35,7 +38,18 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
     );
   }, [macrosInCategory, searchQuery]);
 
+  // Hàm định dạng ngày giờ
+  const formatDateTime = (isoString: string) => {
+    if (!isoString) return '';
+    return new Date(isoString).toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  };
+
+
   const handleTranslate = async (macro: Macro) => {
+    // ... (code xử lý dịch giữ nguyên)
     if (!macro._id || !token) {
       toast.error('Bạn cần đăng nhập để sử dụng chức năng này.');
       return;
@@ -79,9 +93,9 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
     });
   };
 
-  // --- BỔ SUNG: HÀM TỰ ĐỘNG SAO CHÉP KHI BÔI ĐEN ---
   const handleCopyOnSelect = () => {
-    const selection = window.getSelection();
+    // ... (code xử lý copy giữ nguyên)
+     const selection = window.getSelection();
     // Chỉ sao chép nếu có nội dung được chọn (lớn hơn 1 ký tự)
     if (selection && selection.toString().trim().length > 1) {
         const selectedText = selection.toString();
@@ -95,7 +109,6 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
             });
     }
   };
-  // --- KẾT THÚC BỔ SUNG ---
 
   return (
     <div className="category-detail-container">
@@ -105,8 +118,8 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
         </div>
         <h1>{decodedCategoryName}</h1>
         <div className="search-bar-container">
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder={`Tìm kiếm trong danh mục ${decodedCategoryName}...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -122,17 +135,22 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
 
               return (
                 <div key={macro._id} className={`macro-item ${colorClass}`}>
-                  <h3>
-                    <HighlightText text={macro.title} highlight={searchQuery} />
-                  </h3>
-                  
-                  {/* --- THÊM SỰ KIỆN onMouseUp VÀO ĐÂY --- */}
+                  <div className="macro-header"> {/* Bọc header lại */}
+                    <h3>
+                      <HighlightText text={macro.title} highlight={searchQuery} />
+                    </h3>
+                    {/* --- THÊM HIỂN THỊ THỜI GIAN SỬA ĐỔI --- */}
+                    <small className="last-updated">
+                       <IconClock /> Cập nhật: {formatDateTime(macro.updatedAt)}
+                    </small>
+                    {/* --- KẾT THÚC --- */}
+                  </div>
+
                   <div className="macro-content-body" onMouseUp={handleCopyOnSelect}>
                     <ContentViewer content={macro.content} highlight={searchQuery} />
                   </div>
-                  
+
                   {isTranslated && (
-                    // --- VÀ CẢ VÀO KHU VỰC BẢN DỊCH ---
                     <div className="translated-content" onMouseUp={handleCopyOnSelect}>
                       <h4>Bản dịch (Tiếng Anh)</h4>
                       <ContentViewer content={translations[macro._id!].content} />
