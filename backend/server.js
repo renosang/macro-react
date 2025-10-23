@@ -5,6 +5,7 @@ const cors = require('cors');
 const analyticsRoutes = require('./routes/analytics');
 const linkRoutes = require('./routes/links');
 const taskRoutes = require('./routes/tasks');
+const feedbackRoutes = require('./routes/feedback');
 
 const app = express();
 app.use(cors());
@@ -27,6 +28,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/links', linkRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/feedback', feedbackRoutes)
 
 // --- MongoDB Connection ---
 // The MONGODB_URI should be in your .env file or Vercel environment variables

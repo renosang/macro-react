@@ -97,31 +97,93 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
-/* --- Header Styles (ADDED) --- */
 .macro-header {
-  padding: 15px 25px; /* Giữ padding như cũ */
-  color: white; /* Chữ trong header màu trắng */
-  /* Loại bỏ background ở đây, sẽ được set theo màu card */
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Căn lề trên để phù hợp với title nhiều dòng */
+  padding: 15px 25px;
+  color: white;
 }
 
-/* --- Title Styles (UPDATED) --- */
+.macro-header-main {
+  flex-grow: 1;
+  margin-right: 15px;
+}
+
+/* --- Meta section (time & feedback button) --- */
+.macro-header-meta {
+  display: flex;
+  align-items: center; /* Căn giữa icon và text */
+  gap: 12px; /* Khoảng cách giữa time và feedback button */
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 .macro-header h3 {
-  margin: 0 0 5px 0; /* Xóa margin mặc định và thêm margin dưới nhỏ */
+  margin: 0;
   font-size: 1.2rem;
+  line-height: 1.4;
 }
 
-/* --- Last Updated Styles (ADDED) --- */
 .macro-header .last-updated {
   font-size: 0.8rem;
   opacity: 0.8;
-  display: flex; /* Để icon và text thẳng hàng */
+  display: flex;
   align-items: center;
-  gap: 5px; /* Khoảng cách giữa icon và text */
+  gap: 5px;
+  white-space: nowrap;
 }
 
-.macro-header .last-updated svg { /* Style cho icon */
+.macro-header .last-updated svg {
     width: 14px;
     height: 14px;
+}
+
+.feedback-btn-header {
+  background: rgba(255, 255, 255, 0.15); /* Nền bán trong suốt */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Viền nhẹ */
+  color: white;
+  opacity: 0.8;
+  cursor: pointer;
+  padding: 5px; /* Padding nhỏ hơn */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Căn giữa icon */
+  border-radius: 6px; /* Bo góc nhẹ */
+  transition: all 0.2s;
+}
+
+.feedback-btn-header:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.25); /* Nền sáng hơn khi hover */
+}
+
+.feedback-btn-header svg {
+  width: 18px; /* Giữ kích thước icon */
+  height: 18px;
+}
+
+/* ... (các style cho content, màu header, highlight giữ nguyên) ... */
+.macro-content-body {
+  padding: 20px 25px;
+  line-height: 1.6;
+  color: #333;
+}
+.macro-color-1 .macro-header { background: linear-gradient(135deg, #F7971E 0%, #FFD200 100%); }
+.macro-header h3 mark { /* ... */ }
+.macro-content-body mark { /* ... */ }
+
+
+
+@media (max-width: 768px) {
+  /* ... */
+  .macro-header {
+    align-items: center;
+    gap: 10px;
+  }
+  .macro-header-meta {
+     margin-top: 0;
+  }
 }
 
 .macro-content-body {
@@ -219,15 +281,122 @@
 
 .translation-controls {
   text-align: right;
+  flex-shrink: 0;
 }
 
-/* Style nút dịch được di chuyển sang CopyButtons.css */
+.copy-buttons-container {
+    display: flex;
+    justify-content: space-between; /* Đẩy 2 nhóm nút ra 2 phía */
+    align-items: center;
+    width: 100%; /* Chiếm toàn bộ chiều rộng của footer */
+    gap: 8px;
+}
 
+/* --- Cập nhật Macro Actions Footer --- */
 .macro-actions-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Đẩy 2 nhóm nút ra xa nhau */
   align-items: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e9ecef;
+}
+
+/* Nút Góp ý */
+.feedback-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #6c757d;
+  background-color: transparent;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.feedback-btn:hover {
+  background-color: #6c757d;
+  color: white;
+}
+
+.feedback-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* --- MODAL FEEDBACK --- */
+.feedback-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; /* Cao hơn các element khác */
+}
+
+.feedback-modal-content {
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.feedback-modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.feedback-modal-content textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  resize: vertical; /* Cho phép thay đổi chiều cao */
+  box-sizing: border-box;
+}
+
+.feedback-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.feedback-modal-actions button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.feedback-modal-actions button:first-child { /* Nút Hủy */
+  background-color: #f8f9fa;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.feedback-modal-actions button:last-child { /* Nút Gửi */
+  background-color: #007bff;
+  color: white;
+}
+.feedback-modal-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.copy-group {
+    display: flex;
+    gap: 8px;
+}
+
+.translation-controls {
+    /* Đảm bảo nút dịch vẫn ở bên phải nếu cần */
 }

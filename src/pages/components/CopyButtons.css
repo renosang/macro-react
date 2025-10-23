@@ -91,6 +91,10 @@
   background-color: #5a6268;
 }
 
+.translation-controls {
+  flex-shrink: 0; /* Ngăn nút dịch bị co lại */
+}
+
 
 /* Tạo hiệu ứng bubble khi click */
 .translate-btn::after {

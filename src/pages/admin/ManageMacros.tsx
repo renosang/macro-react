@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import './ManageMacros.css';
 import RichTextEditor from '../components/RichTextEditor';
@@ -6,6 +6,7 @@ import HighlightText from '../components/HighlightText';
 import { Category, Macro } from '../../types';
 import { Descendant } from 'slate';
 import useAuthStore from '../../stores/useAuthStore';
+import { useLocation, useNavigate } from 'react-router-dom'; // Import hooks
 
 interface ManageMacrosProps {
   categories: Category[];
@@ -27,41 +28,12 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
   const { token } = useAuthStore();
 
-  const filteredAndSortedMacros = useMemo(() => {
-    let filtered = [...macros];
+  // --- DI CHUYỂN HOOKS VÀO ĐÂY ---
+  const location = useLocation();
+  const navigate = useNavigate();
+  // --- KẾT THÚC DI CHUYỂN HOOKS ---
 
-    if (filterCategory !== 'all') {
-      filtered = filtered.filter(macro => macro.category === filterCategory);
-    }
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(macro => macro.status === statusFilter);
-    }
-    if (searchQuery) {
-      filtered = filtered.filter(macro =>
-        macro.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    if (sortOrder !== 'none') {
-      filtered.sort((a, b) => {
-        const countA = a.useCount || 0;
-        const countB = b.useCount || 0;
-        return sortOrder === 'asc' ? countA - countB : countB - countA;
-      });
-    }
-
-    return filtered;
-  }, [macros, filterCategory, statusFilter, searchQuery, sortOrder]);
-
-  const handleSortByUseCount = () => {
-    if (sortOrder === 'none') {
-      setSortOrder('desc');
-    } else if (sortOrder === 'desc') {
-      setSortOrder('asc');
-    } else {
-      setSortOrder('none');
-    }
-  };
-
+  // --- HÀM MỞ MODAL (Định nghĩa trước useEffect) ---
   const handleOpenModal = (macro: Partial<Macro> | null = null) => {
     if (macro) {
       setCurrentMacro({ ...macro });
@@ -75,14 +47,76 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
     }
     setIsModalOpen(true);
   };
+  // --- KẾT THÚC HÀM MỞ MODAL ---
+
+
+  // --- DI CHUYỂN useEffect VÀO ĐÂY ---
+  useEffect(() => {
+    const macroIdToEdit = location.state?.macroIdToEdit;
+
+    if (macroIdToEdit && macros.length > 0) {
+      const macroToEdit = macros.find(m => m._id === macroIdToEdit);
+      if (macroToEdit) {
+        handleOpenModal(macroToEdit); // Bây giờ hàm này đã được định nghĩa
+        navigate(location.pathname, { replace: true, state: {} });
+      } else {
+        toast.error('Không tìm thấy macro để chỉnh sửa.');
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  // Thêm handleOpenModal vào dependency array nếu ESLint yêu cầu,
+  // nhưng cần đảm bảo nó được bọc trong useCallback nếu có thay đổi phức tạp
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state, macros, navigate]);
+  // --- KẾT THÚC DI CHUYỂN useEffect ---
+
+
+  const filteredAndSortedMacros = useMemo(() => {
+      // ... (logic lọc giữ nguyên)
+       let filtered = [...macros];
+
+        if (filterCategory !== 'all') {
+        filtered = filtered.filter(macro => macro.category === filterCategory);
+        }
+        if (statusFilter !== 'all') {
+        filtered = filtered.filter(macro => macro.status === statusFilter);
+        }
+        if (searchQuery) {
+        filtered = filtered.filter(macro =>
+            macro.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        }
+        if (sortOrder !== 'none') {
+        filtered.sort((a, b) => {
+            const countA = a.useCount || 0;
+            const countB = b.useCount || 0;
+            return sortOrder === 'asc' ? countA - countB : countB - countA;
+        });
+        }
+
+        return filtered;
+  }, [macros, filterCategory, statusFilter, searchQuery, sortOrder]);
+
+  const handleSortByUseCount = () => {
+      // ... (logic sắp xếp giữ nguyên)
+       if (sortOrder === 'none') {
+        setSortOrder('desc');
+        } else if (sortOrder === 'desc') {
+        setSortOrder('asc');
+        } else {
+        setSortOrder('none');
+        }
+  };
 
   const handleCloseModal = () => {
+    // ... (logic đóng modal giữ nguyên)
     setIsModalOpen(false);
     setCurrentMacro(null);
   };
 
   const handleSave = async () => {
-    if (!currentMacro || !currentMacro.title || !currentMacro.category) {
+    // ... (logic lưu giữ nguyên)
+     if (!currentMacro || !currentMacro.title || !currentMacro.category) {
       toast.error('Vui lòng điền đầy đủ tiêu đề và danh mục!');
       return;
     }
@@ -100,8 +134,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
         method,
         headers: {
           'Content-Type': 'application/json',
-          // --- SỬA LỖI CHÍNH TẢ TẠI ĐÂY ---
-          'Authorization': `Bearer ${token}` // Sửa 'Authorisation' thành 'Authorization'
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(currentMacro),
       });
@@ -110,9 +143,9 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
         const errorData = await res.json();
         throw new Error(errorData.message || 'Có lỗi xảy ra.');
       }
-      
+
       const savedMacro = await res.json();
-      
+
       if (method === 'POST') {
         setMacros(prev => [savedMacro, ...prev]);
         toast.success('Tạo macro thành công!');
@@ -128,17 +161,17 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa macro này?')) {
+    // ... (logic xóa giữ nguyên)
+     if (window.confirm('Bạn có chắc chắn muốn xóa macro này?')) {
       if (!token) {
         toast.error('Bạn cần đăng nhập để thực hiện hành động này!');
         return;
       }
       try {
-        const res = await fetch(`/api/macros/${id}`, { 
+        const res = await fetch(`/api/macros/${id}`, {
           method: 'DELETE',
           headers: {
-            // --- SỬA LỖI CHÍNH TẢ TẠI ĐÂY ---
-            'Authorization': `Bearer ${token}` // Sửa 'Authorisation' thành 'Authorization'
+            'Authorization': `Bearer ${token}`
           }
         });
         if (!res.ok) throw new Error('Xóa thất bại');
@@ -152,7 +185,8 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
 
   return (
     <div className="manage-macros-container">
-      <h2>Quản lý Macro</h2>
+      {/* ... (Phần JSX còn lại giữ nguyên) ... */}
+       <h2>Quản lý Macro</h2>
       <div className="controls">
         <div className="filter-controls">
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
@@ -235,7 +269,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
         <div className="modal-backdrop">
           <div className="macro-modal-content">
             <h3>{currentMacro._id ? 'Chỉnh sửa Macro' : 'Thêm Macro mới'}</h3>
-            
+
             <div className="modal-body">
               <div className="form-group">
                 <label>Tiêu đề</label>
@@ -274,7 +308,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
                 />
               </div>
             </div>
-            
+
             <div className="macro-modal-actions">
               <button className="action-btn cancel-btn" onClick={handleCloseModal}>Hủy</button>
               <button className="action-btn save-btn" onClick={handleSave}>Lưu</button>

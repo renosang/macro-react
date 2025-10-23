@@ -57,3 +57,18 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Feedback {
+  _id: string;
+  macro: string; // Macro ID
+  macroTitle: string; // Macro Title
+  content: string;
+  status: 'pending' | 'addressed' | 'rejected';
+  submittedBy: { // Thông tin người gửi
+    _id: string;
+    username: string;
+    fullName: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}

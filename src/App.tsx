@@ -16,6 +16,7 @@ import AnalyticsDashboard from './pages/admin/AnalyticsDashboard';
 import LinksPage from './pages/dashboard/LinksPage';
 import ManageLinksPage from './pages/admin/ManageLinksPage';
 import TasksPage from './pages/dashboard/TasksPage';
+import ManageFeedbackPage from './pages/admin/ManageFeedbackPage';
 import './App.css';
 import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
@@ -100,6 +101,7 @@ function App() {
              <Route path="analytics" element={<AnalyticsDashboard />} />
             <Route path="users" element={<ManageUsersPage />} />
             <Route path="links" element={<ManageLinksPage />} />
+            <Route path="feedback" element={<ManageFeedbackPage />} />
             <Route index element={<Navigate to="categories" />} />
           </Route>
           </Route>
