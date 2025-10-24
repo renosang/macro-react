@@ -7,7 +7,7 @@ interface InteractiveGuideProps {
 }
 
 const InteractiveGuide = ({ run, onTourEnd }: InteractiveGuideProps) => {
-  // Định nghĩa các bước hướng dẫn
+  // --- CẬP NHẬT CÁC BƯỚC HƯỚNG DẪN ---
   const steps: Step[] = [
     {
       target: '#tour-search-bar',
@@ -21,23 +21,19 @@ const InteractiveGuide = ({ run, onTourEnd }: InteractiveGuideProps) => {
       placement: 'top',
     },
     {
-      target: '#tour-editor-button',
-      content: 'Nút này mở ra một trình soạn thảo văn bản nhanh, giúp bạn nháp nội dung trước khi gửi cho khách hàng.',
+      // Gộp chung bước Soạn thảo và AI
+      target: '#tour-ai-chat', 
+      content: 'Khu vực này là các công cụ hỗ trợ nhanh, bao gồm Trợ lý AI và nút Soạn thảo nhanh (✍️) để bạn ghi chú.',
       placement: 'left',
     },
     {
-      target: '#tour-ai-chat',
-      content: 'Đây là trợ lý AI. Bạn có thể hỏi đáp nhanh hoặc nhờ AI tối ưu hóa câu trả lời cho khách hàng.',
-      placement: 'left',
-    },
-    {
-      target: '#tour-contribute-link',
-      content: 'Cuối cùng, nếu bạn có một macro hay và muốn chia sẻ, hãy nhấn vào đây để đóng góp cho hệ thống của chúng ta nhé!',
+      target: '#tour-main-menu',
+      content: 'Cuối cùng, hãy nhấn vào đây để khám phá thêm các tính năng khác như "Quản lý liên kết", "Tác vụ", hoặc "Đóng góp" nhé!',
       placement: 'bottom',
     }
   ];
+  // --- KẾT THÚC CẬP NHẬT BƯỚC ---
 
-  // Xử lý khi tour kết thúc (hoàn thành hoặc bỏ qua)
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status } = data;
     const finishedStatuses: string[] = ['finished', 'skipped'];
@@ -62,6 +58,7 @@ const InteractiveGuide = ({ run, onTourEnd }: InteractiveGuideProps) => {
         next: 'Tiếp theo',
         skip: 'Bỏ qua',
       }}
+      // --- CẬP NHẬT CSS CHUYÊN NGHIỆP HƠN ---
       styles={{
         options: {
           arrowColor: '#ffffff',
@@ -70,7 +67,38 @@ const InteractiveGuide = ({ run, onTourEnd }: InteractiveGuideProps) => {
           textColor: '#333333',
           zIndex: 10000,
         },
+        tooltip: {
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+          padding: '20px',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        },
+        tooltipContent: {
+          fontSize: '15px',
+          lineHeight: '1.6',
+          padding: '5px 0 0 0',
+        },
+        buttonClose: {
+          color: '#888',
+        },
+        buttonNext: {
+          fontSize: '14px',
+          padding: '10px 15px',
+          borderRadius: '8px',
+        },
+        buttonBack: {
+          fontSize: '14px',
+          padding: '10px 15px',
+          borderRadius: '8px',
+          marginRight: 'auto',
+        },
+        buttonSkip: {
+          fontSize: '14px',
+          color: '#555',
+        },
       }}
+      // --- KẾT THÚC CẬP NHẬT CSS ---
     />
   );
 };

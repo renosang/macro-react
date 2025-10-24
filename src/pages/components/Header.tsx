@@ -71,7 +71,11 @@ function Header() {
         
         {/* Nút menu chính thay thế cho các nút cũ */}
         <div className="header-menu-container" ref={menuRef}>
-          <button className="header-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button 
+            id="tour-main-menu" 
+            className="header-menu-toggle" 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
             <IconMenu />
           </button>
 

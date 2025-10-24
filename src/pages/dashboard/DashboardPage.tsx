@@ -23,7 +23,7 @@ function DashboardPage({ categories, macros, announcements }: DashboardPageProps
     if (!hasVisited) {
       setTimeout(() => {
         setRunTour(true);
-      }, 500);
+      }, 1500);
     }
   }, []);
 
