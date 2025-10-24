@@ -30,10 +30,22 @@ const CopyButtons = ({
     let textToCopy = serializeSlate(content);
 
     // Xử lý thay thế "Anh/Chị"
-    if (mode === 'anh') {
-      textToCopy = textToCopy.replace(/Anh\/Chị/gi, 'Anh').replace(/anh\/chị/gi, 'anh');
-    } else if (mode === 'chi') {
-      textToCopy = textToCopy.replace(/Anh\/Chị/gi, 'Chị').replace(/anh\/chị/gi, 'chị');
+    if (mode === 'anh' || mode === 'chi') {
+      // Regex này tìm tất cả các biến thể của "Anh/Chị" HOẶC "A/C" (không phân biệt hoa thường)
+      const regex = /Anh\/Chị|A\/C/gi;
+
+      const replaceLogic = (match: string) => {
+        // Kiểm tra xem ký tự đầu tiên của từ tìm được có phải là chữ hoa không
+        const isCapitalized = match[0] === match[0].toUpperCase();
+
+        if (mode === 'anh') {
+          return isCapitalized ? 'Anh' : 'anh';
+        } else { // mode === 'chi'
+          return isCapitalized ? 'Chị' : 'chị';
+        }
+      };
+
+      textToCopy = textToCopy.replace(regex, replaceLogic);
     }
 
 navigator.clipboard.writeText(textToCopy).then(() => {
