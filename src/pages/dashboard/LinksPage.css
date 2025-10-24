@@ -100,3 +100,23 @@
     padding: 0 2px;
     border-radius: 3px;
 }
+
+.link-team-badge.team-a {
+    background-color: #e7f3ff; /* Blue */
+    color: #0056b3;
+}
+
+.link-team-badge.team-b {
+    background-color: #d4edda; /* Green */
+    color: #155724;
+}
+
+.link-team-badge.team-c {
+    background-color: #fff3cd; /* Yellow */
+    color: #856404;
+}
+
+.link-team-badge.team-d {
+    background-color: #f8d7da; /* Red */
+    color: #721c24;
+}

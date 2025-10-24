@@ -71,7 +71,9 @@ function LinksPage() {
         {filteredLinks.map(link => (
           <a key={link._id} href={link.url} target="_blank" rel="noopener noreferrer" className="link-card-anchor">
             <div className="link-card">
-              <span className="link-team-badge">Team {link.team}</span>
+              <span className={`link-team-badge team-${link.team.toLowerCase()}`}>
+                Team {link.team}
+              </span>
               <h3>
                 <HighlightText text={link.title} highlight={searchQuery} />
               </h3>
