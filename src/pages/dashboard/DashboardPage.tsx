@@ -18,18 +18,43 @@ function DashboardPage({ categories, macros, announcements }: DashboardPageProps
   const [searchQuery, setSearchQuery] = useState('');
   const [runTour, setRunTour] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     const hasVisited = localStorage.getItem(ONBOARDING_KEY);
+    let tourTimeout: NodeJS.Timeout; // Lưu trữ ID của setTimeout
+
     if (!hasVisited) {
-      setTimeout(() => {
+      tourTimeout = setTimeout(() => {
         setRunTour(true);
-      }, 1500);
+      }, 1500); 
     }
-  }, []);
+
+    // --- BỔ SUNG HÀM CLEANUP CỦA useEffect ---
+    // Hàm return này sẽ tự động chạy khi component DashboardPage
+    // bị gỡ bỏ (ví dụ: khi chuyển sang trang khác).
+    return () => {
+      // Xóa setTimeout nếu nó chưa kịp chạy
+      if (tourTimeout) {
+        clearTimeout(tourTimeout);
+      }
+      
+      // Đây là phần quan trọng nhất:
+      // Chủ động gỡ khóa cuộn của body NẾU nó đang bị khóa
+      if (document.body.style.overflow === 'hidden') {
+        document.body.style.overflow = '';
+      }
+    };
+    // --- KẾT THÚC BỔ SUNG ---
+  }, []); // [] đảm bảo nó chỉ chạy 1 lần khi mount và cleanup 1 lần khi unmount
 
   const handleTourEnd = () => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
     setRunTour(false);
+    
+    // Vẫn giữ logic dọn dẹp ở đây để xử lý khi người dùng
+    // chủ động bấm "Skip" hoặc "Finished"
+    if (document.body.style.overflow === 'hidden') {
+      document.body.style.overflow = '';
+    }
   };
 
   const getMacroCount = (categoryName: string) => {

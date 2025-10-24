@@ -12,18 +12,28 @@ export interface EditorState {
 
 const useEditorStore = create<EditorState>()(
   persist(
-    (set) => ({
+    (set, get) => ({ // Thêm 'get'
       isOpen: false,
       content: null,
       _hasHydrated: false,
-      toggleEditor: () => set((state) => ({ isOpen: !state.isOpen })),
+      toggleEditor: () => {
+        const nextIsOpen = !get().isOpen; // Lấy trạng thái sắp tới
+
+        // --- BỔ SUNG LOGIC DỌN DẸP ---
+        // Nếu cửa sổ sắp đóng, hãy đảm bảo body cuộn được
+        if (!nextIsOpen && document.body.style.overflow === 'hidden') {
+          document.body.style.overflow = '';
+        }
+        // --- KẾT THÚC BỔ SUNG ---
+
+        set({ isOpen: nextIsOpen });
+      },
       setContent: (newContent) => set({ content: newContent }),
       setHasHydrated: (hydrated) => set({ _hasHydrated: hydrated }),
     }),
     {
       name: 'editor-storage',
       onRehydrateStorage: () => (state) => {
-        // Vẫn giữ lại để đánh dấu đã hydrated, nhưng onFinishHydration sẽ an toàn hơn
         state?.setHasHydrated(true);
       },
     }
@@ -31,4 +41,3 @@ const useEditorStore = create<EditorState>()(
 );
 
 export default useEditorStore;
-
