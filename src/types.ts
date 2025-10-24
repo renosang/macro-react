@@ -24,6 +24,12 @@ export interface Macro {
     _id: string;
     fullName: string;
   };
+  platformTags?: {
+    shopee?: boolean;
+    lazada?: boolean;
+    tiktok?: boolean;
+    hasBrand?: boolean;
+  };
 }
 
 export interface Announcement {

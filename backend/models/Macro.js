@@ -9,6 +9,14 @@ const macroSchema = new mongoose.Schema({
     enum: ['pending', 'approved'],
     default: 'pending'
   },
+
+  platformTags: {
+    shopee: { type: Boolean, default: false },
+    lazada: { type: Boolean, default: false },
+    tiktok: { type: Boolean, default: false },
+    hasBrand: { type: Boolean, default: false },
+  },
+  
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

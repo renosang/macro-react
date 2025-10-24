@@ -9,10 +9,11 @@ import { serializeSlate } from '../../utils/slateUtils';
 import { Descendant } from 'slate';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../stores/useAuthStore';
-import { HiOutlineClock, HiOutlineLightBulb } from 'react-icons/hi2'; // Import thêm icon LightBulb
+// Xóa HiOutlineTag
+import { HiOutlineClock, HiOutlineLightBulb } from 'react-icons/hi2'; 
 
 const IconClock = HiOutlineClock as React.ElementType;
-const IconFeedback = HiOutlineLightBulb as React.ElementType; // Icon cho feedback
+const IconFeedback = HiOutlineLightBulb as React.ElementType;
 
 function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
   const { categoryName } = useParams<{ categoryName: string }>();
@@ -21,10 +22,9 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
 
   const [translations, setTranslations] = useState<Record<string, { content: Descendant[] }>>({});
   const [loadingTranslationId, setLoadingTranslationId] = useState<string | null>(null);
-  const { token, user } = useAuthStore(); // Lấy thêm user để biết ai gửi feedback
+  const { token, user } = useAuthStore(); 
 
-  // State cho feedback modal
-  const [showFeedbackModal, setShowFeedbackModal] = useState<string | null>(null); // Lưu ID macro đang mở modal
+  const [showFeedbackModal, setShowFeedbackModal] = useState<string | null>(null); 
   const [feedbackContent, setFeedbackContent] = useState('');
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
@@ -161,7 +161,6 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
   return (
     <div className="category-detail-container">
       <main className="page-container">
-        {/* ... (breadcrumb, title, search bar giữ nguyên) ... */}
         <div className="breadcrumb">
           <Link to="/dashboard">Dashboard</Link> &gt; {decodedCategoryName}
         </div>
@@ -177,7 +176,6 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
         <div className="macro-list">
           {filteredMacros.length > 0 ? (
             filteredMacros.map((macro, index) => {
-              // ... (khai báo colorClass, isTranslated, isLoading giữ nguyên)
               const colorClasses = ['macro-color-1', 'macro-color-2', 'macro-color-3', 'macro-color-4', 'macro-color-5'];
               const colorClass = colorClasses[index % colorClasses.length];
               const isTranslated = macro._id && translations[macro._id];
@@ -186,18 +184,28 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
  return (
                 <div key={macro._id} className={`macro-item ${colorClass}`}>
                   <div className="macro-header">
+                    {/* --- CẬP NHẬT CẤU TRÚC --- */}
                     <div className="macro-header-main">
+                        {/* Di chuyển icon lên trước <h3> */}
+                        <div className="platform-icons-wrapper">
+                          {macro.platformTags?.shopee && <img src={`${process.env.PUBLIC_URL}/logo-shopee.png`} alt="Shopee" title="Shopee" className="platform-icon-img" />}
+                          {macro.platformTags?.lazada && <img src={`${process.env.PUBLIC_URL}/logo-lazada.png`} alt="Lazada" title="Lazada" className="platform-icon-img" />}
+                          {macro.platformTags?.tiktok && <img src={`${process.env.PUBLIC_URL}/logo-tiktok.png`} alt="Tiktok" title="Tiktok" className="platform-icon-img" />}
+                          {macro.platformTags?.hasBrand && <img src={`${process.env.PUBLIC_URL}/logo-brand.png`} alt="Brand" title="Chứa tên Brand" className="platform-icon-img brand" />}
+                        </div>
                         <h3>
                           <HighlightText text={macro.title} highlight={searchQuery} />
                         </h3>
                     </div>
+                    {/* --- KẾT THÚC CẬP NHẬT CẤU TRÚC --- */}
+                    
                     {/* Meta section with time and feedback button */}
                     <div className="macro-header-meta">
                         <small className="last-updated">
                            <IconClock /> Cập nhật: {formatDateTime(macro.updatedAt)}
                         </small>
-                        <button className="feedback-btn-header" onClick={() => openFeedbackModal(macro._id)} title="Góp ý cho macro này">
-                            <IconFeedback />
+                        <button className="feedback-btn-header" onClick={() => openFeedbackModal(macro._id!)} title="Góp ý cho macro này">
+                            <IconFeedback /> Góp ý
                         </button>
                     </div>
                   </div>

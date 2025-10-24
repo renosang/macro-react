@@ -28,51 +28,59 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
   const { token } = useAuthStore();
 
-  // --- DI CHUYỂN HOOKS VÀO ĐÂY ---
+  // --- HOOKS ĐÃ ĐƯỢC DI CHUYỂN VÀO TRONG FUNCTION ---
   const location = useLocation();
   const navigate = useNavigate();
-  // --- KẾT THÚC DI CHUYỂN HOOKS ---
 
-  // --- HÀM MỞ MODAL (Định nghĩa trước useEffect) ---
   const handleOpenModal = (macro: Partial<Macro> | null = null) => {
     if (macro) {
-      setCurrentMacro({ ...macro });
+      setCurrentMacro({ ...macro,
+      platformTags: macro.platformTags || { shopee: false, lazada: false, tiktok: false, hasBrand: false }
+      });
     } else {
       setCurrentMacro({
         title: '',
         category: categories.length > 0 ? categories[0].name : '',
         content: emptyContent,
         status: 'pending',
+      platformTags: { shopee: false, lazada: false, tiktok: false, hasBrand: false }
       });
     }
     setIsModalOpen(true);
   };
-  // --- KẾT THÚC HÀM MỞ MODAL ---
 
+  const handlePlatformTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, checked } = e.target;
+      if (currentMacro) {
+          setCurrentMacro({
+              ...currentMacro,
+              platformTags: {
+                  ...currentMacro.platformTags,
+                  [name]: checked,
+              }
+          });
+      }
+  };
 
-  // --- DI CHUYỂN useEffect VÀO ĐÂY ---
+  // --- useEffect ĐÃ ĐƯỢC DI CHUYỂN VÀO TRONG FUNCTION ---
   useEffect(() => {
     const macroIdToEdit = location.state?.macroIdToEdit;
 
     if (macroIdToEdit && macros.length > 0) {
       const macroToEdit = macros.find(m => m._id === macroIdToEdit);
       if (macroToEdit) {
-        handleOpenModal(macroToEdit); // Bây giờ hàm này đã được định nghĩa
+        handleOpenModal(macroToEdit);
         navigate(location.pathname, { replace: true, state: {} });
       } else {
         toast.error('Không tìm thấy macro để chỉnh sửa.');
         navigate(location.pathname, { replace: true, state: {} });
       }
     }
-  // Thêm handleOpenModal vào dependency array nếu ESLint yêu cầu,
-  // nhưng cần đảm bảo nó được bọc trong useCallback nếu có thay đổi phức tạp
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, macros, navigate]);
-  // --- KẾT THÚC DI CHUYỂN useEffect ---
 
 
   const filteredAndSortedMacros = useMemo(() => {
-      // ... (logic lọc giữ nguyên)
        let filtered = [...macros];
 
         if (filterCategory !== 'all') {
@@ -98,7 +106,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   }, [macros, filterCategory, statusFilter, searchQuery, sortOrder]);
 
   const handleSortByUseCount = () => {
-      // ... (logic sắp xếp giữ nguyên)
        if (sortOrder === 'none') {
         setSortOrder('desc');
         } else if (sortOrder === 'desc') {
@@ -109,13 +116,11 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   };
 
   const handleCloseModal = () => {
-    // ... (logic đóng modal giữ nguyên)
     setIsModalOpen(false);
     setCurrentMacro(null);
   };
 
   const handleSave = async () => {
-    // ... (logic lưu giữ nguyên)
      if (!currentMacro || !currentMacro.title || !currentMacro.category) {
       toast.error('Vui lòng điền đầy đủ tiêu đề và danh mục!');
       return;
@@ -161,7 +166,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   };
 
   const handleDelete = async (id: string) => {
-    // ... (logic xóa giữ nguyên)
      if (window.confirm('Bạn có chắc chắn muốn xóa macro này?')) {
       if (!token) {
         toast.error('Bạn cần đăng nhập để thực hiện hành động này!');
@@ -185,7 +189,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
 
   return (
     <div className="manage-macros-container">
-      {/* ... (Phần JSX còn lại giữ nguyên) ... */}
        <h2>Quản lý Macro</h2>
       <div className="controls">
         <div className="filter-controls">
@@ -201,6 +204,8 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
             <option value="approved">Đã xét duyệt</option>
           </select>
         </div>
+        
+        {/* --- KHỐI CODE BỊ LỖI ĐÃ BỊ XÓA KHỎI ĐÂY --- */}
 
         <div className="search-controls">
           <input
@@ -248,7 +253,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
                     hour: '2-digit', minute: '2-digit'
                   })}
                 </td>
-
                 <td className="cell-center">
                   <span className={`status-badge status-${macro.status}`}>
                     {macro.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
@@ -265,6 +269,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
         </table>
       </div>
 
+      {/* Modal */}
       {isModalOpen && currentMacro && (
         <div className="modal-backdrop">
           <div className="macro-modal-content">
@@ -300,6 +305,51 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
                   </select>
                 </div>
               </div>
+              
+              {/* --- KHỐI PLATFORM TAGS (ĐÚNG VỊ TRÍ) --- */}
+              <div className="form-group">
+                <label>Gắn thẻ (Không bắt buộc)</label>
+                <div className="platform-tags-group">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="shopee"
+                      checked={!!currentMacro!.platformTags?.shopee}
+                      onChange={handlePlatformTagChange}
+                    />
+                    Shopee
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="lazada"
+                      checked={!!currentMacro!.platformTags?.lazada}
+                      onChange={handlePlatformTagChange}
+                    />
+                    Lazada
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="tiktok"
+                      checked={!!currentMacro!.platformTags?.tiktok}
+                      onChange={handlePlatformTagChange}
+                    />
+                    Tiktok
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="hasBrand"
+                      checked={!!currentMacro!.platformTags?.hasBrand}
+                      onChange={handlePlatformTagChange}
+                    />
+                    Chứa tên Brand
+                  </label>
+                </div>
+              </div>
+              {/* --- KẾT THÚC --- */}
+
               <div className="form-group">
                 <label>Nội dung</label>
                 <RichTextEditor

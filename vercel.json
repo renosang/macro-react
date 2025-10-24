@@ -43,6 +43,22 @@
       "dest": "/logo512.png"
     },
     {
+      "src": "/logo-shopee.png",
+      "dest": "/logo-shopee.png"
+    },
+    {
+      "src": "/logo-lazada.png",
+      "dest": "/logo-lazada.png"
+    },
+    {
+      "src": "/logo-tiktok.png",
+      "dest": "/logo-tiktok.png"
+    },
+    {
+      "src": "/logo-brand.png",
+      "dest": "/logo-brand.png"
+    },
+    {
       "src": "/robots.txt",
       "dest": "/robots.txt"
     },

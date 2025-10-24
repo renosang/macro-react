@@ -26,7 +26,7 @@ router.post('/', protect, async (req, res) => {
   try {
     // --- SỬA LỖI TẠI ĐÂY ---
     // Lấy thêm trường 'status' từ request body
-    const { title, content, category, keywords, status } = req.body;
+    const { title, content, category, keywords, status, platformTags } = req.body;
 
     const newMacro = new Macro({
       title,
@@ -36,6 +36,7 @@ router.post('/', protect, async (req, res) => {
       // Sử dụng trạng thái được gửi từ frontend,
       // nếu không có thì mặc định là 'pending'
       status: status || 'pending',
+      platformTags,
       createdBy: req.user._id,
     });
     // -------------------------
@@ -51,12 +52,13 @@ router.post('/', protect, async (req, res) => {
 // CẬP NHẬT MACRO
 router.put('/:id', protect, async (req, res) => {
   try {
-    const { title, category, content, status } = req.body;
+    const { title, category, content, status, platformTags } = req.body;
     const updateData = {
       title,
       category,
       content,
       status,
+      platformTags,
       lastModifiedBy: req.user._id
     };
 

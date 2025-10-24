@@ -51,7 +51,7 @@
   margin: 0; /* Xóa căn giữa auto */
 }
 
-.search-bar input {
+.search-bar-container input { /* Style trực tiếp cho input */
   width: 100%;
   padding: 12px 20px 12px 45px;
   border: 1px solid #ddd;
@@ -61,7 +61,7 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.search-bar input:focus {
+.search-bar-container input:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
@@ -97,10 +97,11 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
+/* --- SỬA CSS HEADER --- */
 .macro-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start; /* Căn lề trên để phù hợp với title nhiều dòng */
+  align-items: center; /* Căn giữa theo chiều dọc */
   padding: 15px 25px;
   color: white;
 }
@@ -108,15 +109,19 @@
 .macro-header-main {
   flex-grow: 1;
   margin-right: 15px;
+  display: flex; 
+  align-items: center; /* Căn giữa icon và title */
+  gap: 12px; /* Tăng khoảng cách giữa icon và title */
 }
+/* --- KẾT THÚC SỬA CSS HEADER --- */
 
 /* --- Meta section (time & feedback button) --- */
 .macro-header-meta {
   display: flex;
   align-items: center; /* Căn giữa icon và text */
-  gap: 12px; /* Khoảng cách giữa time và feedback button */
+  gap: 12px; 
   flex-shrink: 0;
-  margin-top: 2px;
+  /* margin-top: 2px; Xóa margin-top vì đã căn giữa */
 }
 
 .macro-header h3 {
@@ -140,56 +145,35 @@
 }
 
 .feedback-btn-header {
-  background: rgba(255, 255, 255, 0.15); /* Nền bán trong suốt */
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Viền nhẹ */
+  background: rgba(255, 255, 255, 0.15); 
+  border: 1px solid rgba(255, 255, 255, 0.3); 
   color: white;
   opacity: 0.8;
   cursor: pointer;
-  padding: 5px; /* Padding nhỏ hơn */
+  padding: 5px 8px; 
   display: flex;
   align-items: center;
-  justify-content: center; /* Căn giữa icon */
-  border-radius: 6px; /* Bo góc nhẹ */
+  gap: 4px; 
+  border-radius: 6px; 
   transition: all 0.2s;
+  font-size: 0.75rem; 
 }
 
 .feedback-btn-header:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.25); /* Nền sáng hơn khi hover */
+  background: rgba(255, 255, 255, 0.25); 
 }
 
 .feedback-btn-header svg {
-  width: 18px; /* Giữ kích thước icon */
-  height: 18px;
+  width: 16px; 
+  height: 16px;
+  flex-shrink: 0;
 }
 
-/* ... (các style cho content, màu header, highlight giữ nguyên) ... */
 .macro-content-body {
   padding: 20px 25px;
   line-height: 1.6;
   color: #333;
-}
-.macro-color-1 .macro-header { background: linear-gradient(135deg, #F7971E 0%, #FFD200 100%); }
-.macro-header h3 mark { /* ... */ }
-.macro-content-body mark { /* ... */ }
-
-
-
-@media (max-width: 768px) {
-  /* ... */
-  .macro-header {
-    align-items: center;
-    gap: 10px;
-  }
-  .macro-header-meta {
-     margin-top: 0;
-  }
-}
-
-.macro-content-body {
-  padding: 20px 25px; /* Padding cho nội dung */
-  line-height: 1.6;
-  color: #333; /* Chữ trong nội dung màu đen */
 }
 
 /* --- Gán màu cho từng header card --- */
@@ -200,7 +184,6 @@
 .macro-color-5 .macro-header { background: linear-gradient(135deg, #dd5e89 0%, #f7bb97 100%); }
 
 /* --- Style cho highlight (UPDATED) --- */
-/* Highlight trong header (tiêu đề) */
 .macro-header h3 mark {
   background-color: rgba(255, 255, 255, 0.3);
   color: white;
@@ -208,11 +191,46 @@
   border-radius: 3px;
   font-weight: bold;
 }
-/* Highlight trong nội dung */
 .macro-content-body mark {
-  background-color: #ffe082; /* Màu vàng nhạt cho highlight trong nội dung */
+  background-color: #ffe082;
   border-radius: 3px;
   padding: 1px 3px;
+}
+
+/* --- CSS CHO PLATFORM ICONS (SỬA LỖI) --- */
+.platform-icons-wrapper {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 8px;
+  /* margin-top: 8px; Xóa vì đã align-items: center */
+  flex-shrink: 0; /* Ngăn icon bị co lại */
+}
+
+/* Style cho logo (ảnh) */
+.platform-icon-img {
+  height: 50px;
+  width: auto; 
+  border-radius: 8px; /* Tăng bo góc */
+  background-color: rgba(255, 255, 255, 0.7); /* Thêm lại nền phủ */
+  padding: 6px; /* Tăng padding */
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.platform-icon-img.brand {
+  background-color: #f0f0f0; 
+  padding: 6px; 
+}
+/* --- KẾT THÚC CSS PLATFORM ICONS --- */
+
+
+/* --- Footer Actions (UPDATED) --- */
+.macro-actions-footer {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  padding: 0px 25px 0px 25px;
+  margin-top: 0;
 }
 
 /* --- Responsive Styles for Mobile --- */
@@ -224,15 +242,33 @@
   .page-container h1 {
     font-size: 1.7rem;
   }
-
+  
   .search-bar-container {
-    width: 100%; /* Chiếm toàn bộ chiều rộng trên mobile */
+    width: 100%; 
   }
 
-  /* Cập nhật padding và font-size cho header trên mobile */
   .macro-header {
     padding: 12px 18px;
+    align-items: flex-start; 
+    flex-direction: column; 
   }
+  
+  /* CẬP NHẬT CHO RESPONSIVE */
+  .macro-header-main {
+      flex-direction: column; /* Icon và title xếp dọc */
+      align-items: flex-start; /* Căn trái */
+      gap: 8px; 
+  }
+  
+  .platform-icon-img {
+      height: 40px; /* Giảm kích thước icon trên mobile */
+      padding: 4px;
+  }
+  
+  .macro-header-meta {
+     margin-top: 8px; 
+  }
+
   .macro-header h3 {
     font-size: 1.1rem;
   }
@@ -244,6 +280,10 @@
   .macro-content-body {
     padding: 15px 18px;
     font-size: 0.95rem;
+  }
+  
+  .macro-actions-footer {
+      padding: 10px 18px 12px 18px;
   }
 }
 
@@ -286,20 +326,12 @@
 
 .copy-buttons-container {
     display: flex;
-    justify-content: space-between; /* Đẩy 2 nhóm nút ra 2 phía */
+    justify-content: space-between; 
     align-items: center;
-    width: 100%; /* Chiếm toàn bộ chiều rộng của footer */
+    width: 100%; 
     gap: 8px;
 }
 
-/* --- Cập nhật Macro Actions Footer --- */
-.macro-actions-footer {
-  display: flex;
-  justify-content: space-between; /* Đẩy 2 nhóm nút ra xa nhau */
-  align-items: center;
-}
-
-/* Nút Góp ý */
 .feedback-btn {
   display: flex;
   align-items: center;
@@ -334,7 +366,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1050; /* Cao hơn các element khác */
+  z-index: 1050; 
 }
 
 .feedback-modal-content {
@@ -359,7 +391,7 @@
   border-radius: 8px;
   font-size: 1rem;
   margin-bottom: 16px;
-  resize: vertical; /* Cho phép thay đổi chiều cao */
+  resize: vertical; 
   box-sizing: border-box;
 }
 
@@ -395,8 +427,4 @@
 .copy-group {
     display: flex;
     gap: 8px;
-}
-
-.translation-controls {
-    /* Đảm bảo nút dịch vẫn ở bên phải nếu cần */
 }
