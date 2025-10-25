@@ -1,10 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import './DashboardPage.css';
 import { Category, Macro, Announcement } from '../../types';
 import BroadcastBanner from '../components/BroadcastBanner';
 import HighlightText from '../components/HighlightText';
-import InteractiveGuide from '../components/InteractiveGuide';
 
 interface DashboardPageProps {
   categories: Category[];
@@ -12,50 +11,8 @@ interface DashboardPageProps {
   announcements: Announcement[];
 }
 
-const ONBOARDING_KEY = 'macroSystemHasVisited';
-
 function DashboardPage({ categories, macros, announcements }: DashboardPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [runTour, setRunTour] = useState(false);
-
-useEffect(() => {
-    const hasVisited = localStorage.getItem(ONBOARDING_KEY);
-    let tourTimeout: NodeJS.Timeout; // Lưu trữ ID của setTimeout
-
-    if (!hasVisited) {
-      tourTimeout = setTimeout(() => {
-        setRunTour(true);
-      }, 1500); 
-    }
-
-    // --- BỔ SUNG HÀM CLEANUP CỦA useEffect ---
-    // Hàm return này sẽ tự động chạy khi component DashboardPage
-    // bị gỡ bỏ (ví dụ: khi chuyển sang trang khác).
-    return () => {
-      // Xóa setTimeout nếu nó chưa kịp chạy
-      if (tourTimeout) {
-        clearTimeout(tourTimeout);
-      }
-      
-      // Đây là phần quan trọng nhất:
-      // Chủ động gỡ khóa cuộn của body NẾU nó đang bị khóa
-      if (document.body.style.overflow === 'hidden') {
-        document.body.style.overflow = '';
-      }
-    };
-    // --- KẾT THÚC BỔ SUNG ---
-  }, []); // [] đảm bảo nó chỉ chạy 1 lần khi mount và cleanup 1 lần khi unmount
-
-  const handleTourEnd = () => {
-    localStorage.setItem(ONBOARDING_KEY, 'true');
-    setRunTour(false);
-    
-    // Vẫn giữ logic dọn dẹp ở đây để xử lý khi người dùng
-    // chủ động bấm "Skip" hoặc "Finished"
-    if (document.body.style.overflow === 'hidden') {
-      document.body.style.overflow = '';
-    }
-  };
 
   const getMacroCount = (categoryName: string) => {
     return macros.filter(macro => macro.category === categoryName).length;
@@ -75,8 +32,6 @@ useEffect(() => {
 
   return (
     <div className="dashboard-container">
-      <InteractiveGuide run={runTour} onTourEnd={handleTourEnd} />
-
       <main className="page-container">
         <BroadcastBanner announcement={latestAnnouncement} />
         
@@ -89,6 +44,8 @@ useEffect(() => {
             placeholder="Tìm kiếm danh mục..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            name="dashboard-search"
+            id="dashboard-search"
           />
           <button>🔍</button>
         </div>

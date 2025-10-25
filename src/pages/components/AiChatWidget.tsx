@@ -131,6 +131,8 @@ const AiChatWidget: React.FC = () => {
         <form className="chat-input-form" onSubmit={handleSendMessage}>
           <textarea
             ref={textareaRef}
+            id="ai-chat-input"
+            name="ai-chat-message"
             placeholder="Tôi có thể giúp gì cho bạn hôm nay?"
             value={input}
             onChange={(e) => setInput(e.target.value)}

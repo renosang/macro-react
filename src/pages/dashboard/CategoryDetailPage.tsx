@@ -92,7 +92,6 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
   };
 
   const hideTranslation = (macroId: string) => {
-      // ... (code xử lý ẩn dịch giữ nguyên)
       setTranslations(prev => {
         const newTranslations = { ...prev };
         delete newTranslations[macroId];
@@ -100,19 +99,33 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
       });
   };
 
-  const handleCopyOnSelect = () => {
-      // ... (code xử lý copy giữ nguyên)
-      const selection = window.getSelection();
-      if (selection && selection.toString().trim().length > 1) {
-          const selectedText = selection.toString();
-          navigator.clipboard.writeText(selectedText)
-              .then(() => {
-                  toast.success('Đã sao chép vào bộ nhớ tạm!');
-              })
-              .catch(err => {
-                  console.error('Lỗi sao chép tự động:', err);
-              });
-      }
+const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
+    // Đảm bảo có token
+    if (!token) return; 
+
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim().length > 1) {
+        const selectedText = selection.toString();
+        navigator.clipboard.writeText(selectedText)
+            .then(() => {
+                toast.success('Đã sao chép vào bộ nhớ tạm!');
+
+                // 2. Thêm logic đếm lượt sử dụng (lấy từ CopyButtons.tsx)
+                if (macro._id && token) {
+                  fetch(`/api/macros/${macro._id}/increment-usage`, {
+                    method: 'PUT',
+                    headers: {
+                      'Authorization': `Bearer ${token}`
+                    }
+                  });
+                }
+                // --- KẾT THÚC THÊM LOGIC ---
+
+            })
+            .catch(err => {
+                console.error('Lỗi sao chép tự động:', err);
+            });
+    }
   };
 
   // --- HÀM MỞ/ĐÓNG MODAL FEEDBACK ---
@@ -210,12 +223,12 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
                     </div>
                   </div>
 
-                  <div className="macro-content-body" onMouseUp={handleCopyOnSelect}>
+                  <div className="macro-content-body" onMouseUp={() => handleCopyOnSelect(macro)}>
                     <ContentViewer content={macro.content} highlight={searchQuery} />
                   </div>
-
+                  
                   {isTranslated && (
-                    <div className="translated-content" onMouseUp={handleCopyOnSelect}>
+                    <div className="translated-content" onMouseUp={() => handleCopyOnSelect(macro)}>
                       <h4>Bản dịch (Tiếng Anh)</h4>
                       <ContentViewer content={translations[macro._id!].content} />
                     </div>
