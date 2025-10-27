@@ -22,21 +22,19 @@ import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
 import useAuthStore from './stores/useAuthStore';
 
-// ----- BỔ SUNG: Hàm xây dựng cây danh mục -----
-// (Chúng ta cần nó ở đây để truyền CÂY cho Dashboard và CategoryDetail)
 const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
   return categories
     .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null)) 
     .map(category => ({
       ...category,
-      children: buildCategoryTree(categories, category._id)
+      children: buildCategoryTree(categories, category._id) || [] 
     }));
 };
 
 function App() {
   const [isAdmin] = useState(true);
-  const [categories, setCategories] = useState<Category[]>([]); // Sẽ lưu trữ CÂY
-  const [flatCategories, setFlatCategories] = useState<Category[]>([]); // Sẽ lưu trữ list PHẲNG
+  const [categories, setCategories] = useState<Category[]>([]); // State này sẽ lưu CÂY
+  const [flatCategories, setFlatCategories] = useState<Category[]>([]); // State này lưu list PHẲNG
   const [macros, setMacros] = useState<Macro[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const { token, logout } = useAuthStore(); 
@@ -54,7 +52,6 @@ function App() {
       try {
         const headers = { 'Authorization': `Bearer ${token}` };
 
-        // API categories giờ trả về PHẲNG (nhưng CÓ parent)
         const [macrosRes, categoriesRes, announcementsRes] = await Promise.all([
           fetch('/api/macros', { headers }),
           fetch('/api/categories', { headers }), 
@@ -72,17 +69,13 @@ function App() {
         }
 
         const macrosData = await macrosRes.json();
-        const categoriesData = await categoriesRes.json(); // Đây là danh sách phẳng
+        const categoriesData = await categoriesRes.json();
         const announcementsData = await announcementsRes.json();
         
         setMacros(macrosData);
         
-        // --- SỬA: Lưu cả danh sách phẳng VÀ cây danh mục ---
-        setFlatCategories(categoriesData); // 1. Lưu danh sách phẳng
-        // 2. Xây dựng cây (chỉ các mục gốc) và lưu
-        setCategories(buildCategoryTree(categoriesData, null)); 
-        // --- KẾT THÚC SỬA ---
-        
+        setFlatCategories(categoriesData);
+        setCategories(buildCategoryTree(categoriesData, null));         
         setAnnouncements(announcementsData);
 
       } catch (error: any) {
@@ -101,13 +94,10 @@ function App() {
         
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardLayout />}>
-            {/* Truyền cây (cấp 1) vào DashboardPage */}
             <Route index element={<DashboardPage categories={categories} macros={macros} announcements={announcements} />} />
             
-            {/* SỬA LỖI MẤT BỘ LỌC: Truyền CÂY vào allCategories */}
             <Route path="category/:categoryName" element={<CategoryDetailPage allMacros={macros} allCategories={categories} />} />
             
-            {/* SỬA: Truyền danh sách PHẲNG cho ContributePage */}
             <Route path="contribute" element={<ContributePage flatCategories={flatCategories} />} />
             
             <Route path="links" element={<LinksPage />} />
@@ -116,10 +106,8 @@ function App() {
          <Route element={<AdminRoute />}>
             <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
             
-            {/* SỬA: ManageCategories cần danh sách phẳng để tự xây dựng cây */}
             <Route path="categories" element={<ManageCategories initialCategories={flatCategories} />} /> 
             
-            {/* SỬA: ManageMacros cần danh sách phẳng */}
             <Route path="macros" element={<ManageMacros categories={flatCategories} macros={macros} setMacros={setMacros} />} />
             
             <Route path="announcements" element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />} />

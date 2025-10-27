@@ -4,10 +4,9 @@ import './ManageCategories.css';
 import { Category } from '../../types'; 
 import useAuthStore from '../../stores/useAuthStore';
 
-// Interface cho danh sách phẳng dùng trong dropdown
 interface FlatCategoryOption {
   _id: string;
-  name: string; // Tên đã có tiền tố thụt lề
+  name: string;
 }
 
 const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
@@ -20,7 +19,7 @@ const buildCategoryTree = (categories: Category[], parentId: string | null = nul
 };
 
 interface ManageCategoriesProps {
-  initialCategories: Category[]; // Danh sách phẳng
+  initialCategories: Category[];
 }
 
 function ManageCategories({ initialCategories }: ManageCategoriesProps) {
@@ -38,13 +37,13 @@ function ManageCategories({ initialCategories }: ManageCategoriesProps) {
   const fetchCategories = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('/api/categories', { // API này trả về danh sách phẳng
+      const res = await fetch('/api/categories', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Không thể tải danh mục.');
       const data = await res.json();
-      setCategories(data); // Cập nhật danh sách phẳng
-      setCategoriesTree(buildCategoryTree(data, null)); // Xây dựng cây
+      setCategories(data);
+      setCategoriesTree(buildCategoryTree(data, null));
     } catch (error: any) {
       toast.error(error.message);
       setCategories([]); 
@@ -97,7 +96,7 @@ function ManageCategories({ initialCategories }: ManageCategoriesProps) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Thêm thất bại.');
       }
-      await fetchCategories(); // Tải lại cả phẳng và cây
+      await fetchCategories();
       toast.success('Thêm danh mục thành công!');
       setIsAdding(false);
       setNewCategoryName('');
@@ -144,7 +143,7 @@ function ManageCategories({ initialCategories }: ManageCategoriesProps) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Cập nhật thất bại.');
       }
-      await fetchCategories(); // Tải lại cả phẳng và cây
+      await fetchCategories();
       toast.success('Cập nhật thành công!');
       handleCancelEdit(); 
     } catch (error: any) {
