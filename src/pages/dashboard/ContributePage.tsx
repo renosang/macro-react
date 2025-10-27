@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import RichTextEditor from '../components/RichTextEditor';
 import { Category } from '../../types';
 import { Descendant } from 'slate';
 import './ContributePage.css';
-import useAuthStore from '../../stores/useAuthStore'; 
+import useAuthStore from '../../stores/useAuthStore';
 
 const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }] }];
 
 interface ContributePageProps {
-  flatCategories: Category[]; // Nhận danh sách phẳng
+  flatCategories: Category[];
 }
 
 interface CategoryOption {
@@ -19,7 +19,7 @@ interface CategoryOption {
 }
 const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
   return categories
-    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null)) 
+    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null))
     .map(category => ({
       ...category,
       children: buildCategoryTree(categories, category._id)
@@ -36,7 +36,7 @@ const buildCategoryDropdownOptions = (cats: Category[], prefix = ''): CategoryOp
   return flatList;
 };
 
-function ContributePage({ flatCategories }: ContributePageProps) { // SỬA: Nhận prop
+function ContributePage({ flatCategories }: ContributePageProps) {
   const [title, setTitle] = useState('');
     
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -73,7 +73,7 @@ function ContributePage({ flatCategories }: ContributePageProps) { // SỬA: Nh�
         },
         body: JSON.stringify({
           title,
-          category: selectedCategory, // Gửi tên (đã bao gồm thụt lề nếu có)
+          category: selectedCategory,
           content,
           status: 'pending', 
         }),

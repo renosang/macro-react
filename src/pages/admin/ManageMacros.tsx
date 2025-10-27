@@ -6,7 +6,7 @@ import HighlightText from '../components/HighlightText';
 import { Category, Macro } from '../../types';
 import { Descendant } from 'slate';
 import useAuthStore from '../../stores/useAuthStore';
-import { useLocation, useNavigate } from 'react-router-dom'; 
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface ManageMacrosProps {
   categories: Category[];
@@ -21,27 +21,16 @@ type SortOrder = 'asc' | 'desc' | 'none';
 
 interface CategoryOption {
   _id: string;
-  name: string; 
+  name: string;
 }
 
 const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
   return categories
-    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null)) 
+    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null))
     .map(category => ({
       ...category,
       children: buildCategoryTree(categories, category._id)
     }));
-};
-
-const buildOptionsRecursive = (cats: Category[], prefix = ''): CategoryOption[] => {
-  let flatList: CategoryOption[] = [];
-  cats.forEach(cat => {
-    flatList.push({ _id: cat._id, name: prefix + cat.name });
-    if (cat.children && cat.children.length > 0) {
-      flatList = flatList.concat(buildOptionsRecursive(cat.children, prefix + '-- '));
-    }
-  });
-  return flatList;
 };
 
 function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps) {
@@ -67,7 +56,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   }, []);
 
   const categoryOptions = useMemo(() => {
-    const categoryTree = buildCategoryTree(categories, null); 
+    const categoryTree = buildCategoryTree(categories, null);
     return buildOptionsCallback(categoryTree);
   }, [categories, buildOptionsCallback]);
 
@@ -81,7 +70,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
       const defaultCategoryName = categoryOptions.length > 0 ? categoryOptions[0].name : '';
       setCurrentMacro({
         title: '',
-        category: defaultCategoryName, 
+        category: defaultCategoryName,
         content: emptyContent,
         status: 'pending',
         platformTags: { shopee: false, lazada: false, tiktok: false, hasBrand: false }
