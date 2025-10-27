@@ -22,42 +22,48 @@ import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
 import useAuthStore from './stores/useAuthStore';
 
+// ----- BỔ SUNG: Hàm xây dựng cây danh mục -----
+// (Chúng ta cần nó ở đây để truyền CÂY cho Dashboard và CategoryDetail)
+const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
+  return categories
+    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null)) 
+    .map(category => ({
+      ...category,
+      children: buildCategoryTree(categories, category._id)
+    }));
+};
+
 function App() {
   const [isAdmin] = useState(true);
-  const [categories, setCategories] = useState<Category[]>([]);
-  // --- BỎ STATE flatCategories ---
+  const [categories, setCategories] = useState<Category[]>([]); // Sẽ lưu trữ CÂY
+  const [flatCategories, setFlatCategories] = useState<Category[]>([]); // Sẽ lưu trữ list PHẲNG
   const [macros, setMacros] = useState<Macro[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const { token, logout } = useAuthStore(); // Lấy token và hàm logout
+  const { token, logout } = useAuthStore(); 
 
   useEffect(() => {
     const fetchData = async () => {
-      // Nếu không có token (chưa đăng nhập), xóa dữ liệu cũ và dừng lại
       if (!token) {
         setCategories([]);
+        setFlatCategories([]); // Reset
         setMacros([]);
         setAnnouncements([]);
         return;
       }
 
       try {
-        // Tạo header có chứa token để xác thực
-        const headers = {
-          'Authorization': `Bearer ${token}`
-        };
+        const headers = { 'Authorization': `Bearer ${token}` };
 
-        // --- SỬA: Đảm bảo fetch /api/categories (API trả về cây của bạn) ---
+        // API categories giờ trả về PHẲNG (nhưng CÓ parent)
         const [macrosRes, categoriesRes, announcementsRes] = await Promise.all([
           fetch('/api/macros', { headers }),
-          // Giả sử /api/categories trả về cây, dựa theo file ManageCategories.tsx
           fetch('/api/categories', { headers }), 
           fetch('/api/announcements', { headers })
         ]);
 
-        // Nếu có lỗi xác thực (token hết hạn), thông báo và logout
         if (macrosRes.status === 401 || categoriesRes.status === 401) {
           toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-          logout(); // Tự động logout người dùng
+          logout(); 
           return;
         }
         
@@ -66,12 +72,17 @@ function App() {
         }
 
         const macrosData = await macrosRes.json();
-        const categoriesData = await categoriesRes.json();
+        const categoriesData = await categoriesRes.json(); // Đây là danh sách phẳng
         const announcementsData = await announcementsRes.json();
         
         setMacros(macrosData);
-        // --- SỬA: Lưu trực tiếp dữ liệu (giả sử là cây) vào categories ---
-        setCategories(categoriesData); 
+        
+        // --- SỬA: Lưu cả danh sách phẳng VÀ cây danh mục ---
+        setFlatCategories(categoriesData); // 1. Lưu danh sách phẳng
+        // 2. Xây dựng cây (chỉ các mục gốc) và lưu
+        setCategories(buildCategoryTree(categoriesData, null)); 
+        // --- KẾT THÚC SỬA ---
+        
         setAnnouncements(announcementsData);
 
       } catch (error: any) {
@@ -80,7 +91,7 @@ function App() {
     };
 
     fetchData();
-  }, [token, logout]); // Thêm token, logout vào dependency array
+  }, [token, logout]); 
 
   return (
     <Router>
@@ -90,23 +101,27 @@ function App() {
         
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardLayout />}>
+            {/* Truyền cây (cấp 1) vào DashboardPage */}
             <Route index element={<DashboardPage categories={categories} macros={macros} announcements={announcements} />} />
-            {/* ----- 
-              SỬA LỖI: Thêm prop allCategories={categories} vào đây. 
-              Component CategoryDetailPage cần prop này để xây dựng bộ lọc.
-              -----
-            */}
+            
+            {/* SỬA LỖI MẤT BỘ LỌC: Truyền CÂY vào allCategories */}
             <Route path="category/:categoryName" element={<CategoryDetailPage allMacros={macros} allCategories={categories} />} />
-            <Route path="contribute" element={<ContributePage />} />
+            
+            {/* SỬA: Truyền danh sách PHẲNG cho ContributePage */}
+            <Route path="contribute" element={<ContributePage flatCategories={flatCategories} />} />
+            
             <Route path="links" element={<LinksPage />} />
             <Route path="tasks" element={<TasksPage />} />
           </Route>
          <Route element={<AdminRoute />}>
             <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
-            {/* SỬA: Giữ nguyên <ManageCategories /> không có props
-                vì component này tự fetch dữ liệu (dựa trên file ManageCategories.tsx bạn gửi) */}
-            <Route path="categories" element={<ManageCategories />} />
-            <Route path="macros" element={<ManageMacros categories={categories} macros={macros} setMacros={setMacros} />} />
+            
+            {/* SỬA: ManageCategories cần danh sách phẳng để tự xây dựng cây */}
+            <Route path="categories" element={<ManageCategories initialCategories={flatCategories} />} /> 
+            
+            {/* SỬA: ManageMacros cần danh sách phẳng */}
+            <Route path="macros" element={<ManageMacros categories={flatCategories} macros={macros} setMacros={setMacros} />} />
+            
             <Route path="announcements" element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />} />
             <Route path="analytics" element={<AnalyticsDashboard />} />
             <Route path="users" element={<ManageUsersPage />} />

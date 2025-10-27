@@ -1,65 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import RichTextEditor from '../components/RichTextEditor';
 import { Category } from '../../types';
 import { Descendant } from 'slate';
 import './ContributePage.css';
-import useAuthStore from '../../stores/useAuthStore'; // --- BỔ SUNG ---
+import useAuthStore from '../../stores/useAuthStore'; 
 
 const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }] }];
 
-function ContributePage() {
+interface ContributePageProps {
+  flatCategories: Category[]; // Nhận danh sách phẳng
+}
+
+interface CategoryOption {
+  _id: string;
+  name: string;
+}
+const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
+  return categories
+    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null)) 
+    .map(category => ({
+      ...category,
+      children: buildCategoryTree(categories, category._id)
+    }));
+};
+const buildCategoryDropdownOptions = (cats: Category[], prefix = ''): CategoryOption[] => {
+  let flatList: CategoryOption[] = [];
+  cats.forEach(cat => {
+    flatList.push({ _id: cat._id, name: prefix + cat.name });
+    if (cat.children && cat.children.length > 0) {
+      flatList = flatList.concat(buildCategoryDropdownOptions(cat.children, prefix + '-- '));
+    }
+  });
+  return flatList;
+};
+
+function ContributePage({ flatCategories }: ContributePageProps) { // SỬA: Nhận prop
   const [title, setTitle] = useState('');
-  const [categories, setCategories] = useState<Category[]>([]);
+    
   const [selectedCategory, setSelectedCategory] = useState('');
   const [content, setContent] = useState<Descendant[]>(emptyContent);
   const navigate = useNavigate();
-  const { token } = useAuthStore(); // --- BỔ SUNG: Lấy token từ store ---
+  const { token } = useAuthStore(); 
 
+  const categoryOptions = useMemo(() => {
+    const categoryTree = buildCategoryTree(flatCategories, null);
+    return buildCategoryDropdownOptions(categoryTree);
+  }, [flatCategories]);
+  
   useEffect(() => {
-    const fetchCategories = async () => {
-      // Nếu không có token (chưa đăng nhập), không làm gì cả
-      if (!token) {
-        return;
-      }
-
-      try {
-        // --- SỬA LỖI: Thêm token vào header của request ---
-        const res = await fetch('/api/categories', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || 'Không thể tải danh mục.');
-        }
-
-        const data = await res.json();
-        setCategories(data);
-        if (data.length > 0) {
-          setSelectedCategory(data[0].name);
-        }
-      } catch (error: any) {
-        toast.error(`Lỗi: ${error.message}`);
-      }
-    };
-    fetchCategories();
-  }, [token]); // Thêm token vào dependency array
+    if (categoryOptions.length > 0) {
+      setSelectedCategory(categoryOptions[0].name);
+    }
+  }, [categoryOptions]);
 
   const handleContribute = async () => {
     if (!title.trim() || !selectedCategory) {
       toast.error('Vui lòng nhập đầy đủ tiêu đề và danh mục.');
       return;
     }
-
     if (!token) {
       toast.error('Bạn cần đăng nhập để thực hiện hành động này.');
       return;
     }
-
     try {
       const res = await fetch('/api/macros', {
         method: 'POST',
@@ -69,17 +73,15 @@ function ContributePage() {
         },
         body: JSON.stringify({
           title,
-          category: selectedCategory,
+          category: selectedCategory, // Gửi tên (đã bao gồm thụt lề nếu có)
           content,
-          status: 'pending', // Macro do người dùng đóng góp sẽ ở trạng thái chờ duyệt
+          status: 'pending', 
         }),
       });
-
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Gửi đóng góp thất bại.');
       }
-
       toast.success('Cảm ơn bạn đã đóng góp! Macro của bạn đã được gửi để xét duyệt.');
       navigate('/dashboard');
     } catch (error: any) {
@@ -110,7 +112,7 @@ function ContributePage() {
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
-            {categories.map(cat => (
+            {categoryOptions.map(cat => (
               <option key={cat._id} value={cat.name}>{cat.name}</option>
             ))}
           </select>

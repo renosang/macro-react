@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import './ManageMacros.css';
 import RichTextEditor from '../components/RichTextEditor';
@@ -6,10 +6,10 @@ import HighlightText from '../components/HighlightText';
 import { Category, Macro } from '../../types';
 import { Descendant } from 'slate';
 import useAuthStore from '../../stores/useAuthStore';
-import { useLocation, useNavigate } from 'react-router-dom'; // Import hooks
+import { useLocation, useNavigate } from 'react-router-dom'; 
 
 interface ManageMacrosProps {
-  categories: Category[];
+  categories: Category[]; // Đây là danh sách phẳng (flat list)
   macros: Macro[];
   setMacros: React.Dispatch<React.SetStateAction<Macro[]>>;
 }
@@ -19,6 +19,31 @@ const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }
 type StatusFilter = 'all' | 'pending' | 'approved';
 type SortOrder = 'asc' | 'desc' | 'none';
 
+interface CategoryOption {
+  _id: string;
+  name: string; // Tên đã có tiền tố thụt lề
+}
+
+const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
+  return categories
+    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null)) 
+    .map(category => ({
+      ...category,
+      children: buildCategoryTree(categories, category._id)
+    }));
+};
+
+const buildCategoryDropdownOptions = (cats: Category[], prefix = ''): CategoryOption[] => {
+  let flatList: CategoryOption[] = [];
+  cats.forEach(cat => {
+    flatList.push({ _id: cat._id, name: prefix + cat.name });
+    if (cat.children && cat.children.length > 0) {
+      flatList = flatList.concat(buildCategoryDropdownOptions(cat.children, prefix + '-- '));
+    }
+  });
+  return flatList;
+};
+
 function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMacro, setCurrentMacro] = useState<Partial<Macro> | null>(null);
@@ -27,10 +52,25 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
   const { token } = useAuthStore();
-
-  // --- HOOKS ĐÃ ĐƯỢC DI CHUYỂN VÀO TRONG FUNCTION ---
   const location = useLocation();
   const navigate = useNavigate();
+
+  const buildOptionsRecursive = useCallback((cats: Category[], prefix = ''): CategoryOption[] => {
+    let flatList: CategoryOption[] = [];
+    cats.forEach(cat => {
+      flatList.push({ _id: cat._id, name: prefix + cat.name });
+      if (cat.children && cat.children.length > 0) {
+        flatList = flatList.concat(buildOptionsRecursive(cat.children, prefix + '-- '));
+      }
+    });
+    return flatList;
+  }, []);
+
+  const categoryOptions = useMemo(() => {
+    const categoryTree = buildCategoryTree(categories, null); // 1. Tạo cây từ list phẳng
+    return buildOptionsRecursive(categoryTree); // 2. Tạo list dropdown từ cây
+  }, [categories, buildOptionsRecursive]);
+
 
   const handleOpenModal = (macro: Partial<Macro> | null = null) => {
     if (macro) {
@@ -38,12 +78,13 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
       platformTags: macro.platformTags || { shopee: false, lazada: false, tiktok: false, hasBrand: false }
       });
     } else {
+      const defaultCategoryName = categoryOptions.length > 0 ? categoryOptions[0].name : '';
       setCurrentMacro({
         title: '',
-        category: categories.length > 0 ? categories[0].name : '',
+        category: defaultCategoryName, 
         content: emptyContent,
         status: 'pending',
-      platformTags: { shopee: false, lazada: false, tiktok: false, hasBrand: false }
+        platformTags: { shopee: false, lazada: false, tiktok: false, hasBrand: false }
       });
     }
     setIsModalOpen(true);
@@ -62,7 +103,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
       }
   };
 
-  // --- useEffect ĐÃ ĐƯỢC DI CHUYỂN VÀO TRONG FUNCTION ---
   useEffect(() => {
     const macroIdToEdit = location.state?.macroIdToEdit;
 
@@ -76,7 +116,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
         navigate(location.pathname, { replace: true, state: {} });
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, macros, navigate]);
 
 
@@ -194,7 +233,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
         <div className="filter-controls">
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
             <option value="all">Tất cả danh mục</option>
-            {categories.map(cat => (
+            {categoryOptions.map(cat => (
               <option key={cat._id} value={cat.name}>{cat.name}</option>
             ))}
           </select>
@@ -205,8 +244,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
           </select>
         </div>
         
-        {/* --- KHỐI CODE BỊ LỖI ĐÃ BỊ XÓA KHỎI ĐÂY --- */}
-
         <div className="search-controls">
           <input
             type="text"
@@ -291,7 +328,13 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
                     value={currentMacro.category}
                     onChange={e => setCurrentMacro({...currentMacro, category: e.target.value})}
                   >
-                    {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
+                    {categoryOptions.length === 0 && <option value="">Không có danh mục</option>}
+                    
+                    {categoryOptions.map(cat => (
+                      <option key={cat._id} value={cat.name}> 
+                        {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                  <div className="form-group">
@@ -301,12 +344,11 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
                     onChange={e => setCurrentMacro({...currentMacro, status: e.target.value as 'pending' | 'approved'})}
                   >
                     <option value="pending">Chờ xét duyệt</option>
-                    <option value="approved">Đã xét duyệt</option>
+                    <option value="approved">Đã duyệt</option>
                   </select>
                 </div>
               </div>
               
-              {/* --- KHỐI PLATFORM TAGS (ĐÚNG VỊ TRÍ) --- */}
               <div className="form-group">
                 <label>Gắn thẻ (Không bắt buộc)</label>
                 <div className="platform-tags-group">
@@ -348,7 +390,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
                   </label>
                 </div>
               </div>
-              {/* --- KẾT THÚC --- */}
 
               <div className="form-group">
                 <label>Nội dung</label>

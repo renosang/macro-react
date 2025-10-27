@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'; // SỬA: Thêm useCallback
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import './ManageCategories.css';
 import { Category } from '../../types'; 
@@ -10,8 +10,23 @@ interface FlatCategoryOption {
   name: string; // Tên đã có tiền tố thụt lề
 }
 
-function ManageCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
+const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
+  return categories
+    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null)) 
+    .map(category => ({
+      ...category,
+      children: buildCategoryTree(categories, category._id)
+    }));
+};
+
+interface ManageCategoriesProps {
+  initialCategories: Category[]; // Danh sách phẳng
+}
+
+function ManageCategories({ initialCategories }: ManageCategoriesProps) {
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [categoriesTree, setCategoriesTree] = useState<Category[]>([]);
+  
   const [isAdding, setIsAdding] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [selectedParentAdd, setSelectedParentAdd] = useState<string>(''); 
@@ -20,29 +35,28 @@ function ManageCategories() {
   const [selectedParentEdit, setSelectedParentEdit] = useState<string>(''); 
   const { token } = useAuthStore();
 
-  // ----- SỬA LỖI 2: Bọc hàm fetchCategories trong useCallback -----
   const fetchCategories = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('/api/categories', { 
+      const res = await fetch('/api/categories', { // API này trả về danh sách phẳng
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Không thể tải danh mục.');
       const data = await res.json();
-      setCategories(data); 
+      setCategories(data); // Cập nhật danh sách phẳng
+      setCategoriesTree(buildCategoryTree(data, null)); // Xây dựng cây
     } catch (error: any) {
       toast.error(error.message);
       setCategories([]); 
+      setCategoriesTree([]);
     }
-  }, [token]); // Thêm token làm dependency
-  // ----- KẾT THÚC SỬA LỖI 2 -----
+  }, [token]); 
 
-  // Tải dữ liệu khi component mount hoặc token/fetchCategories thay đổi
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]); // SỬA: Thêm fetchCategories vào dependency array
+    setCategories(initialCategories);
+    setCategoriesTree(buildCategoryTree(initialCategories, null));
+  }, [initialCategories]);
 
-  // ----- SỬA LỖI 3 & 4: Bọc hàm getFlatCategories trong useCallback -----
   const getFlatCategories = useCallback((cats: Category[], prefix = '', excludeId: string | null = null): FlatCategoryOption[] => {
     let flatList: FlatCategoryOption[] = [];
     cats.forEach(cat => {
@@ -55,19 +69,15 @@ function ManageCategories() {
       }
     });
     return flatList;
-  }, []); // Hàm này không phụ thuộc state/prop, nên mảng rỗng
-  // ----- KẾT THÚC SỬA LỖI 3 & 4 -----
+  }, []); 
 
-  // SỬA: Thêm getFlatCategories vào dependency array
-  const flatCategoryOptionsAdd = useMemo(() => getFlatCategories(categories), [categories, getFlatCategories]);
+  const flatCategoryOptionsAdd = useMemo(() => getFlatCategories(categoriesTree), [categoriesTree, getFlatCategories]);
 
-  // SỬA: Thêm getFlatCategories vào dependency array
   const flatCategoryOptionsEdit = useMemo(() => {
-    return editingCategory ? getFlatCategories(categories, '', editingCategory._id) : [];
-  }, [categories, editingCategory, getFlatCategories]);
+    return editingCategory ? getFlatCategories(categoriesTree, '', editingCategory._id) : [];
+  }, [categoriesTree, editingCategory, getFlatCategories]);
 
 
-  // --- HÀM XỬ LÝ THÊM MỚI ---
   const handleAddNew = async () => {
     if (newCategoryName.trim() === '') {
       toast.error('Tên danh mục không được để trống!');
@@ -87,7 +97,7 @@ function ManageCategories() {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Thêm thất bại.');
       }
-      await fetchCategories();
+      await fetchCategories(); // Tải lại cả phẳng và cây
       toast.success('Thêm danh mục thành công!');
       setIsAdding(false);
       setNewCategoryName('');
@@ -97,7 +107,6 @@ function ManageCategories() {
     }
   };
 
-  // --- HÀM MỞ FORM SỬA ---
   const handleEdit = (category: Category) => {
      setEditingCategory(category);
     setEditingName(category.name);
@@ -105,14 +114,12 @@ function ManageCategories() {
     setIsAdding(false); 
   };
 
-  // --- HÀM HỦY SỬA ---
   const handleCancelEdit = () => {
     setEditingCategory(null);
     setEditingName('');
     setSelectedParentEdit('');
   };
 
-  // --- HÀM LƯU KHI SỬA ---
   const handleSaveEdit = async () => {
     if (!editingCategory || editingName.trim() === '') {
       toast.error('Tên danh mục không được để trống!');
@@ -137,7 +144,7 @@ function ManageCategories() {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Cập nhật thất bại.');
       }
-      await fetchCategories();
+      await fetchCategories(); // Tải lại cả phẳng và cây
       toast.success('Cập nhật thành công!');
       handleCancelEdit(); 
     } catch (error: any) {
@@ -145,7 +152,6 @@ function ManageCategories() {
     }
   };
 
-  // --- HÀM XÓA ---
   const handleDelete = async (id: string) => {
      if (window.confirm('Xóa danh mục này sẽ chuyển các danh mục con (nếu có) thành danh mục gốc. Bạn có chắc chắn?')) {
       if (!token) return;
@@ -167,17 +173,14 @@ function ManageCategories() {
     }
   };
 
-  // --- COMPONENT ĐỆ QUY ĐỂ RENDER CÂY DANH MỤC ---
   const renderCategoryRow = (category: Category, level = 0) => {
     const isEditingCurrent = editingCategory?._id === category._id;
 
-    // Tìm tên của danh mục cha từ danh sách phẳng
-    const parentName = flatCategoryOptionsAdd.find(opt => opt._id === category.parent)?.name.replace(/^-- /, '') || '---';
+    const parentName = categories.find(opt => opt._id === category.parent)?.name || '---';
 
     return (
       <React.Fragment key={category._id}>
         <tr className={level > 0 ? 'child-category' : 'root-category'}>
-          {/* Tên danh mục với thụt lề */}
           <td style={{ paddingLeft: `${level * 25 + 12}px` }}>
             {isEditingCurrent ? (
               <input type="text" value={editingName} onChange={(e) => setEditingName(e.target.value)} className="edit-input" />
@@ -188,22 +191,19 @@ function ManageCategories() {
               </>
             )}
           </td>
-          {/* Danh mục cha */}
           <td>
             {isEditingCurrent ? (
               <select value={selectedParentEdit} onChange={(e) => setSelectedParentEdit(e.target.value)} className="parent-select">
                 <option value="">-- Là danh mục gốc --</option>
-                {/* Lọc bỏ chính nó và con cháu khỏi danh sách cha */}
                 {flatCategoryOptionsEdit.map((opt: FlatCategoryOption) => ( 
                     <option key={opt._id} value={opt._id}>{opt.name}</option>
                   ))
                 }
               </select>
             ) : (
-              parentName // Hiển thị tên cha đã tìm được
+              parentName 
             )}
           </td>
-          {/* Hành động */}
           <td className="action-cell">
             {isEditingCurrent ? (
               <>
@@ -218,12 +218,10 @@ function ManageCategories() {
             )}
           </td>
         </tr>
-        {/* Gọi đệ quy để render các con */}
         {category.children && category.children.length > 0 && category.children.map(child => renderCategoryRow(child, level + 1))}
       </React.Fragment>
     );
   };
-  // --- KẾT THÚC COMPONENT ĐỆ QUY ---
 
   return (
     <div className="manage-categories">
@@ -237,7 +235,6 @@ function ManageCategories() {
           <input type="text" placeholder="Nhập tên danh mục mới..." value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} />
           <select value={selectedParentAdd} onChange={(e) => setSelectedParentAdd(e.target.value)} className="parent-select">
             <option value="">-- Là danh mục gốc --</option>
-            {/* Sử dụng danh sách phẳng cho dropdown */}
             {flatCategoryOptionsAdd.map((opt: FlatCategoryOption) => ( 
               <option key={opt._id} value={opt._id}>{opt.name}</option>
             ))}
@@ -255,9 +252,8 @@ function ManageCategories() {
           </tr>
         </thead>
         <tbody>
-          {/* Render cây danh mục */}
-          {categories.map(category => renderCategoryRow(category))} 
-          {categories.length === 0 && (
+          {categoriesTree.map(category => renderCategoryRow(category))} 
+          {categoriesTree.length === 0 && (
               <tr><td colSpan={3} style={{ textAlign: 'center' }}>Chưa có danh mục nào.</td></tr>
           )}
         </tbody>

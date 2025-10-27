@@ -4,8 +4,8 @@
 }
 
 .editable-area {
-  min-height: 200px !important; /* Chiều cao tối thiểu */
-  max-height: 360px; /* Chiều cao tối đa trước khi cuộn */
+  min-height: 100px !important; /* Chiều cao tối thiểu */
+  max-height: 150px; /* Chiều cao tối đa trước khi cuộn */
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 10px;
