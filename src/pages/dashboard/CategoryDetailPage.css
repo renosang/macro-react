@@ -557,3 +557,22 @@
     display: flex;
     gap: 8px;
 }
+
+.custom-select-options li.dropdown-option-parent {
+  font-weight: 600; /* In đậm */
+  color: #111;     /* Đậm màu hơn một chút */
+  background-color: #fcfcfc; /* Nền hơi khác biệt */
+}
+
+/* Định dạng cho các mục con (đã có thụt lề) */
+.custom-select-options li.dropdown-option-child {
+  font-weight: 400; /* Giữ bình thường */
+  color: #333;
+}
+
+/* Ký tự thụt lề (đã có) */
+.dropdown-prefix {
+  color: #999;
+  margin-right: 4px;
+  font-family: monospace;
+}

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react'; // SỬA: Thêm useCallback
 import toast from 'react-hot-toast';
 import './ManageCategories.css';
-import { Category } from '../../types'; // Đảm bảo type Category có parent và children
+import { Category } from '../../types'; 
 import useAuthStore from '../../stores/useAuthStore';
 
 // Interface cho danh sách phẳng dùng trong dropdown
@@ -11,42 +11,41 @@ interface FlatCategoryOption {
 }
 
 function ManageCategories() {
-  // State categories sẽ lưu cấu trúc cây từ API
   const [categories, setCategories] = useState<Category[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [selectedParentAdd, setSelectedParentAdd] = useState<string>(''); // Lưu ID cha khi thêm
+  const [selectedParentAdd, setSelectedParentAdd] = useState<string>(''); 
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [selectedParentEdit, setSelectedParentEdit] = useState<string>(''); // Lưu ID cha khi sửa
+  const [selectedParentEdit, setSelectedParentEdit] = useState<string>(''); 
   const { token } = useAuthStore();
 
-  // Hàm tải dữ liệu danh mục (dạng cây)
-  const fetchCategories = async () => {
+  // ----- SỬA LỖI 2: Bọc hàm fetchCategories trong useCallback -----
+  const fetchCategories = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('/api/categories', { // API này trả về cấu trúc cây
+      const res = await fetch('/api/categories', { 
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Không thể tải danh mục.');
       const data = await res.json();
-      setCategories(data); // Lưu cấu trúc cây vào state
+      setCategories(data); 
     } catch (error: any) {
       toast.error(error.message);
-      setCategories([]); // Đặt lại thành mảng rỗng nếu lỗi
+      setCategories([]); 
     }
-  };
+  }, [token]); // Thêm token làm dependency
+  // ----- KẾT THÚC SỬA LỖI 2 -----
 
-  // Tải dữ liệu khi component mount hoặc token thay đổi
+  // Tải dữ liệu khi component mount hoặc token/fetchCategories thay đổi
   useEffect(() => {
     fetchCategories();
-  }, [token]);
+  }, [fetchCategories]); // SỬA: Thêm fetchCategories vào dependency array
 
-  // Hàm tạo danh sách phẳng có thụt lề cho dropdown
-  const getFlatCategories = (cats: Category[], prefix = '', excludeId: string | null = null): FlatCategoryOption[] => {
+  // ----- SỬA LỖI 3 & 4: Bọc hàm getFlatCategories trong useCallback -----
+  const getFlatCategories = useCallback((cats: Category[], prefix = '', excludeId: string | null = null): FlatCategoryOption[] => {
     let flatList: FlatCategoryOption[] = [];
     cats.forEach(cat => {
-      // Bỏ qua chính danh mục đang sửa và con cháu của nó (để tránh vòng lặp cha-con)
       if (cat._id === excludeId) {
         return;
       }
@@ -56,15 +55,16 @@ function ManageCategories() {
       }
     });
     return flatList;
-  };
+  }, []); // Hàm này không phụ thuộc state/prop, nên mảng rỗng
+  // ----- KẾT THÚC SỬA LỖI 3 & 4 -----
 
-  // Tạo danh sách phẳng cho dropdown "Thêm mới"
-  const flatCategoryOptionsAdd = useMemo(() => getFlatCategories(categories), [categories]);
+  // SỬA: Thêm getFlatCategories vào dependency array
+  const flatCategoryOptionsAdd = useMemo(() => getFlatCategories(categories), [categories, getFlatCategories]);
 
-  // Tạo danh sách phẳng cho dropdown "Sửa" (loại bỏ category đang sửa)
+  // SỬA: Thêm getFlatCategories vào dependency array
   const flatCategoryOptionsEdit = useMemo(() => {
     return editingCategory ? getFlatCategories(categories, '', editingCategory._id) : [];
-  }, [categories, editingCategory]);
+  }, [categories, editingCategory, getFlatCategories]);
 
 
   // --- HÀM XỬ LÝ THÊM MỚI ---
@@ -80,20 +80,18 @@ function ManageCategories() {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           name: newCategoryName,
-          parent: selectedParentAdd || null // Gửi null nếu không chọn cha
+          parent: selectedParentAdd || null 
         }),
       });
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Thêm thất bại.');
       }
-      // Tải lại danh sách sau khi thêm thành công
       await fetchCategories();
-
       toast.success('Thêm danh mục thành công!');
       setIsAdding(false);
       setNewCategoryName('');
-      setSelectedParentAdd(''); // Reset dropdown
+      setSelectedParentAdd(''); 
     } catch (error: any) {
       toast.error(`Lỗi: ${error.message}`);
     }
@@ -103,8 +101,8 @@ function ManageCategories() {
   const handleEdit = (category: Category) => {
      setEditingCategory(category);
     setEditingName(category.name);
-    setSelectedParentEdit(category.parent || ''); // Đặt giá trị parent hiện tại
-    setIsAdding(false); // Đóng form thêm nếu đang mở
+    setSelectedParentEdit(category.parent || ''); 
+    setIsAdding(false); 
   };
 
   // --- HÀM HỦY SỬA ---
@@ -120,7 +118,6 @@ function ManageCategories() {
       toast.error('Tên danh mục không được để trống!');
       return;
     }
-    // Ngăn chặn tự đặt mình làm cha (Backend cũng nên có kiểm tra này)
     if (editingCategory._id === selectedParentEdit) {
          toast.error('Không thể đặt danh mục làm cha của chính nó.');
          return;
@@ -133,18 +130,16 @@ function ManageCategories() {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           name: editingName,
-          parent: selectedParentEdit || null // Gửi parent mới
+          parent: selectedParentEdit || null 
         }),
       });
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Cập nhật thất bại.');
       }
-      // Tải lại danh sách sau khi sửa thành công
       await fetchCategories();
-
       toast.success('Cập nhật thành công!');
-      handleCancelEdit(); // Đóng form sửa
+      handleCancelEdit(); 
     } catch (error: any) {
       toast.error(`Lỗi: ${error.message}`);
     }
@@ -161,11 +156,8 @@ function ManageCategories() {
         });
         if (!res.ok) throw new Error('Xóa thất bại.');
         
-        // Tải lại danh sách sau khi xóa thành công
         await fetchCategories();
-
         toast.success('Xóa danh mục thành công!');
-        // Nếu đang sửa danh mục vừa xóa thì hủy sửa
         if(editingCategory?._id === id) {
             handleCancelEdit();
         }

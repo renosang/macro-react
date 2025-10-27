@@ -22,17 +22,6 @@ import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
 import useAuthStore from './stores/useAuthStore';
 
-// --- BỎ HÀM buildCategoryTree VÌ ManageCategories TỰ XỬ LÝ ---
-// (Giữ lại hàm này nếu API /api/categories của bạn trả về danh sách phẳng)
-const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
-  return categories
-    .filter(category => category.parent === parentId)
-    .map(category => ({
-      ...category,
-      children: buildCategoryTree(categories, category._id)
-    }));
-};
-
 function App() {
   const [isAdmin] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
