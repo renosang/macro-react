@@ -36,8 +36,6 @@
   margin-bottom: 1.5rem;
 }
 
-/* --- CSS CHO THANH TÌM KIẾM LIỀN MẠCH --- */
-
 .filter-search-bar {
   display: flex;
   width: 100%;
@@ -54,7 +52,6 @@
   position: relative;
 }
 
-/* --- 1. DROPDOWN TÙY CHỈNH --- */
 .custom-select-container {
   position: relative;
   flex-shrink: 0;
@@ -102,7 +99,7 @@
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  width: 300px;
+  width: 300px; /* Hoặc max-content */
   max-height: 300px;
   overflow-y: auto;
   background: #ffffff;
@@ -130,52 +127,50 @@
   text-overflow: ellipsis;
 }
 
+.dropdown-prefix {
+  color: #999;
+  margin-right: 4px;
+  font-family: monospace;
+}
+
 .custom-select-options li:hover {
   background-color: #f4f4f4;
 }
 
-/* --- 2. THANH TÌM KIẾM (ĐÃ SỬA LỖI CĂN CHỈNH) --- */
 .search-input-wrapper {
     flex-grow: 1; 
     position: relative; 
-    /* XÓA: display: flex; (Đây là nguyên nhân gây lệch) */
 }
 
 .search-icon {
-  /* SỬA: Dùng position: absolute để đặt icon LÊN TRÊN input */
   position: absolute;
-  left: 10px; /* Căn lề trái cho icon */
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
   color: #aaa;
-  font-size: 1.2rem; /* Giảm kích thước 1 chút */
+  font-size: 1.2rem;
   pointer-events: none; 
-  z-index: 2; /* Đảm bảo icon nằm trên */
+  z-index: 2; 
 }
 
 .filter-search-bar input {
   width: 100%; 
-  /* SỬA: Tăng padding-left để chữ không đè lên icon */
   padding: 12px 20px 12px 40px; 
   height: 48px; 
   box-sizing: border-box; 
-  
-  /* Reset style */
   border: none;
   outline: none;
   background: transparent;
   box-shadow: none;
-  
   font-size: 1rem;
 }
 .filter-search-bar input:focus {
   border-color: transparent;
   box-shadow: none;
 }
-/* ----- KẾT THÚC CSS HIỆN ĐẠI ----- */
 
 
-/* Responsive (Giữ nguyên logic xếp dọc) */
+/* Responsive */
 @media (max-width: 768px) {
   .filter-search-bar {
     flex-direction: column; 
@@ -223,12 +218,12 @@
   }
   .filter-search-bar input {
       height: 48px; 
-      padding-left: 40px; /* SỬA: Đồng bộ padding cho responsive */
+      padding-left: 40px;
       border: none;
       box-shadow: none;
   }
    .search-icon {
-     left: 15px; /* SỬA: Căn chỉnh lại icon cho responsive */
+     left: 15px;
    }
 }
 
@@ -377,8 +372,8 @@
   padding: 0px 25px;
   margin-top: 0;
 }
+
 @media (max-width: 768px) {
-  /* ... (các style responsive khác giữ nguyên) ... */
   .category-detail-container {
     padding: 15px;
   }

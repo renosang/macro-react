@@ -10,20 +10,17 @@ import { serializeSlate } from '../../utils/slateUtils';
 import { Descendant } from 'slate';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../stores/useAuthStore';
-// ----- SỬA: Đổi HiOutlineSearch thành HiMagnifyingGlass -----
 import { HiOutlineClock, HiOutlineLightBulb, HiMagnifyingGlass } from 'react-icons/hi2'; 
 
 const IconClock = HiOutlineClock as React.ElementType;
 const IconFeedback = HiOutlineLightBulb as React.ElementType;
-const IconSearch = HiMagnifyingGlass as React.ElementType; // ----- SỬA: Gán đúng icon -----
+const IconSearch = HiMagnifyingGlass as React.ElementType;
 
-// Interface Props (giữ nguyên)
 interface CategoryDetailPageProps {
   allMacros: Macro[];
   allCategories: Category[]; 
 }
 
-// Hàm tìm danh mục con (giữ nguyên)
 const findCategoryAndChildren = (categories: Category[], categoryName: string): { currentCategory: Category | null; children: Category[] } => {
   let currentCategory: Category | null = null;
   let children: Category[] = [];
@@ -82,7 +79,6 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
     };
   }, [dropdownRef]);
 
-  // Logic filter (giữ nguyên từ file gốc bạn cung cấp)
   const macrosInCategory = useMemo(() => {
     const targetCategoryNames = [decodedCategoryName];
     if (subCategories && subCategories.length > 0) {
@@ -112,8 +108,7 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
             if (!categories) return;
             for (const cat of categories) {
                 if (cat.name === selectedName) {
-                    names.push(cat.name); // Thêm chính nó
-                    // Thêm tất cả con cháu
+                    names.push(cat.name); 
                     const addChildren = (c: Category) => {
                         if (c.children) {
                             c.children.forEach(child => {
@@ -123,13 +118,12 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
                         }
                     };
                     addChildren(cat);
-                    return; // Found
+                    return; 
                 }
                 if (cat.children) find(cat.children);
             }
         };
         find(cats);
-        // SỬA: Nếu không tìm thấy trong subCategories (trường hợp chọn chính danh mục cha)
         if(names.length === 0 && selectedName === decodedCategoryName) {
           return [decodedCategoryName];
         }
@@ -145,7 +139,6 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
 
     }
      else if (selectedSubCategory === 'all') {
-         tempMacros = macrosInCategory.filter(macro => macro.category === decodedCategoryName);
      }
 
     if (searchQuery.trim()) {
@@ -159,7 +152,6 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
     return tempMacros;
   }, [macrosInCategory, searchQuery, selectedSubCategory, subCategories, decodedCategoryName, currentCategory]);
 
-  // Các hàm (formatDateTime, handleTranslate,...) giữ nguyên
   const formatDateTime = (isoString: string | null | undefined) => {
     if (!isoString) return 'N/A';
     return new Date(isoString).toLocaleString('vi-VN', {
@@ -262,6 +254,36 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
     const found = subCategories.find(c => c.name === selectedSubCategory);
     return found ? found.name : `Tất cả trong "${decodedCategoryName}"`;
   };
+  
+  const renderDropdownOptions = (categories: Category[], level: number): React.ReactNode[] => {
+    const options: React.ReactNode[] = [];
+    
+    categories.forEach(cat => {
+      // Thêm <li> cho category hiện tại
+      options.push(
+        <li 
+          key={cat._id}
+          // Thêm style thụt lề
+          style={{ paddingLeft: `${level * 20 + 14}px` }} 
+          onClick={() => {
+            setSelectedSubCategory(cat.name);
+            setIsDropdownOpen(false);
+          }}
+        >
+          {/* Thêm ký tự phân cấp */}
+          {level > 0 && <span className="dropdown-prefix">└─ </span>}
+          {cat.name}
+        </li>
+      );
+
+      // Nếu có con, gọi đệ quy
+      if (cat.children && cat.children.length > 0) {
+        options.push(...renderDropdownOptions(cat.children, level + 1));
+      }
+    });
+
+    return options;
+  };
 
   return (
     <div className="category-detail-container">
@@ -271,7 +293,6 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
         </div>
         <h1>{decodedCategoryName}</h1>
 
-        {/* ----- Cấu trúc Dropdown và Search (Giữ nguyên) ----- */}
         <div className="filter-search-bar" ref={dropdownRef}>
           {subCategories && subCategories.length > 0 && (
             <div className="custom-select-container">
@@ -292,17 +313,8 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
                   >
                     Tất cả trong "{decodedCategoryName}"
                   </li>
-                  {subCategories.map(subCat => (
-                    <li 
-                      key={subCat._id} 
-                      onClick={() => {
-                        setSelectedSubCategory(subCat.name);
-                        setIsDropdownOpen(false);
-                      }}
-                    >
-                      {subCat.name}
-                    </li>
-                  ))}
+                  
+                  {renderDropdownOptions(subCategories, 0)}                  
                 </ul>
               )}
             </div>
@@ -317,8 +329,6 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
               />
            </div>
         </div>
-        {/* ----- KẾT THÚC ----- */}
-
 
         <div className="macro-list">
           {filteredMacros.length > 0 ? (
