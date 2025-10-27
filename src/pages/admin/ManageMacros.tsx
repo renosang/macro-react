@@ -9,7 +9,7 @@ import useAuthStore from '../../stores/useAuthStore';
 import { useLocation, useNavigate } from 'react-router-dom'; 
 
 interface ManageMacrosProps {
-  categories: Category[]; // Đây là danh sách phẳng (flat list)
+  categories: Category[];
   macros: Macro[];
   setMacros: React.Dispatch<React.SetStateAction<Macro[]>>;
 }
@@ -21,7 +21,7 @@ type SortOrder = 'asc' | 'desc' | 'none';
 
 interface CategoryOption {
   _id: string;
-  name: string; // Tên đã có tiền tố thụt lề
+  name: string; 
 }
 
 const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
@@ -33,12 +33,12 @@ const buildCategoryTree = (categories: Category[], parentId: string | null = nul
     }));
 };
 
-const buildCategoryDropdownOptions = (cats: Category[], prefix = ''): CategoryOption[] => {
+const buildOptionsRecursive = (cats: Category[], prefix = ''): CategoryOption[] => {
   let flatList: CategoryOption[] = [];
   cats.forEach(cat => {
     flatList.push({ _id: cat._id, name: prefix + cat.name });
     if (cat.children && cat.children.length > 0) {
-      flatList = flatList.concat(buildCategoryDropdownOptions(cat.children, prefix + '-- '));
+      flatList = flatList.concat(buildOptionsRecursive(cat.children, prefix + '-- '));
     }
   });
   return flatList;
@@ -55,24 +55,24 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   const location = useLocation();
   const navigate = useNavigate();
 
-  const buildOptionsRecursive = useCallback((cats: Category[], prefix = ''): CategoryOption[] => {
+  const buildOptionsCallback = useCallback((cats: Category[], prefix = ''): CategoryOption[] => {
     let flatList: CategoryOption[] = [];
     cats.forEach(cat => {
       flatList.push({ _id: cat._id, name: prefix + cat.name });
       if (cat.children && cat.children.length > 0) {
-        flatList = flatList.concat(buildOptionsRecursive(cat.children, prefix + '-- '));
+        flatList = flatList.concat(buildOptionsCallback(cat.children, prefix + '-- '));
       }
     });
     return flatList;
   }, []);
 
   const categoryOptions = useMemo(() => {
-    const categoryTree = buildCategoryTree(categories, null); // 1. Tạo cây từ list phẳng
-    return buildOptionsRecursive(categoryTree); // 2. Tạo list dropdown từ cây
-  }, [categories, buildOptionsRecursive]);
+    const categoryTree = buildCategoryTree(categories, null); 
+    return buildOptionsCallback(categoryTree);
+  }, [categories, buildOptionsCallback]);
 
 
-  const handleOpenModal = (macro: Partial<Macro> | null = null) => {
+  const handleOpenModal = useCallback((macro: Partial<Macro> | null = null) => {
     if (macro) {
       setCurrentMacro({ ...macro,
       platformTags: macro.platformTags || { shopee: false, lazada: false, tiktok: false, hasBrand: false }
@@ -88,7 +88,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
       });
     }
     setIsModalOpen(true);
-  };
+  }, [categoryOptions]);
 
   const handlePlatformTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const { name, checked } = e.target;
@@ -116,7 +116,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
         navigate(location.pathname, { replace: true, state: {} });
       }
     }
-  }, [location.state, macros, navigate]);
+  }, [location.state, macros, navigate, handleOpenModal, location.pathname]);
 
 
   const filteredAndSortedMacros = useMemo(() => {
@@ -240,7 +240,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as StatusFilter)}>
             <option value="all">Tất cả trạng thái</option>
             <option value="pending">Chờ xét duyệt</option>
-            <option value="approved">Đã xét duyệt</option>
+            <option value="approved">Đã duyệt</option>
           </select>
         </div>
         
@@ -306,7 +306,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
         </table>
       </div>
 
-      {/* Modal */}
       {isModalOpen && currentMacro && (
         <div className="modal-backdrop">
           <div className="macro-modal-content">
@@ -329,7 +328,6 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
                     onChange={e => setCurrentMacro({...currentMacro, category: e.target.value})}
                   >
                     {categoryOptions.length === 0 && <option value="">Không có danh mục</option>}
-                    
                     {categoryOptions.map(cat => (
                       <option key={cat._id} value={cat.name}> 
                         {cat.name}
