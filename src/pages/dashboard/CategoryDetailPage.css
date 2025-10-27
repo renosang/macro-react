@@ -33,49 +33,207 @@
 .page-container h1 {
   text-align: center;
   font-size: 2.2rem;
+  margin-bottom: 1.5rem;
 }
 
-  .search-bar-container {
+/* --- CSS CHO THANH TÌM KIẾM LIỀN MẠCH --- */
+
+.filter-search-bar {
   display: flex;
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  align-items: center;    /* Căn giữa theo chiều dọc (tùy chọn) */
-  width: 50%; /* Đảm bảo container chiếm toàn bộ chiều rộng */
-  margin: 0 auto 20px auto; /* Căn giữa và thêm margin dưới */
-}
-
-/* --- UPDATED: Điều chỉnh thanh tìm kiếm --- */
-.search-bar {
   width: 100%;
-  max-width: 450px;
+  max-width: 800px;
+  margin: 0 auto 30px auto;
+  align-items: center;
+  background-color: white;
+  border-radius: 999px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  overflow: visible;
+  padding: 0 0 0 20px;
+  gap: 0;
   position: relative;
-  margin: 0; /* Xóa căn giữa auto */
 }
 
-.search-bar-container input { /* Style trực tiếp cho input */
-  width: 100%;
-  padding: 12px 20px 12px 45px;
-  border: 1px solid #ddd;
-  border-radius: 25px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+/* --- 1. DROPDOWN TÙY CHỈNH --- */
+.custom-select-container {
+  position: relative;
+  flex-shrink: 0;
 }
 
-.search-bar-container input:focus {
+.custom-select-toggle {
+  background: transparent;
+  border: none;
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0 30px 0 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  border-right: 1px solid #eee;
+  margin-right: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.custom-select-toggle::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #666;
+  transition: transform 0.2s ease;
+}
+
+.custom-select-toggle:focus {
+  outline: none;
+}
+
+.custom-select-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  padding: 8px;
+  margin: 0;
+  list-style: none;
+  z-index: 100;
+  border: 1px solid #eee;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.custom-select-options li {
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  color: #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-select-options li:hover {
+  background-color: #f4f4f4;
+}
+
+/* --- 2. THANH TÌM KIẾM (ĐÃ SỬA LỖI CĂN CHỈNH) --- */
+.search-input-wrapper {
+    flex-grow: 1; 
+    position: relative; 
+    /* XÓA: display: flex; (Đây là nguyên nhân gây lệch) */
 }
 
 .search-icon {
+  /* SỬA: Dùng position: absolute để đặt icon LÊN TRÊN input */
   position: absolute;
-  left: 15px;
+  left: 10px; /* Căn lề trái cho icon */
   top: 50%;
   transform: translateY(-50%);
   color: #aaa;
+  font-size: 1.2rem; /* Giảm kích thước 1 chút */
+  pointer-events: none; 
+  z-index: 2; /* Đảm bảo icon nằm trên */
+}
+
+.filter-search-bar input {
+  width: 100%; 
+  /* SỬA: Tăng padding-left để chữ không đè lên icon */
+  padding: 12px 20px 12px 40px; 
+  height: 48px; 
+  box-sizing: border-box; 
+  
+  /* Reset style */
+  border: none;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+  
+  font-size: 1rem;
+}
+.filter-search-bar input:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+/* ----- KẾT THÚC CSS HIỆN ĐẠI ----- */
+
+
+/* Responsive (Giữ nguyên logic xếp dọc) */
+@media (max-width: 768px) {
+  .filter-search-bar {
+    flex-direction: column; 
+    gap: 10px;
+    align-items: stretch; 
+    background-color: transparent;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    padding-left: 0;
+  }
+  
+  .custom-select-container {
+     position: static; 
+  }
+  .custom-select-toggle {
+    width: 100%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    height: 48px;
+    padding: 0 30px 0 16px; 
+    justify-content: space-between; 
+    margin: 0;
+    border-right: 1px solid #ddd; 
+  }
+  .custom-select-toggle::after {
+     right: 16px; 
+  }
+  .custom-select-options {
+     width: 100%;
+     position: absolute; 
+     top: auto; 
+     left: 0;
+     right: 0;
+     margin: 0 auto; 
+     width: 90%; 
+  }
+
+  .search-input-wrapper {
+     background-color: white;
+     border: 1px solid #ddd;
+     border-radius: 25px;
+     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .filter-search-bar input {
+      height: 48px; 
+      padding-left: 40px; /* SỬA: Đồng bộ padding cho responsive */
+      border: none;
+      box-shadow: none;
+  }
+   .search-icon {
+     left: 15px; /* SỬA: Căn chỉnh lại icon cho responsive */
+   }
 }
 
 
+/* --- CSS CHO DANH SÁCH MACRO (GIỮ NGUYÊN) --- */
 .macro-list {
   display: flex;
   flex-direction: column;
@@ -83,13 +241,12 @@
   width: 100%;
 }
 
-/* --- Card Styles (UPDATED) --- */
 .macro-item {
-  background-color: #ffffff; /* Nền trắng cho toàn bộ card */
+  background-color: #ffffff; 
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  overflow: hidden; /* Quan trọng: để bo góc cho tiêu đề */
+  overflow: hidden; 
 }
 
 .macro-item:hover {
@@ -97,11 +254,10 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
-/* --- SỬA CSS HEADER --- */
 .macro-header {
   display: flex;
   justify-content: space-between;
-  align-items: center; /* Căn giữa theo chiều dọc */
+  align-items: center; 
   padding: 15px 25px;
   color: white;
 }
@@ -110,18 +266,15 @@
   flex-grow: 1;
   margin-right: 15px;
   display: flex; 
-  align-items: center; /* Căn giữa icon và title */
-  gap: 12px; /* Tăng khoảng cách giữa icon và title */
+  align-items: center; 
+  gap: 12px; 
 }
-/* --- KẾT THÚC SỬA CSS HEADER --- */
 
-/* --- Meta section (time & feedback button) --- */
 .macro-header-meta {
   display: flex;
-  align-items: center; /* Căn giữa icon và text */
+  align-items: center; 
   gap: 12px; 
   flex-shrink: 0;
-  /* margin-top: 2px; Xóa margin-top vì đã căn giữa */
 }
 
 .macro-header h3 {
@@ -176,14 +329,12 @@
   color: #333;
 }
 
-/* --- Gán màu cho từng header card --- */
 .macro-color-1 .macro-header { background: linear-gradient(135deg, #F7971E 0%, #FFD200 100%); }
 .macro-color-2 .macro-header { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); }
 .macro-color-3 .macro-header { background: linear-gradient(135deg, #e52d27 0%, #b31217 100%); }
 .macro-color-4 .macro-header { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
 .macro-color-5 .macro-header { background: linear-gradient(135deg, #dd5e89 0%, #f7bb97 100%); }
 
-/* --- Style cho highlight (UPDATED) --- */
 .macro-header h3 mark {
   background-color: rgba(255, 255, 255, 0.3);
   color: white;
@@ -197,22 +348,19 @@
   padding: 1px 3px;
 }
 
-/* --- CSS CHO PLATFORM ICONS (SỬA LỖI) --- */
 .platform-icons-wrapper {
   display: flex;
   flex-wrap: wrap; 
   gap: 8px;
-  /* margin-top: 8px; Xóa vì đã align-items: center */
-  flex-shrink: 0; /* Ngăn icon bị co lại */
+  flex-shrink: 0; 
 }
 
-/* Style cho logo (ảnh) */
 .platform-icon-img {
   height: 50px;
   width: auto; 
-  border-radius: 8px; /* Tăng bo góc */
-  background-color: rgba(255, 255, 255, 0.7); /* Thêm lại nền phủ */
-  padding: 6px; /* Tăng padding */
+  border-radius: 8px; 
+  background-color: rgba(255, 255, 255, 0.7); 
+  padding: 6px; 
   box-sizing: border-box;
   vertical-align: middle;
 }
@@ -221,20 +369,16 @@
   background-color: #f0f0f0; 
   padding: 6px; 
 }
-/* --- KẾT THÚC CSS PLATFORM ICONS --- */
 
-
-/* --- Footer Actions (UPDATED) --- */
 .macro-actions-footer {
   display: flex;
   justify-content: space-between; 
   align-items: center;
-  padding: 0px 25px 0px 25px;
+  padding: 0px 25px;
   margin-top: 0;
 }
-
-/* --- Responsive Styles for Mobile --- */
 @media (max-width: 768px) {
+  /* ... (các style responsive khác giữ nguyên) ... */
   .category-detail-container {
     padding: 15px;
   }
@@ -243,30 +387,28 @@
     font-size: 1.7rem;
   }
   
-  .search-bar-container {
-    width: 100%; 
-  }
-
   .macro-header {
     padding: 12px 18px;
     align-items: flex-start; 
     flex-direction: column; 
   }
   
-  /* CẬP NHẬT CHO RESPONSIVE */
   .macro-header-main {
-      flex-direction: column; /* Icon và title xếp dọc */
-      align-items: flex-start; /* Căn trái */
+      flex-direction: column; 
+      align-items: flex-start; 
       gap: 8px; 
+      width: 100%;
   }
   
   .platform-icon-img {
-      height: 40px; /* Giảm kích thước icon trên mobile */
+      height: 40px; 
       padding: 4px;
   }
   
   .macro-header-meta {
      margin-top: 8px; 
+     width: 100%;
+     justify-content: space-between;
   }
 
   .macro-header h3 {
@@ -275,7 +417,6 @@
   .macro-header .last-updated {
     font-size: 0.75rem;
   }
-
 
   .macro-content-body {
     padding: 15px 18px;
@@ -287,9 +428,8 @@
   }
 }
 
-/* --- Style cho các phần tử khác giữ nguyên --- */
 .translation-container {
-  margin-top: -10px;
+  margin-top: -10px; 
   padding-top: 15px;
   border-top: 1px dashed rgba(0, 0, 0, 0.1);
 }
@@ -311,12 +451,6 @@
   color: #6c757d;
   font-weight: 600;
   letter-spacing: 0.5px;
-}
-
-.translated-content h5 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 16px;
 }
 
 .translation-controls {

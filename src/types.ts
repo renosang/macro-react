@@ -3,12 +3,15 @@ import { Descendant } from 'slate';
 export interface Category {
   _id: string;
   name: string;
+  parent?: string | null;
+  children?: Category[];
 }
 
 export interface Macro {
   _id: string;
   title: string;
   category: string;
+  subCategory?: string | null;
   content: Descendant[];
   status: 'pending' | 'approved';
   useCount: number; // <-- Thuộc tính đã được thêm vào

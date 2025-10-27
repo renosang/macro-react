@@ -16,13 +16,26 @@
   display: flex;
   margin-bottom: 20px;
   gap: 10px;
+  align-items: center; /* Căn giữa các input/select */
 }
 
-.add-new-form input {
-  flex-grow: 1;
+.add-new-form input,
+.add-new-form select { /* Áp dụng style cho cả select */
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 14px; /* Đồng bộ font size */
+}
+
+.add-new-form input {
+  flex-grow: 1; /* Input tên chiếm nhiều không gian hơn */
+}
+
+/* Style riêng cho select để không bị quá dài */
+.add-new-form select.parent-select {
+    flex-grow: 0.5; 
+    min-width: 200px; /* Tăng độ rộng tối thiểu */
+    max-width: 300px; /* Giới hạn độ rộng tối đa */
 }
 
 .add-new-form button {
@@ -37,19 +50,50 @@
 .categories-table {
   width: 100%;
   border-collapse: collapse;
+  background-color: white; /* Thêm nền trắng */
+  border-radius: 8px; /* Bo góc */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Thêm bóng mờ */
+  overflow: hidden; /* Ẩn tràn nếu cần */
 }
 
 .categories-table th,
 .categories-table td {
-  border: 1px solid #ddd;
-  padding: 12px;
+  /* border: 1px solid #ddd; Bỏ viền cũ */
+  border-bottom: 1px solid #eee; /* Chỉ giữ viền dưới */
+  padding: 12px 15px; /* Điều chỉnh padding */
   text-align: left;
-  vertical-align: middle; /* Căn giữa nội dung theo chiều dọc */
+  vertical-align: middle; 
 }
 
 .categories-table th {
-  background-color: #f2f2f2;
+  background-color: #f8f9fa; /* Màu nền header nhẹ nhàng hơn */
+  font-weight: 600; /* Tăng độ đậm */
 }
+
+/* Bỏ viền bottom cho dòng cuối cùng */
+.categories-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* --- CSS MỚI CHO INPUT/SELECT TRONG BẢNG --- */
+.categories-table td .edit-input,
+.categories-table td .parent-select {
+    width: 100%; 
+    padding: 6px 8px;
+    font-size: 14px;
+    border: 1px solid #007bff; 
+    border-radius: 4px;
+    box-sizing: border-box; 
+}
+
+/* --- THÊM STYLE CHO CHỈ BÁO THỤT LỀ --- */
+.hierarchy-indicator {
+    color: #aaa; 
+    margin-right: 5px;
+    font-family: monospace; 
+}
+/* --- KẾT THÚC THÊM --- */
+
 
 .action-btn {
   padding: 5px 10px;
@@ -58,34 +102,16 @@
   color: white;
   cursor: pointer;
   margin-right: 5px;
-  font-weight: bold;
+}
+.action-btn:last-child {
+  margin-right: 0;
 }
 
-.edit-btn {
-  background-color: #ffc107;
-}
+.edit-btn { background-color: #ffc107; color: #333; }
+.delete-btn { background-color: #dc3545; }
+.save-btn { background-color: #28a745; }
+.cancel-btn { background-color: #6c757d; }
 
-.delete-btn {
-  background-color: #dc3545;
-}
-
-/* --- GIAO DIỆN SỬA INLINE ĐÃ ĐƯỢC CSS LẠI --- */
-
-/* Định dạng cho ô input khi sửa */
-.edit-input {
-  width: 90%;
-  padding: 8px;
-  border: 1px solid #007bff; /* Viền xanh để nổi bật */
-  border-radius: 4px;
-  font-size: 1em;
-}
-
-/* Nút Lưu - màu xanh lá, nổi bật là hành động chính */
-.save-btn {
-  background-color: #28a745;
-}
-
-/* Nút Hủy - màu xám, ít nổi bật hơn là hành động phụ */
-.cancel-btn {
-  background-color: #6c757d;
+.action-cell {
+    white-space: nowrap; /* Giữ nút trên 1 hàng */
 }

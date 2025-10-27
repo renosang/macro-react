@@ -6,26 +6,44 @@ import BroadcastBanner from '../components/BroadcastBanner';
 import HighlightText from '../components/HighlightText';
 
 interface DashboardPageProps {
-  categories: Category[];
+  categories: Category[]; // Prop này giờ là CÂY chỉ chứa danh mục cha (từ App.tsx)
   macros: Macro[];
   announcements: Announcement[];
 }
 
+// --- BỔ SUNG: Hàm đệ quy để đếm macro ---
+// Đếm số macro của category hiện tại và TẤT CẢ các category con cháu của nó
+const getMacroCountRecursive = (category: Category, allMacros: Macro[]): number => {
+  // 1. Đếm macro của chính nó
+  let count = allMacros.filter(macro => macro.category === category.name).length;
+  
+  // 2. Nếu có con, đếm đệ quy cho từng đứa con và cộng dồn
+  if (category.children && category.children.length > 0) {
+    for (const child of category.children) {
+      count += getMacroCountRecursive(child, allMacros); // Đếm cả các con
+    }
+  }
+  return count;
+};
+// --- KẾT THÚC BỔ SUNG ---
+
 function DashboardPage({ categories, macros, announcements }: DashboardPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const getMacroCount = (categoryName: string) => {
-    return macros.filter(macro => macro.category === categoryName).length;
-  };
+  // --- SỬA: Xóa hàm getMacroCount(categoryName: string) cũ ---
+  // const getMacroCount = (categoryName: string) => { ... }; // XÓA HÀM NÀY
 
   const filteredCategories = useMemo(() => {
+    // categories (prop) LÀ CÂY chỉ chứa danh mục cha (đã xử lý ở App.tsx)
+    // Logic này đã đúng, nó chỉ lọc trên danh sách cha.
     if (!searchQuery.trim()) {
-      return categories;
+      return categories; // Trả về danh sách các danh mục cha
     }
+    
     return categories.filter(category =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [categories, searchQuery]);
+  }, [categories, searchQuery]); // categories ở đây là state 'categories' từ App.tsx
 
   const colorClasses = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5'];
   const latestAnnouncement = announcements.length > 0 ? announcements[0] : undefined;
@@ -50,11 +68,17 @@ function DashboardPage({ categories, macros, announcements }: DashboardPageProps
           <button>🔍</button>
         </div>
 
+        {/* SỬA: Dòng này sẽ tự động chỉ đếm danh mục cha (filteredCategories.length) */}
         <h2 className="category-title">Danh mục ({filteredCategories.length})</h2>
         
         <div id="tour-category-grid" className="category-grid">
+          
+          {/* SỬA: filteredCategories giờ chỉ chứa danh mục cha */}
           {filteredCategories.map((category, index) => {
-            const macroCount = getMacroCount(category.name);
+            
+            // --- SỬA: Gọi hàm đếm đệ quy cho mỗi danh mục cha ---
+            const macroCount = getMacroCountRecursive(category, macros); 
+            
             const colorClass = colorClasses[index % colorClasses.length];
             return (
               <Link 
@@ -65,6 +89,7 @@ function DashboardPage({ categories, macros, announcements }: DashboardPageProps
                 <span className="category-name">
                    <HighlightText text={category.name} highlight={searchQuery} />
                 </span>
+                {/* SỬA: Hiển thị tổng số macro (bao gồm cả con) */}
                 <span className="macro-count">({macroCount} Macro)</span>
               </Link>
             );

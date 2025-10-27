@@ -22,9 +22,21 @@ import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
 import useAuthStore from './stores/useAuthStore';
 
+// --- BỎ HÀM buildCategoryTree VÌ ManageCategories TỰ XỬ LÝ ---
+// (Giữ lại hàm này nếu API /api/categories của bạn trả về danh sách phẳng)
+const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
+  return categories
+    .filter(category => category.parent === parentId)
+    .map(category => ({
+      ...category,
+      children: buildCategoryTree(categories, category._id)
+    }));
+};
+
 function App() {
   const [isAdmin] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
+  // --- BỎ STATE flatCategories ---
   const [macros, setMacros] = useState<Macro[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const { token, logout } = useAuthStore(); // Lấy token và hàm logout
@@ -45,10 +57,11 @@ function App() {
           'Authorization': `Bearer ${token}`
         };
 
-        // Gọi đồng thời các API với header xác thực
+        // --- SỬA: Đảm bảo fetch /api/categories (API trả về cây của bạn) ---
         const [macrosRes, categoriesRes, announcementsRes] = await Promise.all([
           fetch('/api/macros', { headers }),
-          fetch('/api/categories', { headers }),
+          // Giả sử /api/categories trả về cây, dựa theo file ManageCategories.tsx
+          fetch('/api/categories', { headers }), 
           fetch('/api/announcements', { headers })
         ]);
 
@@ -68,7 +81,8 @@ function App() {
         const announcementsData = await announcementsRes.json();
         
         setMacros(macrosData);
-        setCategories(categoriesData);
+        // --- SỬA: Lưu trực tiếp dữ liệu (giả sử là cây) vào categories ---
+        setCategories(categoriesData); 
         setAnnouncements(announcementsData);
 
       } catch (error: any) {
@@ -88,17 +102,24 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardPage categories={categories} macros={macros} announcements={announcements} />} />
-            <Route path="category/:categoryName" element={<CategoryDetailPage allMacros={macros} />} />
+            {/* ----- 
+              SỬA LỖI: Thêm prop allCategories={categories} vào đây. 
+              Component CategoryDetailPage cần prop này để xây dựng bộ lọc.
+              -----
+            */}
+            <Route path="category/:categoryName" element={<CategoryDetailPage allMacros={macros} allCategories={categories} />} />
             <Route path="contribute" element={<ContributePage />} />
             <Route path="links" element={<LinksPage />} />
             <Route path="tasks" element={<TasksPage />} />
           </Route>
          <Route element={<AdminRoute />}>
-          <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
-            <Route path="categories" element={<ManageCategories categories={categories} setCategories={setCategories} />} />
+            <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
+            {/* SỬA: Giữ nguyên <ManageCategories /> không có props
+                vì component này tự fetch dữ liệu (dựa trên file ManageCategories.tsx bạn gửi) */}
+            <Route path="categories" element={<ManageCategories />} />
             <Route path="macros" element={<ManageMacros categories={categories} macros={macros} setMacros={setMacros} />} />
             <Route path="announcements" element={<ManageAnnouncements announcements={announcements} setAnnouncements={setAnnouncements} />} />
-             <Route path="analytics" element={<AnalyticsDashboard />} />
+            <Route path="analytics" element={<AnalyticsDashboard />} />
             <Route path="users" element={<ManageUsersPage />} />
             <Route path="links" element={<ManageLinksPage />} />
             <Route path="feedback" element={<ManageFeedbackPage />} />

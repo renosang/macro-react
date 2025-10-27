@@ -17,6 +17,12 @@ const macroSchema = new mongoose.Schema({
     hasBrand: { type: Boolean, default: false },
   },
   
+  subCategory: {
+    type: String,
+    trim: true, 
+    default: null
+  },
+
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

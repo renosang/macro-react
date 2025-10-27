@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+// src/pages/dashboard/CategoryDetailPage.tsx
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Macro } from '../../types';
+import { Macro, Category } from '../../types';
 import './CategoryDetailPage.css';
 import HighlightText from '../components/HighlightText';
 import ContentViewer from '../components/ContentViewer';
@@ -9,81 +10,182 @@ import { serializeSlate } from '../../utils/slateUtils';
 import { Descendant } from 'slate';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../stores/useAuthStore';
-// Xóa HiOutlineTag
-import { HiOutlineClock, HiOutlineLightBulb } from 'react-icons/hi2'; 
+// ----- SỬA: Đổi HiOutlineSearch thành HiMagnifyingGlass -----
+import { HiOutlineClock, HiOutlineLightBulb, HiMagnifyingGlass } from 'react-icons/hi2'; 
 
 const IconClock = HiOutlineClock as React.ElementType;
 const IconFeedback = HiOutlineLightBulb as React.ElementType;
+const IconSearch = HiMagnifyingGlass as React.ElementType; // ----- SỬA: Gán đúng icon -----
 
-function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
+// Interface Props (giữ nguyên)
+interface CategoryDetailPageProps {
+  allMacros: Macro[];
+  allCategories: Category[]; 
+}
+
+// Hàm tìm danh mục con (giữ nguyên)
+const findCategoryAndChildren = (categories: Category[], categoryName: string): { currentCategory: Category | null; children: Category[] } => {
+  let currentCategory: Category | null = null;
+  let children: Category[] = [];
+
+  const findInChildren = (cats: Category[]): boolean => {
+    if (!cats) return false; 
+    for (const cat of cats) {
+      if (cat.name === categoryName) {
+        currentCategory = cat;
+        children = cat.children || [];
+        return true;
+      }
+      if (cat.children && findInChildren(cat.children)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  findInChildren(categories);
+  return { currentCategory, children };
+};
+
+
+function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProps) { 
   const { categoryName } = useParams<{ categoryName: string }>();
   const decodedCategoryName = categoryName ? decodeURIComponent(categoryName) : '';
   const [searchQuery, setSearchQuery] = useState('');
-
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>('all'); 
   const [translations, setTranslations] = useState<Record<string, { content: Descendant[] }>>({});
   const [loadingTranslationId, setLoadingTranslationId] = useState<string | null>(null);
-  const { token, user } = useAuthStore(); 
-
-  const [showFeedbackModal, setShowFeedbackModal] = useState<string | null>(null); 
+  const { token, user } = useAuthStore();
+  const [showFeedbackModal, setShowFeedbackModal] = useState<string | null>(null);
   const [feedbackContent, setFeedbackContent] = useState('');
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null); 
 
-  const macrosInCategory = useMemo(() =>
-    allMacros.filter(macro => macro.category === decodedCategoryName),
-    [allMacros, decodedCategoryName]
-  );
+  const { currentCategory, children: subCategories } = useMemo(() => {
+    return findCategoryAndChildren(allCategories, decodedCategoryName);
+  }, [allCategories, decodedCategoryName]);
+
+  useEffect(() => {
+    setSelectedSubCategory('all');
+  }, [decodedCategoryName]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false); 
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
+
+  // Logic filter (giữ nguyên từ file gốc bạn cung cấp)
+  const macrosInCategory = useMemo(() => {
+    const targetCategoryNames = [decodedCategoryName];
+    if (subCategories && subCategories.length > 0) {
+      const getChildNames = (cats: Category[]): string[] => {
+        let names: string[] = [];
+        cats.forEach(cat => {
+          names.push(cat.name);
+          if (cat.children) {
+            names = names.concat(getChildNames(cat.children));
+          }
+        });
+        return names;
+      };
+      targetCategoryNames.push(...getChildNames(subCategories));
+    }
+    return allMacros.filter(macro => targetCategoryNames.includes(macro.category));
+  }, [allMacros, decodedCategoryName, subCategories]);
+
 
   const filteredMacros = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return macrosInCategory;
-    }
-    const query = searchQuery.toLowerCase();
-    return macrosInCategory.filter(macro =>
-      macro.title.toLowerCase().includes(query) ||
-      serializeSlate(macro.content).toLowerCase().includes(query)
-    );
-  }, [macrosInCategory, searchQuery]);
+    let tempMacros = macrosInCategory;
 
-  // Hàm định dạng ngày giờ
-  const formatDateTime = (isoString: string) => {
-    if (!isoString) return '';
+    if (selectedSubCategory !== 'all') {
+      const getDescendantNames = (cats: Category[], selectedName: string): string[] => {
+        let names: string[] = [];
+        const find = (categories: Category[]) => {
+            if (!categories) return;
+            for (const cat of categories) {
+                if (cat.name === selectedName) {
+                    names.push(cat.name); // Thêm chính nó
+                    // Thêm tất cả con cháu
+                    const addChildren = (c: Category) => {
+                        if (c.children) {
+                            c.children.forEach(child => {
+                                names.push(child.name);
+                                addChildren(child);
+                            });
+                        }
+                    };
+                    addChildren(cat);
+                    return; // Found
+                }
+                if (cat.children) find(cat.children);
+            }
+        };
+        find(cats);
+        // SỬA: Nếu không tìm thấy trong subCategories (trường hợp chọn chính danh mục cha)
+        if(names.length === 0 && selectedName === decodedCategoryName) {
+          return [decodedCategoryName];
+        }
+        return names;
+      };
+      
+      const searchBase = selectedSubCategory === decodedCategoryName 
+                            ? [currentCategory] 
+                            : subCategories;
+
+      const selectedCategoryNames = getDescendantNames(searchBase as Category[], selectedSubCategory);
+      tempMacros = tempMacros.filter(macro => selectedCategoryNames.includes(macro.category));
+
+    }
+     else if (selectedSubCategory === 'all') {
+         tempMacros = macrosInCategory.filter(macro => macro.category === decodedCategoryName);
+     }
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      tempMacros = tempMacros.filter(macro =>
+        macro.title.toLowerCase().includes(query) ||
+        serializeSlate(macro.content).toLowerCase().includes(query)
+      );
+    }
+
+    return tempMacros;
+  }, [macrosInCategory, searchQuery, selectedSubCategory, subCategories, decodedCategoryName, currentCategory]);
+
+  // Các hàm (formatDateTime, handleTranslate,...) giữ nguyên
+  const formatDateTime = (isoString: string | null | undefined) => {
+    if (!isoString) return 'N/A';
     return new Date(isoString).toLocaleString('vi-VN', {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });
   };
 
-
   const handleTranslate = async (macro: Macro) => {
-      // ... (code xử lý dịch giữ nguyên)
       if (!macro._id || !token) {
         toast.error('Bạn cần đăng nhập để sử dụng chức năng này.');
         return;
       }
-
       setLoadingTranslationId(macro._id);
       try {
         const res = await fetch('/api/ai/translate', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ content: macro.content, targetLang: 'en' }),
         });
-
         if (!res.ok) {
           const errorData = await res.json();
           throw new Error(errorData.message || 'API dịch thuật gặp lỗi.');
         }
-
         const data = await res.json();
-        const translatedContentSlate = data.translation;
-
-        setTranslations(prev => ({
-          ...prev,
-          [macro._id!]: { content: translatedContentSlate }
-        }));
+        setTranslations(prev => ({ ...prev, [macro._id!]: { content: data.translation } }));
       } catch (error: any) {
         toast.error(`Dịch thất bại: ${error.message}`);
       } finally {
@@ -99,39 +201,28 @@ function CategoryDetailPage({ allMacros }: { allMacros: Macro[] }) {
       });
   };
 
-const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
-    // Đảm bảo có token
-    if (!token) return; 
-
+  const handleCopyOnSelect = (macro: Macro) => {
+    if (!token) return;
     const selection = window.getSelection();
     if (selection && selection.toString().trim().length > 1) {
         const selectedText = selection.toString();
         navigator.clipboard.writeText(selectedText)
             .then(() => {
                 toast.success('Đã sao chép vào bộ nhớ tạm!');
-
-                // 2. Thêm logic đếm lượt sử dụng (lấy từ CopyButtons.tsx)
                 if (macro._id && token) {
                   fetch(`/api/macros/${macro._id}/increment-usage`, {
                     method: 'PUT',
-                    headers: {
-                      'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                   });
                 }
-                // --- KẾT THÚC THÊM LOGIC ---
-
             })
-            .catch(err => {
-                console.error('Lỗi sao chép tự động:', err);
-            });
+            .catch(err => { console.error('Lỗi sao chép tự động:', err); });
     }
   };
 
-  // --- HÀM MỞ/ĐÓNG MODAL FEEDBACK ---
-  const openFeedbackModal = (macroId: string) => {
+   const openFeedbackModal = (macroId: string) => {
       setShowFeedbackModal(macroId);
-      setFeedbackContent(''); // Reset nội dung khi mở
+      setFeedbackContent('');
   };
 
   const closeFeedbackModal = () => {
@@ -139,8 +230,7 @@ const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
       setFeedbackContent('');
   };
 
-  // --- HÀM GỬI FEEDBACK ---
-  const handleSubmitFeedback = async () => {
+   const handleSubmitFeedback = async () => {
       if (!feedbackContent.trim() || !showFeedbackModal || !token || !user) {
           toast.error('Vui lòng nhập nội dung góp ý.');
           return;
@@ -149,14 +239,8 @@ const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
       try {
           const res = await fetch('/api/feedback', {
               method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-              },
-              body: JSON.stringify({
-                  macroId: showFeedbackModal,
-                  content: feedbackContent
-              }),
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ macroId: showFeedbackModal, content: feedbackContent }),
           });
           if (!res.ok) {
               const errorData = await res.json();
@@ -171,6 +255,14 @@ const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
       }
   };
 
+  const getSelectedCategoryText = () => {
+    if (selectedSubCategory === 'all') {
+      return `Tất cả trong "${decodedCategoryName}"`;
+    }
+    const found = subCategories.find(c => c.name === selectedSubCategory);
+    return found ? found.name : `Tất cả trong "${decodedCategoryName}"`;
+  };
+
   return (
     <div className="category-detail-container">
       <main className="page-container">
@@ -178,14 +270,56 @@ const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
           <Link to="/dashboard">Dashboard</Link> &gt; {decodedCategoryName}
         </div>
         <h1>{decodedCategoryName}</h1>
-        <div className="search-bar-container">
-          <input
-            type="text"
-            placeholder={`Tìm kiếm trong danh mục ${decodedCategoryName}...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+
+        {/* ----- Cấu trúc Dropdown và Search (Giữ nguyên) ----- */}
+        <div className="filter-search-bar" ref={dropdownRef}>
+          {subCategories && subCategories.length > 0 && (
+            <div className="custom-select-container">
+              <button 
+                type="button" 
+                className="custom-select-toggle"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                {getSelectedCategoryText()}
+              </button>
+              {isDropdownOpen && (
+                <ul className="custom-select-options">
+                  <li 
+                    onClick={() => {
+                      setSelectedSubCategory('all');
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    Tất cả trong "{decodedCategoryName}"
+                  </li>
+                  {subCategories.map(subCat => (
+                    <li 
+                      key={subCat._id} 
+                      onClick={() => {
+                        setSelectedSubCategory(subCat.name);
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      {subCat.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+           )}
+           <div className="search-input-wrapper">
+              <IconSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder={`Tìm kiếm macro...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+           </div>
         </div>
+        {/* ----- KẾT THÚC ----- */}
+
+
         <div className="macro-list">
           {filteredMacros.length > 0 ? (
             filteredMacros.map((macro, index) => {
@@ -194,12 +328,10 @@ const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
               const isTranslated = macro._id && translations[macro._id];
               const isLoadingTranslation = loadingTranslationId === macro._id;
 
- return (
-                <div key={macro._id} className={`macro-item ${colorClass}`}>
+              return (
+                 <div key={macro._id} className={`macro-item ${colorClass}`}>
                   <div className="macro-header">
-                    {/* --- CẬP NHẬT CẤU TRÚC --- */}
                     <div className="macro-header-main">
-                        {/* Di chuyển icon lên trước <h3> */}
                         <div className="platform-icons-wrapper">
                           {macro.platformTags?.shopee && <img src={`${process.env.PUBLIC_URL}/logo-shopee.png`} alt="Shopee" title="Shopee" className="platform-icon-img" />}
                           {macro.platformTags?.lazada && <img src={`${process.env.PUBLIC_URL}/logo-lazada.png`} alt="Lazada" title="Lazada" className="platform-icon-img" />}
@@ -210,9 +342,6 @@ const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
                           <HighlightText text={macro.title} highlight={searchQuery} />
                         </h3>
                     </div>
-                    {/* --- KẾT THÚC CẬP NHẬT CẤU TRÚC --- */}
-                    
-                    {/* Meta section with time and feedback button */}
                     <div className="macro-header-meta">
                         <small className="last-updated">
                            <IconClock /> Cập nhật: {formatDateTime(macro.updatedAt)}
@@ -226,7 +355,7 @@ const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
                   <div className="macro-content-body" onMouseUp={() => handleCopyOnSelect(macro)}>
                     <ContentViewer content={macro.content} highlight={searchQuery} />
                   </div>
-                  
+
                   {isTranslated && (
                     <div className="translated-content" onMouseUp={() => handleCopyOnSelect(macro)}>
                       <h4>Bản dịch (Tiếng Anh)</h4>
@@ -234,7 +363,6 @@ const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
                     </div>
                   )}
 
-                  {/* Thanh actions footer mới */}
                   <div className="macro-actions-footer">
                       <CopyButtons
                           content={macro.content}
@@ -249,13 +377,12 @@ const handleCopyOnSelect = (macro: Macro) => { // 1. Chấp nhận 'macro'
               );
             })
           ) : (
-            <p>Không tìm thấy macro nào phù hợp với từ khóa của bạn.</p>
+             <p>Không tìm thấy macro nào phù hợp.</p>
           )}
         </div>
       </main>
 
-      {/* --- MODAL FEEDBACK --- */}
-      {showFeedbackModal && (
+       {showFeedbackModal && (
         <div className="feedback-modal-backdrop" onClick={closeFeedbackModal}>
           <div className="feedback-modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Góp ý cho Macro</h3>
