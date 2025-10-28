@@ -1,107 +1,111 @@
-const MacroUsage = require('../models/MacroUsage');
-const Category = require('../models/Category');
+// backend/routes/macros.js
 const express = require('express');
-const Macro = require('../models/Macro');
-const { last } = require('slate');
-const { protect } = require('../middleware/authMiddleware');
-
 const router = express.Router();
+const Macro = require('../models/Macro');
+const { protect, admin } = require('../middleware/authMiddleware');
 
-// LẤY TẤT CẢ MACRO
+// GET /api/macros - Lấy tất cả macro
 router.get('/', protect, async (req, res) => {
   try {
-    // Thêm .populate() để lấy thông tin chi tiết của người tạo và người sửa
-    const macros = await Macro.find({})
-      .populate('createdBy', 'fullName')
-      .populate('lastModifiedBy', 'fullName')
-      .sort({ updatedAt: -1 });
+    const macros = await Macro.find()
+      .sort({ updatedAt: -1 })
+      
+      // ----- SỬA ĐỔI QUAN TRỌNG -----
+      // Populate để lấy thông tin category (tên, _id, parent)
+      // và thông tin người tạo/sửa
+      .populate('category') 
+      .populate('createdBy', 'fullName') 
+      .populate('lastModifiedBy', 'fullName');
+    // -----------------------------
+      
     res.json(macros);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// TẠO MACRO MỚI
+// POST /api/macros - Tạo macro mới
 router.post('/', protect, async (req, res) => {
-  try {
-const { title, content, category, status, platformTags, subCategory } = req.body;
+  // `category` nhận từ body giờ sẽ là ID
+  const { title, category, content, status, platformTags } = req.body;
 
-    const newMacro = new Macro({
-      title,
-      content,
-      category,
-      status: status || 'pending',
-      platformTags,
-      subCategory: (category === 'Macro chung' && subCategory) ? subCategory.trim() : null,
-      createdBy: req.user._id,
-    });
-
-    const savedMacro = await newMacro.save();
-    await savedMacro.populate('createdBy', 'fullName');
-    res.status(201).json(savedMacro);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  if (!title || !category || !content) {
+    return res.status(400).json({ message: 'Vui lòng nhập đủ thông tin.' });
   }
-});
 
-// CẬP NHẬT MACRO
-router.put('/:id', protect, async (req, res) => {
+  const macro = new Macro({
+    title,
+    category, // Lưu ID trực tiếp
+    content,
+    status: (req.user && req.user.role === 'admin' && status) ? status : 'pending',
+    platformTags,
+    createdBy: req.user._id,
+    lastModifiedBy: req.user._id
+  });
+
   try {
-const { title, category, content, status, platformTags, subCategory } = req.body;
-    const updateData = {
-      title,
-      category,
-      content,
-      status,
-      platformTags,
-      subCategory: (category === 'Macro chung' && subCategory) ? subCategory.trim() : null,
-      lastModifiedBy: req.user._id
-    };
-
-    const updatedMacro = await Macro.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!updatedMacro) return res.status(404).send('Không tìm thấy macro.');
-    res.json(updatedMacro);
+    const newMacro = await macro.save();
+    // Populate ngược lại để trả về data đầy đủ cho client
+    const populatedMacro = await Macro.findById(newMacro._id)
+        .populate('category')
+        .populate('createdBy', 'fullName');
+    res.status(201).json(populatedMacro);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// XÓA MACRO
-router.delete('/:id', protect, async (req, res) => {
-    try {
-        const deletedMacro = await Macro.findByIdAndDelete(req.params.id);
-        if (!deletedMacro) {
-            return res.status(404).json({ message: "Không tìm thấy macro" });
-        }
-        res.json({ message: "Đã xóa macro thành công" });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+// PUT /api/macros/:id - Cập nhật macro
+router.put('/:id', protect, admin, async (req, res) => {
+  // `category` nhận từ body giờ sẽ là ID
+  const { title, category, content, status, platformTags } = req.body;
+
+  try {
+    const macro = await Macro.findById(req.params.id);
+    if (!macro) return res.status(404).json({ message: 'Không tìm thấy macro.' });
+
+    macro.title = title || macro.title;
+    macro.category = category || macro.category; // Lưu ID
+    macro.content = content || macro.content;
+    macro.status = status || macro.status;
+    macro.platformTags = platformTags !== undefined ? platformTags : macro.platformTags;
+    macro.lastModifiedBy = req.user._id;
+
+    const updatedMacro = await macro.save();
+    const populatedMacro = await Macro.findById(updatedMacro._id)
+        .populate('category')
+        .populate('createdBy', 'fullName')
+        .populate('lastModifiedBy', 'fullName');
+        
+    res.json(populatedMacro);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+router.delete('/:id', protect, admin, async (req, res) => {
+  try {
+    const macro = await Macro.findByIdAndDelete(req.params.id);
+    if (!macro) return res.status(404).json({ message: 'Không tìm thấy macro.' });
+    res.json({ message: 'Xóa macro thành công.' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 router.put('/:id/increment-usage', protect, async (req, res) => {
-  try {
-    const macro = await Macro.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { useCount: 1 } },
-      { new: true }
-    );
-
-    if (!macro) {
-      return res.status(404).send('Không tìm thấy macro.');
+    try {
+        const macro = await Macro.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { useCount: 1 } },
+            { new: true }
+        );
+        if (!macro) return res.status(404).send('Không tìm thấy macro.');
+        res.json(macro);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
-
-    // Tạo bản ghi lịch sử sử dụng
-    const usage = new MacroUsage({
-      macro: macro._id,
-      category: macro.category
-    });
-    await usage.save();
-
-    res.json(macro);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
 });
+
 
 module.exports = router;

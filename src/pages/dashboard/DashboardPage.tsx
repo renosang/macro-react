@@ -12,11 +12,12 @@ interface DashboardPageProps {
 }
 
 const getMacroCountRecursive = (category: Category, allMacros: Macro[]): number => {
-  let count = allMacros.filter(macro => macro.category === category.name).length;
-  
+  let count = allMacros.filter(macro => 
+    macro.category && (typeof macro.category === 'object') && macro.category.name === category.name
+  ).length;  
   if (category.children && category.children.length > 0) {
     for (const child of category.children) {
-      count += getMacroCountRecursive(child, allMacros); // Đếm cả các con
+      count += getMacroCountRecursive(child, allMacros);
     }
   }
   return count;
@@ -27,7 +28,7 @@ function DashboardPage({ categories, macros, announcements }: DashboardPageProps
 
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) {
-      return categories; // Trả về danh sách các danh mục cha
+      return categories;
     }
     
     return categories.filter(category =>

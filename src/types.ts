@@ -8,9 +8,9 @@ export interface Category {
 }
 
 export interface Macro {
-  _id: string;
+  _id?: string;
   title: string;
-  category: string;
+  category: string | Category;
   subCategory?: string | null;
   content: Descendant[];
   status: 'pending' | 'approved';

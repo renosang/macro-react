@@ -59,7 +59,9 @@ function App() {
         ]);
 
         if (macrosRes.status === 401 || categoriesRes.status === 401) {
-          toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+          toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', {
+          id: 'session-expired-toast' 
+        });
           logout(); 
           return;
         }

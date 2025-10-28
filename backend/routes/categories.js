@@ -1,4 +1,3 @@
-// backend/routes/categories.js
 const express = require('express');
 const Category = require('../models/Category');
 const Macro = require('../models/Macro');
@@ -15,16 +14,14 @@ router.get('/', protect, async (req, res) => {
 });
 
 router.post('/', protect, admin, async (req, res) => {
-  // Lấy thêm 'parent' từ body
   const { name, parent } = req.body; 
   if (!name) {
     return res.status(400).json({ message: 'Tên danh mục là bắt buộc.' });
   }
   
-  // Tạo category mới với 'name' và 'parent'
   const newCategory = new Category({ 
     name, 
-    parent: parent || null // Nếu parent là "" hoặc undefined, gán là null
+    parent: parent || null 
   });
 
   try {
@@ -37,11 +34,11 @@ router.post('/', protect, admin, async (req, res) => {
 
 router.put('/:id', protect, admin, async (req, res) => {
     try {
-        const { name, parent } = req.body; // Lấy thêm 'parent'
+        const { name, parent } = req.body; 
         
         const updatedCategory = await Category.findByIdAndUpdate(
           req.params.id, 
-          { name: name, parent: parent || null }, // Cập nhật cả 'name' và 'parent'
+          { name: name, parent: parent || null }, 
           { new: true }
         );
         
@@ -56,18 +53,14 @@ router.delete('/:id', protect, admin, async (req, res) => {
   try {
     const categoryId = req.params.id;
 
-    // 1. Tìm và xóa danh mục
     const category = await Category.findByIdAndDelete(categoryId);
     if (!category) return res.status(404).send('Không tìm thấy danh mục.');
 
-    // 2. Cập nhật các danh mục con, set 'parent' của chúng về null (thành danh mục gốc)
     await Category.updateMany(
       { parent: categoryId }, 
       { $set: { parent: null } }
     );
     
-    // 3. (Tùy chọn) Cập nhật các macro đang dùng danh mục này
-    // Gán chúng về 'Chưa phân loại'
     await Macro.updateMany(
         { category: category.name },
         { $set: { category: 'Chưa phân loại' } }

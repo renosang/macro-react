@@ -1,3 +1,4 @@
+// src/pages/dashboard/ContributePage.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -15,8 +16,9 @@ interface ContributePageProps {
 
 interface CategoryOption {
   _id: string;
-  name: string;
+  displayName: string;
 }
+
 const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
   return categories
     .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null))
@@ -25,10 +27,14 @@ const buildCategoryTree = (categories: Category[], parentId: string | null = nul
       children: buildCategoryTree(categories, category._id)
     }));
 };
+
 const buildCategoryDropdownOptions = (cats: Category[], prefix = ''): CategoryOption[] => {
   let flatList: CategoryOption[] = [];
   cats.forEach(cat => {
-    flatList.push({ _id: cat._id, name: prefix + cat.name });
+    flatList.push({ 
+      _id: cat._id, 
+      displayName: prefix + cat.name 
+    });
     if (cat.children && cat.children.length > 0) {
       flatList = flatList.concat(buildCategoryDropdownOptions(cat.children, prefix + '-- '));
     }
@@ -38,7 +44,6 @@ const buildCategoryDropdownOptions = (cats: Category[], prefix = ''): CategoryOp
 
 function ContributePage({ flatCategories }: ContributePageProps) {
   const [title, setTitle] = useState('');
-    
   const [selectedCategory, setSelectedCategory] = useState('');
   const [content, setContent] = useState<Descendant[]>(emptyContent);
   const navigate = useNavigate();
@@ -51,7 +56,7 @@ function ContributePage({ flatCategories }: ContributePageProps) {
   
   useEffect(() => {
     if (categoryOptions.length > 0) {
-      setSelectedCategory(categoryOptions[0].name);
+      setSelectedCategory(categoryOptions[0]._id);
     }
   }, [categoryOptions]);
 
@@ -73,7 +78,7 @@ function ContributePage({ flatCategories }: ContributePageProps) {
         },
         body: JSON.stringify({
           title,
-          category: selectedCategory,
+          category: selectedCategory, // Gửi ID
           content,
           status: 'pending', 
         }),
@@ -108,13 +113,15 @@ function ContributePage({ flatCategories }: ContributePageProps) {
         </div>
         <div className="form-group">
           <label>Danh mục</label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            {categoryOptions.map(cat => (
-              <option key={cat._id} value={cat.name}>{cat.name}</option>
-            ))}
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          {categoryOptions.map(cat => (
+            <option key={cat._id} value={cat._id}>
+              {cat.displayName}
+            </option>
+          ))}
           </select>
         </div>
         <div className="form-group">

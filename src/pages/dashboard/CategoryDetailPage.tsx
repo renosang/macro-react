@@ -1,4 +1,3 @@
-// src/pages/dashboard/CategoryDetailPage.tsx
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Macro, Category } from '../../types';
@@ -80,62 +79,70 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
   }, [dropdownRef]);
 
   const macrosInCategory = useMemo(() => {
-    const targetCategoryNames = [decodedCategoryName];
-    if (subCategories && subCategories.length > 0) {
-      const getChildNames = (cats: Category[]): string[] => {
-        let names: string[] = [];
-        cats.forEach(cat => {
-          names.push(cat.name);
-          if (cat.children) {
-            names = names.concat(getChildNames(cat.children));
-          }
-        });
-        return names;
-      };
-      targetCategoryNames.push(...getChildNames(subCategories));
-    }
-    return allMacros.filter(macro => targetCategoryNames.includes(macro.category));
-  }, [allMacros, decodedCategoryName, subCategories]);
+    if (!currentCategory) return []; 
+
+    const targetCategoryIds: string[] = [currentCategory._id];
+
+    const getChildIds = (cats: Category[]): string[] => {
+      let ids: string[] = [];
+      cats.forEach(cat => {
+        ids.push(cat._id);
+        if (cat.children && cat.children.length > 0) {
+          ids = ids.concat(getChildIds(cat.children));
+        }
+      });
+      return ids;
+    };
+    
+    targetCategoryIds.push(...getChildIds(subCategories));
+    
+    return allMacros.filter(macro => 
+      macro.category && (typeof macro.category === 'object') && targetCategoryIds.includes(macro.category._id)
+    );
+  }, [allMacros, currentCategory, subCategories]);
 
 
   const filteredMacros = useMemo(() => {
     let tempMacros = macrosInCategory;
 
     if (selectedSubCategory !== 'all') {
-      const getDescendantNames = (cats: Category[], selectedName: string): string[] => {
-        let names: string[] = [];
+      
+      const getDescendantIds = (cats: Category[], selectedId: string): string[] => {
+        let ids: string[] = [];
         const find = (categories: Category[]) => {
             if (!categories) return;
             for (const cat of categories) {
-                if (cat.name === selectedName) {
-                    names.push(cat.name); 
+                if (cat._id === selectedId) {
+                    ids.push(cat._id); 
                     const addChildren = (c: Category) => {
                         if (c.children) {
                             c.children.forEach(child => {
-                                names.push(child.name);
+                                ids.push(child._id);
                                 addChildren(child);
                             });
                         }
                     };
-                    addChildren(cat);
+                    addChildren(cat); 
                     return; 
                 }
-                if (cat.children) find(cat.children);
+                if (cat.children) find(cat.children); 
             }
         };
-        find(cats);
-        if(names.length === 0 && selectedName === decodedCategoryName) {
-          return [decodedCategoryName];
+        
+        find(cats); 
+        
+        if(ids.length === 0 && selectedId === currentCategory?._id) {
+          return [currentCategory._id];
         }
-        return names;
+        return ids;
       };
       
-      const searchBase = selectedSubCategory === decodedCategoryName 
-                            ? [currentCategory] 
-                            : subCategories;
-
-      const selectedCategoryNames = getDescendantNames(searchBase as Category[], selectedSubCategory);
-      tempMacros = tempMacros.filter(macro => selectedCategoryNames.includes(macro.category));
+      const searchBase = subCategories;
+      const selectedCategoryIds = getDescendantIds(searchBase, selectedSubCategory);
+      
+      tempMacros = tempMacros.filter(macro => 
+        macro.category && (typeof macro.category === 'object') && selectedCategoryIds.includes(macro.category._id)
+      );
 
     }
      else if (selectedSubCategory === 'all') {
@@ -150,7 +157,7 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
     }
 
     return tempMacros;
-  }, [macrosInCategory, searchQuery, selectedSubCategory, subCategories, decodedCategoryName, currentCategory]);
+  }, [macrosInCategory, searchQuery, selectedSubCategory, subCategories, currentCategory]);
 
   const formatDateTime = (isoString: string | null | undefined) => {
     if (!isoString) return 'N/A';
@@ -248,35 +255,49 @@ function CategoryDetailPage({ allMacros, allCategories }: CategoryDetailPageProp
   };
 
   const getSelectedCategoryText = () => {
-    if (selectedSubCategory === 'all') {
+    if (selectedSubCategory === 'all' || !currentCategory) {
       return `Tất cả trong "${decodedCategoryName}"`;
     }
-    const found = subCategories.find(c => c.name === selectedSubCategory);
-    return found ? found.name : `Tất cả trong "${decodedCategoryName}"`;
+    
+    let foundName = `Tất cả trong "${decodedCategoryName}"`; 
+
+    if (selectedSubCategory === currentCategory._id) {
+        return decodedCategoryName;
+    }
+
+    const findName = (cats: Category[]): boolean => {
+        for(const cat of cats) {
+            if (cat._id === selectedSubCategory) {
+                foundName = cat.name;
+                return true;
+            }
+            if (cat.children && findName(cat.children)) return true;
+        }
+        return false;
+    };
+    
+    findName(subCategories); 
+    return foundName;
   };
   
   const renderDropdownOptions = (categories: Category[], level: number): React.ReactNode[] => {
     const options: React.ReactNode[] = [];
     
     categories.forEach(cat => {
-      // Thêm <li> cho category hiện tại
       options.push(
         <li 
           key={cat._id}
-          // Thêm style thụt lề
           style={{ paddingLeft: `${level * 20 + 14}px` }} 
           onClick={() => {
-            setSelectedSubCategory(cat.name);
+            setSelectedSubCategory(cat._id);
             setIsDropdownOpen(false);
           }}
         >
-          {/* Thêm ký tự phân cấp */}
           {level > 0 && <span className="dropdown-prefix">└─ </span>}
           {cat.name}
         </li>
       );
 
-      // Nếu có con, gọi đệ quy
       if (cat.children && cat.children.length > 0) {
         options.push(...renderDropdownOptions(cat.children, level + 1));
       }

@@ -1,3 +1,4 @@
+// src/pages/admin/ManageCategories.tsx
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import './ManageCategories.css';
@@ -89,7 +90,7 @@ function ManageCategories({ initialCategories }: ManageCategoriesProps) {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           name: newCategoryName,
-          parent: selectedParentAdd || null 
+          parent: selectedParentAdd || null // Gửi ID
         }),
       });
       if (!res.ok) {
@@ -109,7 +110,7 @@ function ManageCategories({ initialCategories }: ManageCategoriesProps) {
   const handleEdit = (category: Category) => {
      setEditingCategory(category);
     setEditingName(category.name);
-    setSelectedParentEdit(category.parent || ''); 
+    setSelectedParentEdit(category.parent || ''); // parent đã là ID
     setIsAdding(false); 
   };
 
@@ -136,7 +137,7 @@ function ManageCategories({ initialCategories }: ManageCategoriesProps) {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           name: editingName,
-          parent: selectedParentEdit || null 
+          parent: selectedParentEdit || null // Gửi ID
         }),
       });
       if (!res.ok) {

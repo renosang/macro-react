@@ -5,7 +5,7 @@ import './LoginPage.css';
 import useAuthStore from '../../stores/useAuthStore';
 
 const REMEMBER_USERNAME_KEY = 'rememberedUsername';
-const REMEMBER_PASSWORD_KEY = 'rememberedPassword'; // Key mới cho mật khẩu
+const REMEMBER_PASSWORD_KEY = 'rememberedPassword';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -14,15 +14,15 @@ function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const { login, token } = useAuthStore();
+  
+  const [isLoading, setIsLoading] = useState(false); 
 
-  // Load username và password đã lưu khi component mount
   useEffect(() => {
     const rememberedUsername = localStorage.getItem(REMEMBER_USERNAME_KEY);
-    const rememberedPassword = localStorage.getItem(REMEMBER_PASSWORD_KEY); // Lấy mật khẩu đã lưu
+    const rememberedPassword = localStorage.getItem(REMEMBER_PASSWORD_KEY);
     if (rememberedUsername) {
       setUsername(rememberedUsername);
       setRememberMe(true);
-      // Chỉ điền mật khẩu nếu username cũng được lưu
       if (rememberedPassword) {
         setPassword(rememberedPassword);
       }
@@ -38,9 +38,13 @@ function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
-      toast.error('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
+      toast.error('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.', { id: 'login-validation-error' });
       return;
     }
+
+    if (isLoading) return; 
+
+    setIsLoading(true);
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -55,27 +59,27 @@ function LoginPage() {
         const user = { id: data.id, username: data.username, role: data.role };
         login(user, data.token);
 
-        // Xử lý lưu hoặc xóa username và password dựa trên checkbox
         if (rememberMe) {
           localStorage.setItem(REMEMBER_USERNAME_KEY, username);
-          // !!! CẢNH BÁO: LƯU MẬT KHẨU VÀO LOCALSTORAGE LÀ KHÔNG AN TOÀN !!!
           localStorage.setItem(REMEMBER_PASSWORD_KEY, password);
         } else {
           localStorage.removeItem(REMEMBER_USERNAME_KEY);
           localStorage.removeItem(REMEMBER_PASSWORD_KEY);
         }
 
-        toast.success('Đăng nhập thành công!');
+        toast.success('Đăng nhập thành công!', { id: 'login-success' });
         navigate('/dashboard');
       } else {
         throw new Error(data.message || 'Đăng nhập thất bại.');
       }
     } catch (error) {
       if (error instanceof Error) {
-        toast.error(error.message);
+        toast.error(error.message, { id: 'login-api-error' });
       } else {
-        toast.error('Đã có lỗi xảy ra.');
+        toast.error('Đã có lỗi xảy ra.', { id: 'login-unknown-error' });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -125,12 +129,13 @@ function LoginPage() {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
               />
-              {/* Sửa lại label */}
               <label htmlFor="remember">Ghi nhớ đăng nhập</label>
             </div>
           </div>
 
-          <button type="submit" className="login-btn">Đăng nhập</button>
+          <button type="submit" className="login-btn" disabled={isLoading}>
+            {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+          </button>
         </form>
       </div>
     </div>

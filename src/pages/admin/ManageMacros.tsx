@@ -6,7 +6,7 @@ import HighlightText from '../components/HighlightText';
 import { Category, Macro } from '../../types';
 import { Descendant } from 'slate';
 import useAuthStore from '../../stores/useAuthStore';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom'; 
 
 interface ManageMacrosProps {
   categories: Category[];
@@ -21,22 +21,24 @@ type SortOrder = 'asc' | 'desc' | 'none';
 
 interface CategoryOption {
   _id: string;
-  name: string;
+  displayName: string; 
 }
 
 const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
   return categories
-    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null))
+    .filter(category => (category.parent || null) === (parentId ? parentId.toString() : null)) 
     .map(category => ({
       ...category,
-      children: buildCategoryTree(categories, category._id)
+      children: buildCategoryTree(categories, category._id) || [] 
     }));
 };
 
 function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentMacro, setCurrentMacro] = useState<Partial<Macro> | null>(null);
-  const [filterCategory, setFilterCategory] = useState<string>('all');
+  
+  const [currentMacro, setCurrentMacro] = useState<(Omit<Partial<Macro>, 'category'> & { category?: string }) | null>(null);
+
+  const [filterCategory, setFilterCategory] = useState<string>('all'); // Sẽ lưu ID
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
@@ -47,7 +49,10 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   const buildOptionsCallback = useCallback((cats: Category[], prefix = ''): CategoryOption[] => {
     let flatList: CategoryOption[] = [];
     cats.forEach(cat => {
-      flatList.push({ _id: cat._id, name: prefix + cat.name });
+      flatList.push({ 
+        _id: cat._id, 
+        displayName: prefix + cat.name
+      });
       if (cat.children && cat.children.length > 0) {
         flatList = flatList.concat(buildOptionsCallback(cat.children, prefix + '-- '));
       }
@@ -56,21 +61,26 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   }, []);
 
   const categoryOptions = useMemo(() => {
-    const categoryTree = buildCategoryTree(categories, null);
-    return buildOptionsCallback(categoryTree);
+    const categoryTree = buildCategoryTree(categories, null); 
+    return buildOptionsCallback(categoryTree); 
   }, [categories, buildOptionsCallback]);
-
 
   const handleOpenModal = useCallback((macro: Partial<Macro> | null = null) => {
     if (macro) {
-      setCurrentMacro({ ...macro,
-      platformTags: macro.platformTags || { shopee: false, lazada: false, tiktok: false, hasBrand: false }
+      const categoryId = (macro.category && typeof macro.category === 'object') 
+                         ? macro.category._id 
+                         : (macro.category as string | undefined);
+
+      setCurrentMacro({ 
+        ...macro,
+        category: categoryId,
+        platformTags: macro.platformTags || { shopee: false, lazada: false, tiktok: false, hasBrand: false }
       });
     } else {
-      const defaultCategoryName = categoryOptions.length > 0 ? categoryOptions[0].name : '';
+      const defaultCategoryId = categoryOptions.length > 0 ? categoryOptions[0]._id : '';
       setCurrentMacro({
         title: '',
-        category: defaultCategoryName,
+        category: defaultCategoryId,
         content: emptyContent,
         status: 'pending',
         platformTags: { shopee: false, lazada: false, tiktok: false, hasBrand: false }
@@ -112,22 +122,24 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
        let filtered = [...macros];
 
         if (filterCategory !== 'all') {
-        filtered = filtered.filter(macro => macro.category === filterCategory);
+          filtered = filtered.filter(macro => 
+            macro.category && (typeof macro.category === 'object') && macro.category._id === filterCategory
+          );
         }
         if (statusFilter !== 'all') {
-        filtered = filtered.filter(macro => macro.status === statusFilter);
+          filtered = filtered.filter(macro => macro.status === statusFilter);
         }
         if (searchQuery) {
-        filtered = filtered.filter(macro =>
-            macro.title.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+          filtered = filtered.filter(macro =>
+              macro.title.toLowerCase().includes(searchQuery.toLowerCase())
+          );
         }
         if (sortOrder !== 'none') {
-        filtered.sort((a, b) => {
-            const countA = a.useCount || 0;
-            const countB = b.useCount || 0;
-            return sortOrder === 'asc' ? countA - countB : countB - countA;
-        });
+          filtered.sort((a, b) => {
+              const countA = a.useCount || 0;
+              const countB = b.useCount || 0;
+              return sortOrder === 'asc' ? countA - countB : countB - countA;
+          });
         }
 
         return filtered;
@@ -223,7 +235,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
           <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
             <option value="all">Tất cả danh mục</option>
             {categoryOptions.map(cat => (
-              <option key={cat._id} value={cat.name}>{cat.name}</option>
+              <option key={cat._id} value={cat._id}>{cat.displayName}</option>
             ))}
           </select>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as StatusFilter)}>
@@ -268,7 +280,13 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
             {filteredAndSortedMacros.map(macro => (
               <tr key={macro._id}>
                 <td className="cell-left"><HighlightText text={macro.title} highlight={searchQuery} /></td>
-                <td className="cell-center">{macro.category}</td>
+                
+                <td className="cell-center">
+                  {(typeof macro.category === 'object' && macro.category.name) 
+                    ? macro.category.name 
+                    : 'Chưa phân loại'}
+                </td>
+                
                 <td className="cell-center">{macro.createdBy?.fullName ?? 'Không xác định'}</td>
                 <td className="cell-center">
                   {macro.lastModifiedBy?.fullName ?? macro.createdBy?.fullName ?? 'Không xác định'}
@@ -312,14 +330,15 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
               <div className="form-group-row">
                 <div className="form-group">
                   <label>Danh mục</label>
+                  
                   <select
                     value={currentMacro.category}
                     onChange={e => setCurrentMacro({...currentMacro, category: e.target.value})}
                   >
                     {categoryOptions.length === 0 && <option value="">Không có danh mục</option>}
                     {categoryOptions.map(cat => (
-                      <option key={cat._id} value={cat.name}> 
-                        {cat.name}
+                      <option key={cat._id} value={cat._id}> 
+                        {cat.displayName}
                       </option>
                     ))}
                   </select>
