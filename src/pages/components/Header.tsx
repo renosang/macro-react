@@ -39,9 +39,7 @@ const IconClockSmall = HiOutlineClock as React.ElementType;
 
 function Header() {
   const { user } = useAuthStore();
-  const logoutFromStore = useAuthStore((state) => state.logout);
-  const navigateHook = useNavigate();
-
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
