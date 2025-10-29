@@ -1,23 +1,53 @@
+// backend/models/Task.js
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
-  title: {
-    type: String,
+  title: { 
+    type: String, 
     required: true,
-    trim: true
+    trim: true 
   },
-  status: {
+  
+  // ----- THÊM MỚI -----
+  description: {
     type: String,
-    enum: ['pending', 'completed'],
-    default: 'pending'
+    default: '' // Thêm mô tả, mặc định là rỗng
   },
-  user: {
+  // -------------------
+
+  // Người được gán task
+  assignedTo: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'User'
+    ref: 'User',
+    required: true
+  },
+  // Người đã gán task (Đã có)
+  assignedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  // Deadline (Đã có)
+  deadline: {
+    type: Date,
+    default: null
+  },
+  isComplete: {
+    type: Boolean,
+    default: false
+  },
+  isRead: {
+    type: Boolean,
+    default: false
+  },
+  completionNotified: { 
+    type: Boolean,
+    default: false 
+  },
+  deadlineReminderSent: { 
+    type: Boolean,
+    default: false 
   }
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Task', taskSchema);

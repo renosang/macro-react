@@ -81,3 +81,74 @@ export interface Feedback {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface TaskUser {
+  _id: string;
+  fullName: string;
+  username: string;
+}
+
+// --- Định nghĩa cho Task (Bạn đã có, bao gồm description) ---
+export interface Task {
+  _id: string;
+  title: string;
+  description: string;
+  isComplete: boolean;
+  deadline: string | null;
+  assignedTo: TaskUser;   // <-- Sử dụng TaskUser
+  assignedBy: TaskUser;   // <-- Sử dụng TaskUser
+  createdAt: string;
+  updatedAt: string; // <-- Thêm updatedAt nếu API trả về
+  // Các trường trạng thái thông báo (completionNotified, etc.) nếu cần ở frontend
+}
+
+// --- THÊM CÁC KIỂU CHO NOTIFICATION ---
+export type NotificationType = 'newTask' | 'taskCompleted' | 'deadlineUpcoming';
+
+export interface BaseNotification {
+  _id: string; // ID của task liên quan
+  type: NotificationType;
+  message: string;
+  timestamp: string;
+}
+export interface NewTaskNotification extends BaseNotification {
+  type: 'newTask';
+  relatedTask?: { // Dùng optional chaining (?) nếu API có thể không trả về đầy đủ
+    _id: string;
+    title?: string; // Dùng optional
+    assignedBy?: { fullName?: string }; // Dùng optional
+  };
+}
+export interface TaskCompletedNotification extends BaseNotification {
+  type: 'taskCompleted';
+  relatedTask?: {
+    _id: string;
+    title?: string;
+    assignedTo?: { fullName?: string };
+  };
+}
+export interface DeadlineNotification extends BaseNotification {
+  type: 'deadlineUpcoming';
+  relatedTask?: {
+    _id: string;
+    title?: string;
+    deadline?: string;
+    // Thêm assignedTo/assignedBy nếu cần hiển thị tên trong message ở frontend
+    assignedTo?: { _id: string, fullName?: string };
+    assignedBy?: { _id: string, fullName?: string };
+  };
+}
+
+// Union Type chính cho Notification
+export type Notification = NewTaskNotification | TaskCompletedNotification | DeadlineNotification;
+
+// --- Định nghĩa cho NotificationTask (Kiểu cơ bản trả về từ hook cũ - có thể không cần nữa) ---
+// Bạn có thể giữ lại hoặc xóa nếu không dùng đến
+export interface NotificationTask {
+  _id: string;
+  title: string;
+  assignedBy: {
+    fullName: string;
+  };
+  createdAt: string;
+}
