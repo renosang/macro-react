@@ -15,10 +15,10 @@ import {
   HiOutlineArrowRightOnRectangle,
   HiOutlinePencilSquare,
   HiOutlineLink,
-  HiOutlineClipboardDocumentList, // Icon cho Task
+  HiOutlineClipboardDocumentList,
+  HiOutlineKey,
 } from 'react-icons/hi2';
 
-// Ép kiểu các icon để TypeScript hiểu đúng
 const IconPortal = HiOutlineRectangleGroup as React.ElementType;
 const IconCQM = HiOutlineCheckBadge as React.ElementType;
 const IconBacklog = HiOutlineQueueList as React.ElementType;
@@ -28,7 +28,8 @@ const IconMenu = HiOutlineBars3 as React.ElementType;
 const IconLogout = HiOutlineArrowRightOnRectangle as React.ElementType;
 const IconContribute = HiOutlinePencilSquare as React.ElementType;
 const IconLinks = HiOutlineLink as React.ElementType;
-const IconTasks = HiOutlineClipboardDocumentList as React.ElementType; // Icon cho Task
+const IconTasks = HiOutlineClipboardDocumentList as React.ElementType;
+const IconChangePassword = HiOutlineKey as React.ElementType;
 
 
 function Header() {
@@ -110,12 +111,15 @@ function Header() {
               
               <div className="dropdown-separator"></div>
 
-              {/* Nhóm chức năng bổ sung */}
               {user?.role === 'admin' && (
                 <NavLink to="/admin" onClick={() => setIsMenuOpen(false)}>
                   <IconAdmin /><span>Trang quản trị</span>
                 </NavLink>
               )}
+
+              <NavLink to="/dashboard/change-password" onClick={() => setIsMenuOpen(false)}>
+                <IconChangePassword /><span>Đổi mật khẩu</span>
+              </NavLink>
 
               
               <div className="dropdown-separator"></div>

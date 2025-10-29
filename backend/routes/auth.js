@@ -1,32 +1,33 @@
+// backend/routes/auth.js
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
 
-// Register a new user (Không thay đổi)
 router.post('/register', async (req, res) => {
     try {
         const { username, password, role } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ username, password: hashedPassword, role });
-        await newUser.save();
+        const newUser = new User({ username, password, role }); 
+        await newUser.save(); 
         res.status(201).send('User registered successfully');
     } catch (error) {
         res.status(500).send('Error registering user');
     }
 });
 
-// Login a user
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        const user = await User.findOne({ username });
+        const usernameRegex = new RegExp('^' + username + '$', 'i');
+        const user = await User.findOne({ username: usernameRegex });
+
         if (!user) {
             return res.status(400).json({ message: 'Tên đăng nhập hoặc mật khẩu không đúng' });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await user.comparePassword(password);
+        
         if (!isMatch) {
             return res.status(400).json({ message: 'Tên đăng nhập hoặc mật khẩu không đúng' });
         }
@@ -47,7 +48,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// verifyToken middleware (Không thay đổi)
 const verifyToken = (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
@@ -61,5 +61,39 @@ const verifyToken = (req, res, next) => {
     }
     return next();
 };
+
+router.put('/change-password', verifyToken, async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: 'Vui lòng cung cấp mật khẩu cũ và mới.' });
+    }
+
+    if (newPassword.length < 6) {
+        return res.status(400).json({ message: 'Mật khẩu mới phải có ít nhất 6 ký tự.' });
+    }
+
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
+        }
+
+        const isMatch = await user.comparePassword(oldPassword);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Mật khẩu cũ không chính xác.' });
+        }
+
+        user.password = newPassword; 
+        
+        await user.save(); 
+        
+        res.status(200).json({ message: 'Đổi mật khẩu thành công.' });
+
+    } catch (error) {
+        console.error('Lỗi khi đổi mật khẩu:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ khi đổi mật khẩu.' });
+    }
+});
 
 module.exports = { router, verifyToken };

@@ -21,6 +21,7 @@ import './App.css';
 import { Category, Macro, Announcement } from './types';
 import AdminRoute from './pages/components/AdminRoute';
 import useAuthStore from './stores/useAuthStore';
+import ChangePasswordPage from './pages/dashboard/ChangePasswordPage';
 
 const buildCategoryTree = (categories: Category[], parentId: string | null = null): Category[] => {
   return categories
@@ -104,6 +105,7 @@ function App() {
             
             <Route path="links" element={<LinksPage />} />
             <Route path="tasks" element={<TasksPage />} />
+            <Route path="change-password" element={<ChangePasswordPage />} />
           </Route>
          <Route element={<AdminRoute />}>
             <Route path="/admin" element={isAdmin ? <AdminLayout /> : <Navigate to="/dashboard" />}>
