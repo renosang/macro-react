@@ -39,7 +39,10 @@ const IconClockSmall = HiOutlineClock as React.ElementType;
 
 function Header() {
   const { user } = useAuthStore();
+  const logoutFromStore = useAuthStore((state) => state.logout);
+  
   const navigate = useNavigate();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -50,18 +53,35 @@ function Header() {
   useEffect(() => {
   }, [notifications]);
 
+  const handleLogout = () => {
+    setIsMenuOpen(false);
+    logoutFromStore();
+    navigate('/login');
+  };
 
-  const handleLogout = () => { /* ... */ };
-  useEffect(() => { /* ... */ }, [menuRef, notifRef]);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setIsNotifOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef, notifRef]);
 
   const handleNotifClickInternal = (notification: Notification) => {
     handleNotificationClick(notification);
     setIsNotifOpen(false);
   }
 
+  // Hàm render nội dung thông báo (đã ép kiểu)
   const renderNotificationContent = (notification: Notification) => {
     let fallbackContent = <div className="notification-item-content"><span>{notification.message || 'Thông báo không hợp lệ'}</span></div>;
-
     try {
       if (notification.type === 'newTask') {
         const specificNotification = notification as NewTaskNotification;
