@@ -4,7 +4,6 @@ import './ManageMacros.css';
 import RichTextEditor from '../components/RichTextEditor';
 import HighlightText from '../components/HighlightText';
 import { Category, Macro, CustomElement } from '../../types';
-import { Descendant } from 'slate';
 import useAuthStore from '../../stores/useAuthStore';
 import { useLocation, useNavigate } from 'react-router-dom'; 
 
@@ -38,7 +37,7 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
   
   const [currentMacro, setCurrentMacro] = useState<(Omit<Partial<Macro>, 'category'> & { category?: string }) | null>(null);
 
-  const [filterCategory, setFilterCategory] = useState<string>('all'); // Sẽ lưu ID
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');

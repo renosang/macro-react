@@ -1,7 +1,7 @@
 // src/pages/components/ContentViewer.tsx
 import React from 'react';
-import { Node, Text, Descendant } from 'slate'; 
-import { CustomElement, CustomText, ImageElement, ParagraphElement } from '../../types'; 
+import { Text, Descendant } from 'slate'; 
+import { CustomElement, CustomText } from '../../types'; 
 
 interface ContentViewerProps {
   content: Descendant[];
@@ -9,6 +9,7 @@ interface ContentViewerProps {
 }
 
 const ContentViewer = ({ content, highlight }: ContentViewerProps) => {
+
   if (!Array.isArray(content)) {
     return <div className="content-viewer"><p>Nội dung không hợp lệ.</p></div>;
   }
@@ -17,7 +18,15 @@ const ContentViewer = ({ content, highlight }: ContentViewerProps) => {
      return nodes.map((node, i) => {
        if (Text.isText(node)) {
           const leaf = node as CustomText;
-          let el = <>{leaf.text.replace(/\n/g, '<br />')}</>; // Thêm hỗ trợ xuống dòng
+          const textSegments = leaf.text.split('\n').map((line, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && <br />}
+              {line}
+            </React.Fragment>
+          ));
+          
+          let el = <>{textSegments}</>;
+
           if (leaf.bold) el = <strong>{el}</strong>;
           if (leaf.italic) el = <em>{el}</em>;
           if (leaf.underline) el = <u>{el}</u>;
@@ -27,6 +36,7 @@ const ContentViewer = ({ content, highlight }: ContentViewerProps) => {
           return <React.Fragment key={i}>{el}</React.Fragment>;
        }
 
+       // Xử lý Element Node
        const el = node as CustomElement;
        const children = serializeSimple(el.children as Descendant[]);
        
@@ -43,7 +53,15 @@ const ContentViewer = ({ content, highlight }: ContentViewerProps) => {
          case 'list-item':
            return <li key={i}>{children}</li>;
          case 'image':
-            return <img key={i} src={el.url} alt="Nội dung ảnh" style={{ maxWidth: '100%', maxHeight: '500px', borderRadius: '4px' }} />;
+            return (
+              <p style={style} key={i}> {/* Bọc ảnh trong <p> để tuân thủ align */}
+                <img 
+                  src={el.url} 
+                  alt="Nội dung ảnh" 
+                  style={{ maxWidth: '100%', maxHeight: '500px', borderRadius: '4px' }} 
+                />
+              </p>
+            );
          case 'paragraph':
          default:
            return <p key={i} style={style}>{children}</p>;
