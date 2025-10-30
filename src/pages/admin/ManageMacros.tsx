@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import './ManageMacros.css';
 import RichTextEditor from '../components/RichTextEditor';
 import HighlightText from '../components/HighlightText';
-import { Category, Macro } from '../../types';
+import { Category, Macro, CustomElement } from '../../types';
 import { Descendant } from 'slate';
 import useAuthStore from '../../stores/useAuthStore';
 import { useLocation, useNavigate } from 'react-router-dom'; 
@@ -14,7 +14,7 @@ interface ManageMacrosProps {
   setMacros: React.Dispatch<React.SetStateAction<Macro[]>>;
 }
 
-const emptyContent: Descendant[] = [{ type: 'paragraph', children: [{ text: '' }] }];
+const emptyContent: CustomElement[] = [{ type: 'paragraph', children: [{ text: '' }] }];
 
 type StatusFilter = 'all' | 'pending' | 'approved';
 type SortOrder = 'asc' | 'desc' | 'none';
@@ -401,7 +401,10 @@ function ManageMacros({ categories, macros = [], setMacros }: ManageMacrosProps)
                 <label>Nội dung</label>
                 <RichTextEditor
                   value={currentMacro.content || emptyContent}
-                  onChange={newContent => setCurrentMacro({...currentMacro, content: newContent})}
+                  onChange={newContent => setCurrentMacro({
+                    ...currentMacro, 
+                    content: newContent as CustomElement[]
+                  })}
                 />
               </div>
             </div>

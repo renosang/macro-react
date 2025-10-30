@@ -1,6 +1,7 @@
-import React, { useMemo, useCallback } from 'react';
-import { createEditor, Descendant, Text, Range, NodeEntry } from 'slate';
-import { Slate, Editable, withReact, RenderLeafProps, RenderElementProps } from 'slate-react';
+// src/pages/components/ContentViewer.tsx
+import React from 'react';
+import { Node, Text, Descendant } from 'slate'; 
+import { CustomElement, CustomText, ImageElement, ParagraphElement } from '../../types'; 
 
 interface ContentViewerProps {
   content: Descendant[];
@@ -8,72 +9,52 @@ interface ContentViewerProps {
 }
 
 const ContentViewer = ({ content, highlight }: ContentViewerProps) => {
-  const editor = useMemo(() => withReact(createEditor()), []);
+  if (!Array.isArray(content)) {
+    return <div className="content-viewer"><p>Nội dung không hợp lệ.</p></div>;
+  }
   
-  const safeContent: Descendant[] = Array.isArray(content) && content.length > 0
-    ? content
-    : [{ type: 'paragraph', children: [{ text: '' }] }];
+  const serializeSimple = (nodes: Descendant[]): JSX.Element[] => {
+     return nodes.map((node, i) => {
+       if (Text.isText(node)) {
+          const leaf = node as CustomText;
+          let el = <>{leaf.text.replace(/\n/g, '<br />')}</>; // Thêm hỗ trợ xuống dòng
+          if (leaf.bold) el = <strong>{el}</strong>;
+          if (leaf.italic) el = <em>{el}</em>;
+          if (leaf.underline) el = <u>{el}</u>;
+          if (leaf.black) el = <span style={{ color: 'black' }}>{el}</span>;
+          if (leaf.color) el = <span style={{ color: leaf.color }}>{el}</span>;
+          if (leaf.highlight) el = <mark>{el}</mark>;
+          return <React.Fragment key={i}>{el}</React.Fragment>;
+       }
 
-  const decorate = useCallback(([node, path]: NodeEntry) => {
-    const ranges: Range[] = [];
-    if (highlight && Text.isText(node)) {
-      const { text } = node;
-      const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
-      let offset = 0;
-      for (const part of parts) {
-        if (part.toLowerCase() === highlight.toLowerCase()) {
-          ranges.push({
-            anchor: { path, offset },
-            focus: { path, offset: offset + part.length },
-            highlight: true,
-          });
-        }
-        offset += part.length;
-      }
-    }
-    return ranges;
-  }, [highlight]);
+       const el = node as CustomElement;
+       const children = serializeSimple(el.children as Descendant[]);
+       
+       let style = {};
+       if (el.type === 'paragraph' || el.type === 'bulleted-list' || el.type === 'numbered-list') {
+         style = { textAlign: el.align };
+       }
 
-  const renderElement = useCallback((props: RenderElementProps) => {
-    const { attributes, children, element } = props;
-    const style = { textAlign: element.align };
-    switch (element.type) {
-      case 'bulleted-list':
-        return <ul style={style} {...attributes}>{children}</ul>;
-      case 'numbered-list':
-        return <ol style={style} {...attributes}>{children}</ol>;
-      case 'list-item':
-        return <li {...attributes}>{children}</li>;
-      default:
-        return <p style={style} {...attributes}>{children}</p>;
-    }
-  }, []);
-
-  // SỬA LỖI: Lấy thêm `attributes` từ `props`
-  const renderLeaf = useCallback((props: RenderLeafProps) => {
-    const { attributes } = props; // <-- Lấy attributes ở đây
-    let { children, leaf } = props;
-
-    if (leaf.bold) children = <strong>{children}</strong>;
-    if (leaf.italic) children = <em>{children}</em>;
-    if (leaf.underline) children = <u>{children}</u>;
-    if (leaf.color) children = <span style={{ color: leaf.color }}>{children}</span>;
-    if (leaf.highlight) children = <mark>{children}</mark>;
-    
-    // Sử dụng `attributes` đã lấy được
-    return <span {...attributes}>{children}</span>;
-  }, []);
+       switch (el.type) {
+         case 'bulleted-list':
+           return <ul key={i} style={style}>{children}</ul>;
+         case 'numbered-list':
+           return <ol key={i} style={style}>{children}</ol>;
+         case 'list-item':
+           return <li key={i}>{children}</li>;
+         case 'image':
+            return <img key={i} src={el.url} alt="Nội dung ảnh" style={{ maxWidth: '100%', maxHeight: '500px', borderRadius: '4px' }} />;
+         case 'paragraph':
+         default:
+           return <p key={i} style={style}>{children}</p>;
+       }
+     });
+  };
 
   return (
-    <Slate editor={editor} initialValue={safeContent}>
-      <Editable
-        readOnly
-        placeholder="Không có nội dung..."
-        decorate={decorate}
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-      />
-    </Slate>
+    <div className="content-viewer">
+      {serializeSimple(content)}
+    </div>
   );
 };
 

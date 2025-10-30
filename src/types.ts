@@ -1,4 +1,6 @@
-import { Descendant } from 'slate';
+import { BaseEditor, Descendant } from 'slate';
+import { ReactEditor } from 'slate-react';
+import { HistoryEditor } from 'slate-history';
 
 export interface Category {
   _id: string;
@@ -12,7 +14,7 @@ export interface Macro {
   title: string;
   category: string | Category;
   subCategory?: string | null;
-  content: Descendant[];
+  content: CustomElement[];
   status: 'pending' | 'approved';
   useCount: number; // <-- Thuộc tính đã được thêm vào
   submittedBy?: string; // <-- Thuộc tính đã được thêm vào
@@ -152,3 +154,68 @@ export interface NotificationTask {
   };
   createdAt: string;
 }
+
+// 1. Định nghĩa các Mark (định dạng text)
+// Thêm 'black' (màu đen), 'color', 'highlight'
+export type CustomText = {
+  text: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  black?: boolean;
+  color?: string;
+  highlight?: boolean;
+};
+
+// 2. Định nghĩa các kiểu Element
+export type ParagraphElement = {
+  type: 'paragraph';
+  align?: 'left' | 'center' | 'right' | 'justify';
+  children: (CustomText | ImageElement)[]; // <-- Cho phép ảnh inline
+};
+
+export type ImageElement = {
+  type: 'image';
+  url: string; // Sẽ chứa URL từ ImgBB
+  children: CustomText[]; // Bắt buộc phải có children (dù rỗng)
+};
+
+export type BulletedListElement = {
+  type: 'bulleted-list';
+  align?: ParagraphElement['align'];
+  children: ListItemElement[];
+};
+
+export type NumberedListElement = {
+  type: 'numbered-list';
+  align?: ParagraphElement['align'];
+  children: ListItemElement[];
+};
+
+export type ListItemElement = {
+  type: 'list-item';
+  children: CustomText[];
+};
+
+// 3. Union Type cho tất cả Element
+export type CustomElement =
+  | ParagraphElement
+  | ImageElement
+  | BulletedListElement
+  | NumberedListElement
+  | ListItemElement;
+
+// 4. Kiểu Editor (Sửa lỗi 'KiEUDJ')
+export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
+
+// 5. Ghi đè kiểu mặc định của Slate
+declare module 'slate' {
+  interface CustomTypes {
+    Editor: CustomEditor;
+    Element: CustomElement;
+    Text: CustomText;
+  }
+}
+
+// 6. Định nghĩa các loại Mark (sửa lỗi 'keyof')
+export type TextMark = 'bold' | 'italic' | 'underline' | 'black' | 'color' | 'highlight';
